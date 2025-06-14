@@ -1,9 +1,9 @@
-using Api.Entities;
-using Api.Entities.Dtos;
+using Api.Entities.Dtos.Authentication;
 
 namespace Api.Services;
 
 public interface IAuthService
 {
-    public Task<string?> AuthAsync(AuthDto authDto);
+    public Task<AuthResponseDto> AuthAsync(AuthDto authDto);
+    public Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken);
 }

@@ -8,6 +8,7 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Login> Logins { get; set; }
     public virtual DbSet<Tag> Tags { get; set; }
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,19 +18,20 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
         modelBuilder.Entity<Login>()
             .HasMany(e => e.Tags)
             .WithMany();
+        modelBuilder.Entity<RefreshToken>()
+            .HasOne<User>()
+            .WithOne();
 
+        // Rename tables and columns to lower snake_case
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
-            // Table name
             entity.SetTableName(ToLowerSnakeCase(entity.GetTableName()));
         
-            // Colonnes
             foreach (var property in entity.GetProperties())
             {
                 property.SetColumnName(ToLowerSnakeCase(property.Name));
             }
             
-            // Clés primaires et étrangères
             foreach (var key in entity.GetKeys())
             {
                 key.SetName(key.GetName().ToLower());
@@ -54,7 +56,7 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
                 return name;
 
             var builder = new System.Text.StringBuilder();
-            for (int i = 0; i < name.Length; i++)
+            for (var i = 0; i < name.Length; i++)
             {
                 var c = name[i];
                 if (char.IsUpper(c))

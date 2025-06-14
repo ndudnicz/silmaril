@@ -9,7 +9,7 @@ public class User: MyEntity
     [Column("username")]
     [MaxLength(MaxStringLength)]
     public required string Username { get; set; }
-    [Column("password")]
+    [Column("password_hash")]
     [MaxLength(Sha512HashLength)]
-    public required string Password { get; set; }
+    public required string PasswordHash { get; set; }
 }

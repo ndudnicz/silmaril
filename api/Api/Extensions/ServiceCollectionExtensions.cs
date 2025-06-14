@@ -1,5 +1,7 @@
 using System.Text;
+using Api.Repositories;
 using Api.Repositories.EFContext;
+using Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -51,5 +53,25 @@ public static class ServiceCollectionExtensions
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
                 };
             });
+    }
+
+    public static void AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<ILoginRepository, LoginRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITagRepository, TagRepository>();
+        services.AddScoped<IAuthRepository, AuthRepository>();
+    }
+    
+    public static void AddServices(this IServiceCollection services, ConfigurationManager configuration, string jwtSecretKey)
+    {
+        services.AddScoped<IAuthService>(s => new AuthService(
+            s.GetService<IUserService>()!,
+            s.GetService<IAuthRepository>()!,
+            configuration,
+            jwtSecretKey));
+        services.AddScoped<ILoginService, LoginService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITagService, TagService>();
     }
 }

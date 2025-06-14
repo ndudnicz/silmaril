@@ -11,15 +11,19 @@ public class LoginService(
 {
     public async Task<Login?> GetLoginAsync(int id)
     {
-        return await loginRepository.GetLoginAsync(id);
+        return await loginRepository.GetLoginWithTagsAsync(id);
     }
 
     public async Task<Login> AddTagToLoginAsync(int loginId, string tagName)
     {
-        var login = await loginRepository.GetLoginAsync(loginId);
+        var login = await loginRepository.GetLoginWithTagsAsync(loginId);
         if (login == null)
         {
-            throw LoginServiceException.LoginNotFound(loginId);
+            throw new LoginNotFound(loginId);
+        }
+        if (login.Tags.Any(t => t.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new TagAlreadyExistsForLogin(tagName);
         }
 
         try

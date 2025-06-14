@@ -1,30 +1,18 @@
 using Api.Extensions;
 using Api.Helpers;
 using Api.Repositories;
-using Api.Repositories.EFContext;
 using Api.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 // Add services to the container.
 builder.Services.AddContexts(configuration);
-var jwtSecretKey = CryptoHelper.GenerateJwtSecretKey();
+var jwtSecretKey = CryptoHelper.GenerateRandomBase64Str(32);
 builder.Services.AddJwtAuthentication(configuration, jwtSecretKey);
-
-builder.Services.AddScoped<ILoginRepository, LoginRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ITagRepository, TagRepository>();
-
-builder.Services.AddScoped<IAuthService>(s => new AuthService(s.GetService<IUserRepository>()!, configuration, jwtSecretKey));
-builder.Services.AddScoped<ILoginService, LoginService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ITagService, TagService>();
-
+builder.Services.AddRepositories();
+builder.Services.AddServices(configuration, jwtSecretKey);
 builder.Services.AddControllers();
 builder.Services.AddRouting(opt => opt.LowercaseUrls = true);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

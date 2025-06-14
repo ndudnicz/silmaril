@@ -1,4 +1,4 @@
-namespace Api.Entities.Dtos;
+namespace Api.Entities.Dtos.Authentication;
 
 public class AuthDto
 {

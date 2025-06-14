@@ -8,17 +8,22 @@ public class TagService(
     ITagRepository loginRepository
     ): ITagService
 {
-    public async Task<Tag?> GetTagAsync(int id)
+    public async Task<Tag> GetTagAsync(int id)
     {
-        return await loginRepository.GetTagAsync(id);
+        var tag = await loginRepository.GetTagAsync(id);
+        if (tag == null)
+        {
+            throw new TagNotFound(id);
+        }
+        return tag;
     }
     
-    public async Task<Tag?> GetTagByNameAsync(string name)
+    public async Task<Tag> GetTagByNameAsync(string name)
     {
         var tag = await loginRepository.GetTagByNameAsync(name);
         if (tag == null)
         {
-            throw TagServiceException.TagNameNotFound(name);
+            throw new TagNameNotFound(name);
         }
         return tag;
     }
