@@ -13,10 +13,7 @@ public static class ServiceCollectionExtensions
         const int retryCount = 5;
         const int retryDelaySeconds = 30;
 
-        AddContext<LoginContext>();
-        AddContext<UserContext>();
-        AddContext<TagContext>();
-        AddContext<LoginTagContext>();
+        AddContext<AppDbContext>();
         return;
 
         void AddContext<T>() where T : DbContext{

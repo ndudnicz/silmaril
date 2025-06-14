@@ -18,9 +18,12 @@ builder.Services.AddJwtAuthentication(configuration, jwtSecretKey);
 
 builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITagRepository, TagRepository>();
 
 builder.Services.AddScoped<IAuthService>(s => new AuthService(s.GetService<IUserRepository>()!, configuration, jwtSecretKey));
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITagService, TagService>();
 
 builder.Services.AddControllers();
 builder.Services.AddRouting(opt => opt.LowercaseUrls = true);

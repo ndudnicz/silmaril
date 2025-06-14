@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Entities;
 
-[Table("login_tags")]
+[Table("tags")]
 public class Tag: MyEntity
 {
     [Column("name")]

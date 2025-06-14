@@ -16,4 +16,21 @@ public class LoginController(
     {
         return Ok(await loginService.GetLoginAsync(id));
     }
+    
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> AddTagToLoginAsync(
+        [FromRoute] int id,
+        [FromBody] string tagName
+    )
+    {
+        try
+        {
+            return Ok(await loginService.AddTagToLoginAsync(id, tagName));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error adding tag to login");
+            return BadRequest(ex.Message);
+        }
+    }
 }

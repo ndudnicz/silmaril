@@ -8,19 +8,20 @@ public class Login: MyEntity
 {
     [Column("user_id")]
     public int UserId { get; set; }
-    [Column("name")]
-    [MaxLength(MaxStringLength)]
-    public required string Name { get; set; }
-    [Column("identifier")]
-    [MaxLength(MaxStringLength)]
-    public required string Identifier { get; set; }
+    [Column("encrypted_name")]
+    [MaxLength(MaxLongStringLength)]
+    public required string EncryptedName { get; set; }
+    [Column("encrypted_identifier")]
+    [MaxLength(MaxLongStringLength)]
+    public string? EncryptedIdentifier { get; set; }
     [Column("encrypted_password")]
     [MaxLength(MaxLongStringLength)]
-    public required string EncryptedPassword { get; set; }
-    [Column("url")]
-    [MaxLength(MaxStringLength)]
-    public string? Url { get; set; }
-    [Column("notes")]
+    public string? EncryptedPassword { get; set; }
+    [Column("encrypted_url")]
     [MaxLength(MaxLongStringLength)]
-    public string? Notes { get; set; }
+    public string? EncryptedUrl { get; set; }
+    [Column("encrypted_notes")]
+    [MaxLength(MaxLongStringLength)]
+    public string? EncryptedNotes { get; set; }
+    public List<Tag> Tags { get; set; } = new();
 }

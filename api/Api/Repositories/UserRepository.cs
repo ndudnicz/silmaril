@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories;
 
-public class UserRepository(UserContext db): IUserRepository
+public class UserRepository(AppDbContext db): IUserRepository
 {
     public async Task<User?> GetUserByUserNameAsync(string username)
     {
