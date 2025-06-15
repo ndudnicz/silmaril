@@ -15,6 +15,9 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
         modelBuilder.Entity<User>()
             .HasMany<Login>()
             .WithOne();
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
         modelBuilder.Entity<Login>()
             .HasMany(e => e.Tags)
             .WithMany();

@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -19,8 +18,7 @@ namespace Api.Migrations
                 name: "tags",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     name = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -36,11 +34,10 @@ namespace Api.Migrations
                 name: "users",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     username = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    password = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
+                    password_hash = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     updated = table.Column<DateTime>(type: "datetime(6)", nullable: true)
@@ -55,9 +52,8 @@ namespace Api.Migrations
                 name: "logins",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    user_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     encrypted_name = table.Column<string>(type: "varchar(2048)", maxLength: 2048, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     encrypted_identifier = table.Column<string>(type: "varchar(2048)", maxLength: 2048, nullable: true)
@@ -84,11 +80,35 @@ namespace Api.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "refresh_tokens",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    user_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    token_hash = table.Column<string>(type: "varchar(2048)", maxLength: 2048, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    expires = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updated = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_refresh_tokens", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_refresh_tokens_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "login_tag",
                 columns: table => new
                 {
-                    login_id = table.Column<int>(type: "int", nullable: false),
-                    tags_id = table.Column<int>(type: "int", nullable: false)
+                    login_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    tags_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
@@ -117,6 +137,12 @@ namespace Api.Migrations
                 name: "ix_logins_user_id",
                 table: "logins",
                 column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_user_id",
+                table: "refresh_tokens",
+                column: "user_id",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -124,6 +150,9 @@ namespace Api.Migrations
         {
             migrationBuilder.DropTable(
                 name: "login_tag");
+
+            migrationBuilder.DropTable(
+                name: "refresh_tokens");
 
             migrationBuilder.DropTable(
                 name: "logins");

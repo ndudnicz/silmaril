@@ -1,6 +1,7 @@
+using Api.Controllers.Attributes;
 using Api.Entities.Dtos.Authentication;
+using Api.Exceptions;
 using Api.Services;
-using Api.Services.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Entities;
@@ -9,9 +10,9 @@ public abstract class MyEntity
     protected const int Sha512HashLength = 128;
     
     protected MyEntity() {}
-    
+    [Key]
     [Column("id")]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     [Column("created")]
     public DateTime Created { get; set; }
     [Column("updated")]

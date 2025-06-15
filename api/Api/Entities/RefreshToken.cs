@@ -6,7 +6,7 @@ namespace Api.Entities;
 public class RefreshToken: MyEntity
 {
     [Column("user_id")]
-    public required int UserId { get; set; }
+    public required Guid UserId { get; set; }
     [Column("token_hash")]
     [MaxLength(MaxLongStringLength)]
     public required string TokenHash { get; set; }

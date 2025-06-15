@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250614122538_AddRefreshToken")]
-    partial class AddRefreshToken
+    [Migration("20250615101734_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,12 +27,10 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Entities.Login", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("char(36)")
                         .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
@@ -68,8 +66,8 @@ namespace Api.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("updated");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -83,12 +81,10 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Entities.RefreshToken", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("char(36)")
                         .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
@@ -108,8 +104,8 @@ namespace Api.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("updated");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -124,12 +120,10 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Entities.Tag", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("char(36)")
                         .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
@@ -153,12 +147,10 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("char(36)")
                         .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
@@ -188,12 +180,12 @@ namespace Api.Migrations
 
             modelBuilder.Entity("LoginTag", b =>
                 {
-                    b.Property<int>("LoginId")
-                        .HasColumnType("int")
+                    b.Property<Guid>("LoginId")
+                        .HasColumnType("char(36)")
                         .HasColumnName("login_id");
 
-                    b.Property<int>("TagsId")
-                        .HasColumnType("int")
+                    b.Property<Guid>("TagsId")
+                        .HasColumnType("char(36)")
                         .HasColumnName("tags_id");
 
                     b.HasKey("LoginId", "TagsId")

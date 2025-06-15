@@ -1,6 +1,6 @@
 using Api.Entities;
+using Api.Exceptions;
 using Api.Repositories;
-using Api.Services.Exceptions;
 
 namespace Api.Services;
 
@@ -8,7 +8,7 @@ public class TagService(
     ITagRepository loginRepository
     ): ITagService
 {
-    public async Task<Tag> GetTagAsync(int id)
+    public async Task<Tag> GetTagAsync(Guid id)
     {
         var tag = await loginRepository.GetTagAsync(id);
         if (tag == null)
@@ -20,11 +20,21 @@ public class TagService(
     
     public async Task<Tag> GetTagByNameAsync(string name)
     {
-        var tag = await loginRepository.GetTagByNameAsync(name);
-        if (tag == null)
+        return await loginRepository.GetTagByNameAsync(name);
+    }
+    
+    public async Task<List<Tag>> GetTagByNameBulkAsync(string[] names)
+    {
+        var tags = await loginRepository.GetTagByNameBulkAsync(names);
+        if (tags == null || tags.Count == 0)
         {
-            throw new TagNameNotFound(name);
+            throw new TagNameNotFound(names[0]);
         }
-        return tag;
+        if (tags.Count != names.Length)
+        {
+            var missingNames = names.Except(tags.Select(t => t.Name)).ToArray();
+            throw new TagNamesNotFound(string.Join(", ", missingNames));
+        }
+        return tags;
     }
 }

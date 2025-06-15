@@ -6,21 +6,37 @@ namespace Api.Repositories;
 
 public class LoginRepository(AppDbContext db): ILoginRepository
 {
-    public async Task<Login?> GetLoginAsync(int id)
+    public async Task<Login> GetLoginAsync(Guid id)
     {
         return await db.Logins
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstAsync(x => x.Id == id);
     }
     
-    public async Task<Login?> GetLoginWithTagsAsync(int id)
+    public async Task<Login> GetLoginWithTagsAsync(Guid id)
     {
         return await db.Logins
             .Include(l => l.Tags)
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstAsync(x => x.Id == id);
     }
 
+    public async Task<Login> GetLoginWithByUserIdTagsAsync(Guid id, Guid userId)
+    {
+        return await db.Logins
+            .Include(l => l.Tags)
+            .FirstAsync(x => x.Id == id && x.UserId == userId);
+    }
+    
+    public async Task<Login> CreateLoginAsync(Login login)
+    {
+        login.Created = DateTime.UtcNow;
+        await db.Logins.AddAsync(login);
+        await db.SaveChangesAsync();
+        return login;
+    }
+    
     public async Task<Login> UpdateLoginAsync(Login login)
     {
+        login.Updated = DateTime.UtcNow;
         db.Logins.Update(login);
         await db.SaveChangesAsync();
         return login;

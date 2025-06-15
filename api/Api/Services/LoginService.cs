@@ -1,40 +1,58 @@
 using Api.Entities;
+using Api.Entities.Dtos;
+using Api.Exceptions;
 using Api.Repositories;
-using Api.Services.Exceptions;
 
 namespace Api.Services;
 
 public class LoginService(
     ILoginRepository loginRepository,
-    ITagService tagService
-    ): ILoginService
+    ITagService tagService,
+    IUserRepository userRepository
+) : ILoginService
 {
-    public async Task<Login?> GetLoginAsync(int id)
+    public async Task<Login> GetLoginAsync(Guid id)
     {
         return await loginRepository.GetLoginWithTagsAsync(id);
     }
 
-    public async Task<Login> AddTagToLoginAsync(int loginId, string tagName)
+    public async Task<Login> CreateLoginAsync(CreateLoginDto createLoginDto)
+    {
+        var login = Login.FromCreateLoginDto(createLoginDto);
+        if (createLoginDto.TagNames.Length > 0)
+        {
+            var tags = await tagService.GetTagByNameBulkAsync(createLoginDto.TagNames);
+            login.Tags = tags;
+        }
+        return await loginRepository.CreateLoginAsync(login);
+    }
+
+    public async Task<Login> AddTagToLoginAsync(Guid loginId, string tagName)
     {
         var login = await loginRepository.GetLoginWithTagsAsync(loginId);
-        if (login == null)
-        {
-            throw new LoginNotFound(loginId);
-        }
         if (login.Tags.Any(t => t.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase)))
         {
             throw new TagAlreadyExistsForLogin(tagName);
         }
 
-        try
+        var tag = await tagService.GetTagByNameAsync(tagName);
+        login.Tags.Add(tag!);
+        return await loginRepository.UpdateLoginAsync(login);
+    }
+
+    public async Task<Login> UpdateLoginAsync(UpdateLoginDto updateLoginDto)
+    {
+        if (await userRepository.UserExistsAsync(updateLoginDto.UserId) == false)
         {
-            var tag = await tagService.GetTagByNameAsync(tagName);
-            login.Tags.Add(tag!);
-            return await loginRepository.UpdateLoginAsync(login);
+            throw new UserNotFound(updateLoginDto.UserId);
         }
-        catch
-        {
-            throw;
-        }
+        var existingLogin = await loginRepository.GetLoginWithByUserIdTagsAsync(updateLoginDto.Id, updateLoginDto.UserId);
+        existingLogin.Tags = await tagService.GetTagByNameBulkAsync(updateLoginDto.Tags.Select(t => t.Name).ToArray());
+        existingLogin.EncryptedIdentifier = updateLoginDto.EncryptedIdentifier;
+        existingLogin.EncryptedPassword = updateLoginDto.EncryptedPassword;
+        existingLogin.EncryptedName = updateLoginDto.EncryptedName;
+        existingLogin.EncryptedNotes = updateLoginDto.EncryptedNotes;
+        existingLogin.EncryptedUrl = updateLoginDto.EncryptedUrl;
+        return await loginRepository.UpdateLoginAsync(existingLogin);
     }
 }
