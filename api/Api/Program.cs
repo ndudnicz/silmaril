@@ -60,8 +60,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Silmaril API V1");
-        // c.RoutePrefix = string.Empty; // optionnel : pour que Swagger soit accessible à la racine
-    });}
+    });
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

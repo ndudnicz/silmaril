@@ -1,0 +1,45 @@
+<div class="signup-container">
+    <div>
+        <h1>Sign up</h1>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+            <mat-form-field appearance="fill">
+                <mat-label>Username</mat-label>
+                <input matInput placeholder="" type="text" formControlName="username" required>
+                <mat-icon matSuffix>account_box</mat-icon>
+            </mat-form-field>
+            <br>
+            <mat-form-field appearance="fill">
+                <mat-label>Password</mat-label>
+                <input matInput placeholder="" on-focusout="inputFocusOut()" type="password" formControlName="password" required>
+                <mat-icon matSuffix>lock</mat-icon>
+            </mat-form-field>
+            <br>
+
+            <mat-form-field appearance="fill">
+                <mat-label>Confirm Password</mat-label>
+                <input matInput placeholder="" type="password" formControlName="confirmPassword" required>
+                <mat-icon matSuffix>lock</mat-icon>
+            </mat-form-field>
+            <br>
+                    @if (displayPasswordRequirements) {
+        <mat-card appearance="outlined" class="error-message">
+            <mat-card-content>
+                Password Requirements :
+                <ul>
+                    <li>At least 8 characters</li>
+                    <li>At least one letter</li>
+                    <li>At least one digit</li>
+                    <li>At least one uppercase letter</li>
+                    <li>At least one lowercase letter</li>
+                    <li>At least one special character</li>
+                </ul>
+            </mat-card-content>
+         </mat-card>
+        }
+
+            <button mat-raised-button type="submit" matButton [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || confirmPasswordFormControl.invalid">Sign
+                up</button>
+            <a class="a-button" style="margin-left: 10px;" mat-button routerLink="/signin" target="_blank">Signin</a>
+        </form>
+    </div>
+</div>

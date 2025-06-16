@@ -24,7 +24,7 @@ public class UserService(
     {
         if (AuthService.ValidatePasswordFormat(createUserDto.Password) == false)
         {
-            
+            throw new InvalidPasswordFormat();
         }
         return await userRepository.CreateUserAsync(User.FromCreateUserDto(createUserDto));
     }

@@ -21,8 +21,7 @@ public class LoginService(
         var login = Login.FromCreateLoginDto(createLoginDto);
         if (createLoginDto.TagNames.Length > 0)
         {
-            var tags = await tagService.GetTagByNameBulkAsync(createLoginDto.TagNames);
-            login.Tags = tags;
+            login.Tags = await tagService.GetTagByNameBulkAsync(createLoginDto.TagNames);
         }
         return await loginRepository.CreateLoginAsync(login);
     }

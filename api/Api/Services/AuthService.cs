@@ -23,7 +23,7 @@ public class AuthService(
     public static bool ValidatePasswordFormat(string password)
     {
         // Password must be at least 8 characters long, contain at least one letter, one digit,
-        // one uppercase letter and one lowercase letter and contains at least one special character.
+        // one uppercase letter, one lowercase letter and contains at least one special character.
         const string specialCharacters = "!@#$%^&*()-_=+[]{}|;:',.<>?/";
         return !string.IsNullOrEmpty(password)
                && password.Length >= 8
@@ -36,26 +36,19 @@ public class AuthService(
     
     public async Task<AuthResponseDto> AuthAsync(AuthDto authDto)
     {
-        try
+        var user = await userService.GetUserByUserNameAsync(authDto.Username);
+        if (user!.PasswordHash != CryptoHelper.Sha512(authDto.Password))
         {
-            var user = await userService.GetUserByUserNameAsync(authDto.Username);
-            if (user!.PasswordHash != CryptoHelper.Sha512(authDto.Password))
-            {
-                throw new InvalidPassword();
-            }
-            var jwt = GenerateJwtToken(user.Id);
-            var (refreshTokenStr, refreshToken) = GenerateRefreshToken(user.Id);
-            await authRepository.UpsertAsync(refreshToken);
-            return new AuthResponseDto
-            {
-                JwtToken = jwt,
-                RefreshToken = refreshTokenStr
-            };
+            throw new InvalidPassword();
         }
-        catch
+        var jwt = GenerateJwtToken(user.Id);
+        var (refreshTokenStr, refreshToken) = GenerateRefreshToken(user.Id);
+        await authRepository.UpsertAsync(refreshToken);
+        return new AuthResponseDto
         {
-            throw;
-        }
+            JwtToken = jwt,
+            RefreshToken = refreshTokenStr
+        };
     }
 
     public async Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken)
@@ -70,23 +63,15 @@ public class AuthService(
         {
             throw new ExpiredRefreshToken();
         }
-
-        try
+        var user = await userService.GetUserAsync(existingRefreshToken.UserId);
+        var jwt = GenerateJwtToken(user.Id);
+        var (newRefreshTokenStr, newRefreshToken) = GenerateRefreshToken(user.Id);
+        await authRepository.UpsertAsync(newRefreshToken);
+        return new AuthResponseDto
         {
-            var user = await userService.GetUserAsync(existingRefreshToken.UserId);
-            var jwt = GenerateJwtToken(user.Id);
-            var (newRefreshTokenStr, newRefreshToken) = GenerateRefreshToken(user.Id);
-            await authRepository.UpsertAsync(newRefreshToken);
-            return new AuthResponseDto
-            {
-                JwtToken = jwt,
-                RefreshToken = newRefreshTokenStr
-            };
-        }
-        catch
-        {
-            throw;
-        }
+            JwtToken = jwt,
+            RefreshToken = newRefreshTokenStr
+        };
     }
 
     private string GenerateJwtToken(Guid userId)
