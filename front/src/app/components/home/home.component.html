@@ -1,1 +1,14 @@
-<p>home works!</p>
+<div class="home-container">
+    <div>
+        <h3>Enter your master password</h3>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+            <mat-form-field appearance="fill">
+                <mat-label>Password</mat-label>
+                <input matInput placeholder="" type="password" formControlName="password" required>
+                <mat-icon matSuffix>lock</mat-icon>
+            </mat-form-field>
+            <br>
+            <button type="submit" mat-raised-button [disabled]="masterPasswordFormControl.invalid || loading">Submit</button>
+        </form>
+    </div>
+</div>

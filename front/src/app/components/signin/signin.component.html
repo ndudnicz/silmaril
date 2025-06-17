@@ -15,7 +15,7 @@
             </mat-form-field>
             <br>
                 <button type="submit" mat-raised-button
-                    [disabled]="usernameFormControl.invalid || passwordFormControl.invalid">Sign
+                    [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || loading">Sign
                     in</button>
                 <a class="a-button" style="margin-left: 10px;" mat-button routerLink="/signup" target="_blank">Signup</a>
         </form>

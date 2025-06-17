@@ -14,13 +14,16 @@ public class User: MyEntity
     [Column("password_hash")]
     [MaxLength(Sha512HashLength)]
     public required string PasswordHash { get; set; }
+    [Column("salt")]
+    public required byte[] Salt { get; set; }
     
     public static User FromCreateUserDto(CreateUserDto createUserDto)
     {
         return new User
         {
             Username = createUserDto.Username,
-            PasswordHash = CryptoHelper.Sha512(createUserDto.Password)
+            PasswordHash = CryptoHelper.Sha512(createUserDto.Password),
+            Salt = CryptoHelper.GenerateSalt128()
         };
     }
 

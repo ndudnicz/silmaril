@@ -12,6 +12,26 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.Property(e => e.Salt)
+                .HasColumnType("binary(16)")
+                .IsRequired();
+        });
+        modelBuilder.Entity<Login>(entity =>
+        {
+            entity.Property(l => l.EncryptedName)
+                .HasColumnType("Blob");
+            entity.Property(l => l.EncryptedIdentifier)
+                .HasColumnType("Blob");
+            entity.Property(l => l.EncryptedNotes)
+                .HasColumnType("Blob");
+            entity.Property(l => l.EncryptedPassword)
+                .HasColumnType("Blob");
+            entity.Property(l => l.EncryptedUrl)
+                .HasColumnType("Blob");
+        });
         modelBuilder.Entity<User>()
             .HasMany<Login>()
             .WithOne();

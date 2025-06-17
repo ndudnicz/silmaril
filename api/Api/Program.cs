@@ -52,7 +52,13 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
+var allowedOrigins = configuration["AllowedOrigins"]!.Split(",");
+app.UseCors(b =>
+        b.WithOrigins(allowedOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()  // Add AllowCredentials for SignalR to work with cookies or authorization headers
+);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

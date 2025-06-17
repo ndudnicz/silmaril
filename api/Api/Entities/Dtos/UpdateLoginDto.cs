@@ -6,10 +6,10 @@ public class UpdateLoginDto
     public DateTime Created { get; set; }
     public DateTime? Updated { get; set; }
     public Guid UserId { get; set; }
-    public required string EncryptedName { get; set; }
-    public string? EncryptedIdentifier { get; set; }
-    public string? EncryptedPassword { get; set; }
-    public string? EncryptedUrl { get; set; }
-    public string? EncryptedNotes { get; set; }
+    public required byte[] EncryptedName { get; set; }
+    public byte[]? EncryptedIdentifier { get; set; }
+    public byte[]? EncryptedPassword { get; set; }
+    public byte[]? EncryptedUrl { get; set; }
+    public byte[]? EncryptedNotes { get; set; }
     public List<Tag> Tags { get; set; } = new();
 }

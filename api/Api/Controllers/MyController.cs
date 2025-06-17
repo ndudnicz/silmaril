@@ -8,4 +8,14 @@ namespace Api.Controllers;
 public abstract class MyControllerV1: ControllerBase
 {
     protected MyControllerV1() {}
+    
+    protected Guid GetUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.Name)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            throw new UnauthorizedAccessException("User ID not found in claims.");
+        }
+        return userId;
+    }
 }

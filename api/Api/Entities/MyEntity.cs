@@ -6,7 +6,6 @@ namespace Api.Entities;
 public abstract class MyEntity
 {
     protected const int MaxStringLength = 128;
-    protected const int MaxLongStringLength = 2048;
     protected const int Sha512HashLength = 128;
     
     protected MyEntity() {}

@@ -24,4 +24,14 @@ public static class CryptoHelper
         var hashBytes = SHA1.HashData(Encoding.UTF8.GetBytes(str));
         return BitConverter.ToString(hashBytes).Replace("-", "");
     }
+    
+    public static byte[] GenerateSalt128()
+    {
+        byte[] salt = new byte[16];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(salt);
+        }
+        return salt;
+    }
 }

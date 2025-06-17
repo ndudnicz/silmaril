@@ -26,6 +26,12 @@ public class LoginController(
             return NotFound(ex.Message);
         }
     }
+
+    [HttpGet("user/{userId:guid}")]
+    public Task<IActionResult> GetLoginsAsync([FromRoute] Guid userId)
+    {
+        throw new NotImplementedException();
+    }
     
     [HttpPost]
     [ValidateUserIdMatchesDto]

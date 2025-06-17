@@ -12,12 +12,12 @@ public class UserController(
     IUserService userService
     ) : MyControllerV1
 {
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetAsync([FromRoute] Guid id)
+    [HttpGet]
+    public async Task<IActionResult> GetAsync()
     {
         try
         {
-            return Ok(UserDto.FromUser(await userService.GetUserAsync(id)));
+            return Ok(UserDto.FromUser(await userService.GetUserAsync(GetUserId())));
         }
         catch (Exception ex)
         {
