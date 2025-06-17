@@ -9,4 +9,5 @@ public class CreateLoginDto
     public byte[]? EncryptedUrl { get; set; }
     public byte[]? EncryptedNotes { get; set; }
     public string[] TagNames { get; set; } = [];
+    public int? EncryptionVersion { get; set; }
 }

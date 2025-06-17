@@ -12,4 +12,5 @@ public class UpdateLoginDto
     public byte[]? EncryptedUrl { get; set; }
     public byte[]? EncryptedNotes { get; set; }
     public List<Tag> Tags { get; set; } = new();
+    public int? EncryptionVersion { get; set; }
 }

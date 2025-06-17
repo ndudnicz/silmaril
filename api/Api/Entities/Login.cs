@@ -19,6 +19,8 @@ public class Login: MyEntity
     public byte[]? EncryptedUrl { get; set; }
     [Column("encrypted_notes")]
     public byte[]? EncryptedNotes { get; set; }
+    [Column("encryption_version")]
+    public int? EncryptionVersion { get; set; }
     public List<Tag> Tags { get; set; } = new();
     
     public static Login FromCreateLoginDto(CreateLoginDto dto)
@@ -31,7 +33,8 @@ public class Login: MyEntity
             EncryptedPassword = dto.EncryptedPassword,
             EncryptedUrl = dto.EncryptedUrl,
             EncryptedNotes = dto.EncryptedNotes,
-            Tags = dto.TagNames.Select(name => new Tag { Name = name }).ToList()
+            Tags = dto.TagNames.Select(name => new Tag { Name = name }).ToList(),
+            EncryptionVersion = dto.EncryptionVersion
         };
     }
     
@@ -48,7 +51,8 @@ public class Login: MyEntity
             EncryptedPassword = dto.EncryptedPassword,
             EncryptedUrl = dto.EncryptedUrl,
             EncryptedNotes = dto.EncryptedNotes,
-            Tags = dto.Tags
+            Tags = dto.Tags,
+            EncryptionVersion = dto.EncryptionVersion
         };
     }
 }
