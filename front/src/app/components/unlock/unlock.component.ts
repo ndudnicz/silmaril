@@ -7,11 +7,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgxSpinnerService } from "ngx-spinner";
-import { ReactiveFormsModule } from '@angular/forms'; // ⬅️ nécessaire pour formGroup
+import { ReactiveFormsModule } from '@angular/forms';
 import { VaultService } from '../../services/vault.service';
 import { Router } from '@angular/router';
+import { ToastWrapper } from '../../utils/toast.wrapper';
 
 @Component({
+  standalone: true,
   selector: 'app-home',
   imports: [
     ReactiveFormsModule,
@@ -20,7 +22,7 @@ import { Router } from '@angular/router';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
-    MatDividerModule
+    MatDividerModule,
   ],
   templateUrl: './unlock.component.html',
   styleUrl: './unlock.component.css'
@@ -35,6 +37,7 @@ export class UnlockComponent implements OnInit {
   constructor(
     private vaultService: VaultService,
     private router: Router,
+    private spinner: NgxSpinnerService,
   ) { }
 
   ngOnInit() {
@@ -44,17 +47,22 @@ export class UnlockComponent implements OnInit {
   }
 
   async onSubmit() {
-    this.loading = true;
-    console.log('Form submitted:', this.form.value);
-    await this.vaultService.setMasterPasswordAsync(this.masterPasswordFormControl.value!);
-    let key = this.vaultService.getKey();
-    console.log('Master password set:', key);
-    this.router.navigate(['/vault']);
-    this.loading = false;
-    // Handle form submission logic here
+    try {
+      this.loading = true;
+      this.spinner.show();
+      console.log('Form submitted:', this.form.value);
+      await this.vaultService.setMasterPasswordAsync(this.masterPasswordFormControl.value!);
+      ToastWrapper.success('Vault unlocked successfully');
+      this.router.navigate(['/vault']);
+    } catch (error: any) {
+      ToastWrapper.error('Failed to unlock vault: ', error.message ?? error);
+    } finally {
+      this.loading = false;
+      this.spinner.hide();
+    }
   }
 
-    keypress(event: KeyboardEvent) {
+  keypress(event: KeyboardEvent) {
     if (this.masterPasswordFormControl.valid
       && event.key === 'Enter') {
       event.stopImmediatePropagation();

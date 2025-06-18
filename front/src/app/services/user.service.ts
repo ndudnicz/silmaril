@@ -8,19 +8,13 @@ import { ToastWrapper } from '../utils/toast.wrapper';
   providedIn: 'root'
 })
 export class UserService {
-  private static apiEndpointV1 = environment.apiEndpoint + '/v1';
+  private apiEndpointV1 = environment.apiEndpoint + '/v1';
 
   constructor(private fetchService: FetchService) { }
 
-  async getLoginsAsync(): Promise<void> {
-    let encryptedLogins = await fetch(`${UserService.apiEndpointV1}/logins`, {
-
-    })
-  }
-
   async getUserAsync(): Promise<User> {
     try {
-      const response = await this.fetchService.getAsync(`${UserService.apiEndpointV1}/user`, {});
+      const response = await this.fetchService.getAsync(`${this.apiEndpointV1}/user`, {});
       if (!response.ok) {
         throw new Error('Failed to fetch user data');
       }
@@ -35,7 +29,7 @@ export class UserService {
   async createUserAsync(username: string, password: string, confirmPassword: string): Promise<boolean> {
     try {
       const response = await this.fetchService.postAsync(
-        `${UserService.apiEndpointV1}/user`,
+        `${this.apiEndpointV1}/user`,
         { 'Content-Type': 'application/json' },
         { username, password, confirmPassword }
       );

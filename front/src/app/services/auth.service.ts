@@ -24,6 +24,13 @@ export class AuthService {
     localStorage.setItem(AuthService.JWT_EXPIRES, String(parsedToken.exp));
   }
 
+  public clearLocalStorage(): void {
+    localStorage.removeItem(AuthService.JWT_TOKEN_KEY);
+    localStorage.removeItem(AuthService.REFRESH_TOKEN_KEY);
+    localStorage.removeItem(AuthService.AUTHENTICATED_KEY);
+    localStorage.removeItem(AuthService.JWT_EXPIRES);
+  }
+
   public async authAsync(username: string, password: string): Promise<boolean> {
     try {
       const response = await this.fetchService.postAsync(

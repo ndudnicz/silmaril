@@ -38,26 +38,30 @@ export class VaultService {
     localStorage.setItem(VaultService.SALT_KEY_NAME, JSON.stringify(Array.from(salt!)));
   }
 
+  public clearSalt(): void {
+    localStorage.removeItem(VaultService.SALT_KEY_NAME);
+  }
+
   public async setMasterPasswordAsync(password: string): Promise<void> {
     try {
-    this.key = await deriveKeyFromPasswordAsync(password, this.salt);
-    
-    // let exportedKey = await exportKeyAsync(key);
-    // const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
-    // console.log('VaultService.setMasterPassword keyBase64', keyBase64);
-    
-    // let keyString = JSON.stringify(await exportKeyAsync(key));
-    // console.log('VaultService.setMasterPassword keyString', keyString);
-    
-    // this.key = 
-    // localStorage.setItem(VaultService.ENCRYPTION_KEY_NAME, JSON.stringify(key));
-    console.log('Master password set successfully', this.key);
-    
+      this.key = await deriveKeyFromPasswordAsync(password, this.salt);
+
+      // let exportedKey = await exportKeyAsync(key);
+      // const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
+      // console.log('VaultService.setMasterPassword keyBase64', keyBase64);
+
+      // let keyString = JSON.stringify(await exportKeyAsync(key));
+      // console.log('VaultService.setMasterPassword keyString', keyString);
+
+      // this.key = 
+      // localStorage.setItem(VaultService.ENCRYPTION_KEY_NAME, JSON.stringify(key));
+      console.log('Master password set successfully', this.key);
+
 
     }
     catch (error) {
       console.log(error);
-      
+
     }
 
   }

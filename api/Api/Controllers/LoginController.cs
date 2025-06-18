@@ -18,7 +18,8 @@ public class LoginController(
     {
         try
         {
-            return Ok(await loginService.GetLoginsByUserIdAsync(GetUserId()));
+            var r = await loginService.GetLoginsByUserIdAsync(GetUserId());
+            return Ok(r);
         }
         catch (Exception ex)
         {

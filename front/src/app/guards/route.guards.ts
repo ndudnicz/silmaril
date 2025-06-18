@@ -17,7 +17,7 @@ export const authNoAuthGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (AuthService.isAuthenticated()) {
-    return router.createUrlTree(['/home']);
+    return router.createUrlTree(['/unlock']);
   } else {
     return true;
   }
@@ -30,6 +30,6 @@ export const vaultUnlocked: CanActivateFn = () => {
   if (vaultService.isUnlocked()) {
     return true;
   } else {
-    return router.createUrlTree(['/home']);
+    return router.createUrlTree(['/unlock']);
   }
 }
