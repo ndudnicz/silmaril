@@ -6,9 +6,10 @@ import { ToastWrapper } from '../utils/toast.wrapper';
 
 @Injectable({ providedIn: 'root' })
 export class VaultService {
-  private static ENCRYPTION_KEY_NAME = 'vault-encryption-key';
   private static SALT_KEY_NAME = 'vault-salt';
-  private salt: Uint8Array = new Uint8Array(); // Peut venir du serveur ou être stocké localement de manière sûre
+  private salt: Uint8Array;
+  private key: CryptoKey | null = null;
+  private static instance: VaultService | null = null;
 
   constructor() {
     // Exemple : récupère ou initialise le sel
@@ -22,6 +23,13 @@ export class VaultService {
     }
   }
 
+  // public static getInstance(): VaultService {
+  //   if (!VaultService.instance) {
+  //     VaultService.instance = new VaultService();
+  //   }
+  //   return VaultService.instance;
+  // }
+
   public static setSalt(salt: Uint8Array | null): void {
     if (!salt) {
       const errorMessage = 'Salt not found. Please contact support. 2';
@@ -30,16 +38,20 @@ export class VaultService {
     localStorage.setItem(VaultService.SALT_KEY_NAME, JSON.stringify(Array.from(salt!)));
   }
 
-  public async setMasterPassword(password: string): Promise<void> {
+  public async setMasterPasswordAsync(password: string): Promise<void> {
     try {
-    const key = await deriveKeyFromPasswordAsync(password, this.salt);
+    this.key = await deriveKeyFromPasswordAsync(password, this.salt);
     
-    let extractedKey = await exportKeyAsync(key);
-    let keyString = JSON.stringify(await exportKeyAsync(key));
-    console.log('VaultService.setMasterPassword keyString', keyString);
+    // let exportedKey = await exportKeyAsync(key);
+    // const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
+    // console.log('VaultService.setMasterPassword keyBase64', keyBase64);
     
-    localStorage.setItem(VaultService.ENCRYPTION_KEY_NAME, JSON.stringify(key));
-    console.log('Master password set successfully', localStorage.getItem(VaultService.ENCRYPTION_KEY_NAME));
+    // let keyString = JSON.stringify(await exportKeyAsync(key));
+    // console.log('VaultService.setMasterPassword keyString', keyString);
+    
+    // this.key = 
+    // localStorage.setItem(VaultService.ENCRYPTION_KEY_NAME, JSON.stringify(key));
+    console.log('Master password set successfully', this.key);
     
 
     }
@@ -50,19 +62,16 @@ export class VaultService {
 
   }
 
-  public static isUnlocked(): boolean {
-    return localStorage.getItem(VaultService.ENCRYPTION_KEY_NAME) !== null;
+  public isUnlocked(): boolean {
+    return this.key !== null;
   }
 
   getKey(): CryptoKey | null {
-    if (localStorage.getItem(VaultService.ENCRYPTION_KEY_NAME) === null) {
-      return null;
-    }
-    return JSON.parse(localStorage.getItem(VaultService.ENCRYPTION_KEY_NAME)!) as CryptoKey;
+    return this.key;
   }
 
   clearKey(): void {
-    localStorage.removeItem(VaultService.ENCRYPTION_KEY_NAME);
+    this.key = null;
   }
 
   async decryptData(encryptedData: ArrayBuffer, iv: Uint8Array): Promise<string> {
