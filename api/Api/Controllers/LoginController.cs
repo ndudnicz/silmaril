@@ -13,24 +13,18 @@ public class LoginController(
     ILoginService loginService
     ) : MyControllerV1
 {
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetAsync([FromRoute] Guid id)
+    [HttpGet]
+    public async Task<IActionResult> GetLoginsAsync()
     {
         try
         {
-            return Ok(await loginService.GetLoginAsync(id));
+            return Ok(await loginService.GetLoginsByUserIdAsync(GetUserId()));
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error fetching login with ID {Id}", id);
-            return NotFound(ex.Message);
+            logger.LogError(ex, "Error fetching logins for user with ID {UserId}", GetUserId());
+            return BadRequest(ex.InnerException?.Message ?? ex.Message);
         }
-    }
-
-    [HttpGet("user/{userId:guid}")]
-    public Task<IActionResult> GetLoginsAsync([FromRoute] Guid userId)
-    {
-        throw new NotImplementedException();
     }
     
     [HttpPost]
@@ -47,23 +41,6 @@ public class LoginController(
             return BadRequest(ex.InnerException?.Message ?? ex.Message);
         }
     }
-    
-    // [HttpPut("{id:guid}/tag/{tagName}")]
-    // public async Task<IActionResult> AddTagToLoginAsync(
-    //     [FromRoute] Guid id,
-    //     [FromRoute] string tagName
-    // )
-    // {
-    //     try
-    //     {
-    //         return Ok(await loginService.AddTagToLoginAsync(id, tagName));
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         logger.LogError(ex, "Error adding tag to login");
-    //         return BadRequest(ex.Message);
-    //     }
-    // }
 
     [HttpPut]
     [ValidateUserIdMatchesDto]

@@ -11,9 +11,14 @@ public class LoginService(
     IUserRepository userRepository
 ) : ILoginService
 {
-    public async Task<Login> GetLoginAsync(Guid id)
+    public async Task<Login> GetLoginByUserIdAsync(Guid id, Guid userId)
     {
-        return await loginRepository.GetLoginWithTagsAsync(id);
+        return await loginRepository.GetLoginWithByUserIdTagsAsync(id, userId);
+    }
+    
+    public async Task<IEnumerable<Login>> GetLoginsByUserIdAsync(Guid userId)
+    {
+        return await loginRepository.GetLoginsWithByUserIdTagsAsync(userId);
     }
 
     public async Task<Login> CreateLoginAsync(CreateLoginDto createLoginDto)
@@ -47,11 +52,8 @@ public class LoginService(
         }
         var existingLogin = await loginRepository.GetLoginWithByUserIdTagsAsync(updateLoginDto.Id, updateLoginDto.UserId);
         existingLogin.Tags = await tagService.GetTagByNameBulkAsync(updateLoginDto.Tags.Select(t => t.Name).ToArray());
-        existingLogin.EncryptedIdentifier = updateLoginDto.EncryptedIdentifier;
-        existingLogin.EncryptedPassword = updateLoginDto.EncryptedPassword;
-        existingLogin.EncryptedName = updateLoginDto.EncryptedName;
-        existingLogin.EncryptedNotes = updateLoginDto.EncryptedNotes;
-        existingLogin.EncryptedUrl = updateLoginDto.EncryptedUrl;
+        existingLogin.EncryptedData = updateLoginDto.EncryptedData;
+        existingLogin.Updated = DateTime.UtcNow;
         return await loginRepository.UpdateLoginAsync(existingLogin);
     }
 }

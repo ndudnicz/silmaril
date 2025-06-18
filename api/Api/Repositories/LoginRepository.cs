@@ -25,6 +25,15 @@ public class LoginRepository(AppDbContext db): ILoginRepository
             .Include(l => l.Tags)
             .FirstAsync(x => x.Id == id && x.UserId == userId);
     }
+
+    public async Task<IEnumerable<Login>> GetLoginsWithByUserIdTagsAsync(Guid userId)
+    {
+        return await db.Logins
+            .AsNoTracking()
+            .Include(l => l.Tags)
+            .Where(l => l.UserId == userId)
+            .ToListAsync();
+    }
     
     public async Task<Login> CreateLoginAsync(Login login)
     {

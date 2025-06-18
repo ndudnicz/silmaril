@@ -10,6 +10,9 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NgxSpinnerService } from "ngx-spinner";
 import { Router } from '@angular/router';
+import { ToastWrapper } from '../../utils/toast.wrapper';
+import { UserService } from '../../services/user.service';
+import { VaultService } from '../../services/vault.service';
 
 @Component({
   standalone: true,
@@ -37,25 +40,30 @@ export class SigninComponent {
 
   constructor(
     private spinner: NgxSpinnerService,
-    private router: Router
-  ) {}
-  loading = true;
+    private router: Router,
+    private authService: AuthService,
+    private userService: UserService
+  ) { }
+  loading = false;
 
   async onSubmit() {
-    this.spinner.show();
-    this.loading = true;
-    const result = await AuthService.authAsync(this.form.value.username, this.form.value.password)
-    this.loading = false;
-    this.spinner.hide();
-    if (result) {
-      console.log('Login successful');
-      console.log('token:', AuthService.getJwtToken());
+    try {
+      this.spinner.show();
+      this.loading = true;
+      const result = await this.authService.authAsync(this.form.value.username, this.form.value.password)
+      ToastWrapper.success('Authentication successful');
+      const user = await this.userService.getUserAsync();
+      VaultService.setSalt(user.salt);
       this.router.navigate(['/home']);
-    } else {
-      console.error('Login failed');
-      // Handle login failure (e.g., show an error message)
+    } catch (error: any) {
+      console.log(error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      ToastWrapper.error(errorMessage, null);
+    } finally {
+      this.loading = false;
+      this.spinner.hide();
     }
-    console.log('Form submitted:', this.form.value);
   }
 
   keypress(event: KeyboardEvent) {

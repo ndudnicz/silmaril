@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
-public class AuthController(IAuthService authService): MyControllerV1
+public class AuthController(
+    IAuthService authService,
+    ILogger<AuthController> logger): MyControllerV1
 {
     [HttpPost]
     public async Task<IActionResult> Auth([FromBody] AuthDto authDto)
@@ -15,9 +17,10 @@ public class AuthController(IAuthService authService): MyControllerV1
         {
             return Ok(await authService.AuthAsync(authDto));
         }
-        catch (InvalidPassword ex)
+        catch (Exception ex)
         {
-            return Unauthorized(ex.Message);
+            logger.LogError(ex, "Authentication failed for user {Username}", authDto.Username);
+            return BadRequest("Authentication failed");
         }
     }
     
@@ -31,6 +34,11 @@ public class AuthController(IAuthService authService): MyControllerV1
         catch (InvalidRefreshToken ex)
         {
             return Unauthorized(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to refresh token for user with refresh token {RefreshToken}", authRefreshDto.RefreshToken);
+            return BadRequest("Failed to refresh token");
         }
     }
 }

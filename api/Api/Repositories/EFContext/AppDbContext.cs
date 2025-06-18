@@ -21,15 +21,7 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
         });
         modelBuilder.Entity<Login>(entity =>
         {
-            entity.Property(l => l.EncryptedName)
-                .HasColumnType("Blob");
-            entity.Property(l => l.EncryptedIdentifier)
-                .HasColumnType("Blob");
-            entity.Property(l => l.EncryptedNotes)
-                .HasColumnType("Blob");
-            entity.Property(l => l.EncryptedPassword)
-                .HasColumnType("Blob");
-            entity.Property(l => l.EncryptedUrl)
+            entity.Property(l => l.EncryptedData)
                 .HasColumnType("Blob");
         });
         modelBuilder.Entity<User>()

@@ -1,10 +1,52 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
+import { FetchService } from './fetch.service';
+import { User } from '../entities/user';
+import { ToastWrapper } from '../utils/toast.wrapper';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
+  private static apiEndpointV1 = environment.apiEndpoint + '/v1';
 
-  constructor() { }
+  constructor(private fetchService: FetchService) { }
 
+  async getLoginsAsync(): Promise<void> {
+    let encryptedLogins = await fetch(`${UserService.apiEndpointV1}/logins`, {
+
+    })
+  }
+
+  async getUserAsync(): Promise<User> {
+    try {
+      const response = await this.fetchService.getAsync(`${UserService.apiEndpointV1}/user`, {});
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      return await response.json() as User;
+    } catch (error) {
+      ToastWrapper.error('Error fetching user data', null);
+      console.error('Error fetching user data:', error);
+      throw error;
+    }
+  }
+
+  async createUserAsync(username: string, password: string, confirmPassword: string): Promise<boolean> {
+    try {
+      const response = await this.fetchService.postAsync(
+        `${UserService.apiEndpointV1}/user`,
+        { 'Content-Type': 'application/json' },
+        { username, password, confirmPassword }
+      );
+      if (!response.ok) {
+        throw new Error('User creation failed');
+      }
+      return response.ok;
+    }
+    catch (error) {
+      console.error('Error during user creation:', error);
+      return false;
+    }
+  }
 }

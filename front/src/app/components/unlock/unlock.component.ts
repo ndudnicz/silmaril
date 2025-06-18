@@ -1,16 +1,14 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { NgxSpinnerService } from "ngx-spinner";
-import { Router } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms'; // ⬅️ nécessaire pour formGroup
+import { VaultService } from '../../services/vault.service';
 
 @Component({
   selector: 'app-home',
@@ -23,20 +21,27 @@ import { ReactiveFormsModule } from '@angular/forms'; // ⬅️ nécessaire pour
     MatTooltipModule,
     MatDividerModule
   ],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  templateUrl: './unlock.component.html',
+  styleUrl: './unlock.component.css'
 })
-export class HomeComponent {
-  masterPasswordFormControl = new FormControl('');
+export class UnlockComponent {
+  masterPasswordFormControl = new FormControl('', [Validators.required, Validators.minLength(8)]);
   form: FormGroup = new FormGroup({
     password: this.masterPasswordFormControl
   });
   loading = false;
 
-  constructor() { }
+  constructor(
+    private vaultService: VaultService
+  ) { }
 
   onSubmit() {
+    this.loading = true;
     console.log('Form submitted:', this.form.value);
+    this.vaultService.setMasterPassword(this.masterPasswordFormControl.value!);
+    let key = this.vaultService.getKey();
+    console.log('Master password set:', key?.algorithm);
+    
     // Handle form submission logic here
   }
 

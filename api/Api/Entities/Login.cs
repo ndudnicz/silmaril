@@ -9,16 +9,8 @@ public class Login: MyEntity
 {
     [Column("user_id")]
     public Guid UserId { get; set; }
-    [Column("encrypted_name")]
-    public required byte[] EncryptedName { get; set; }
-    [Column("encrypted_identifier")]
-    public byte[]? EncryptedIdentifier { get; set; }
-    [Column("encrypted_password")]
-    public byte[]? EncryptedPassword { get; set; }
-    [Column("encrypted_url")]
-    public byte[]? EncryptedUrl { get; set; }
-    [Column("encrypted_notes")]
-    public byte[]? EncryptedNotes { get; set; }
+    [Column("encrypted_data")]
+    public byte[]? EncryptedData { get; set; }
     [Column("encryption_version")]
     public int? EncryptionVersion { get; set; }
     public List<Tag> Tags { get; set; } = new();
@@ -28,11 +20,7 @@ public class Login: MyEntity
         return new Login
         {
             UserId = dto.UserId,
-            EncryptedName = dto.EncryptedName,
-            EncryptedIdentifier = dto.EncryptedIdentifier,
-            EncryptedPassword = dto.EncryptedPassword,
-            EncryptedUrl = dto.EncryptedUrl,
-            EncryptedNotes = dto.EncryptedNotes,
+            EncryptedData = dto.EncryptedData,
             Tags = dto.TagNames.Select(name => new Tag { Name = name }).ToList(),
             EncryptionVersion = dto.EncryptionVersion
         };
@@ -46,11 +34,7 @@ public class Login: MyEntity
             Created = dto.Created,
             Updated = dto.Updated,
             UserId = dto.UserId,
-            EncryptedName = dto.EncryptedName,
-            EncryptedIdentifier = dto.EncryptedIdentifier,
-            EncryptedPassword = dto.EncryptedPassword,
-            EncryptedUrl = dto.EncryptedUrl,
-            EncryptedNotes = dto.EncryptedNotes,
+            EncryptedData = dto.EncryptedData,
             Tags = dto.Tags,
             EncryptionVersion = dto.EncryptionVersion
         };

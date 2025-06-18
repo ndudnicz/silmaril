@@ -37,9 +37,9 @@
          </mat-card>
         }
 
-            <button mat-raised-button type="submit" matButton [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || confirmPasswordFormControl.invalid">Sign
+            <button mat-raised-button type="submit" matButton [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || confirmPasswordFormControl.invalid || loading">Sign
                 up</button>
-            <a class="a-button" style="margin-left: 10px;" mat-button routerLink="/signin" target="_blank">Signin</a>
+            <a class="a-button" style="margin-left: 10px;" mat-button routerLink="/signin">Signin</a>
         </form>
     </div>
 </div>

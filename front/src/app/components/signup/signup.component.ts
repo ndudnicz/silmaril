@@ -3,12 +3,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatCardModule} from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCardModule } from '@angular/material/card';
 import { FormGroup, FormControl, ReactiveFormsModule, ValidatorFn, AbstractControl } from '@angular/forms';
 import { AuthHelper } from '../helpers/auth.helper';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { UserService } from '../../services/user.service';
+import { toast } from 'ngx-sonner';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   standalone: true,
@@ -38,9 +41,32 @@ export class SignupComponent {
   });
 
   displayPasswordRequirements = false;
+  loading = false;
 
-  onSubmit() {
-    console.log('Form submitted:', this.form.value);
+  constructor(
+    private userService: UserService,
+    private spinner: NgxSpinnerService,
+    private router: Router
+  ) { }
+
+  async onSubmit() {
+    try {
+      this.loading = true;
+      this.spinner.show();
+      const created = await this.userService.createUserAsync(
+        this.form.value.username,
+        this.form.value.password,
+        this.form.value.confirmPassword
+      );
+      toast.success('User created successfully, please sign in.');
+      this.form.reset();
+      this.router.navigate(['/signin']);
+    } catch (error) {
+      console.error('Error during user creation:', error);
+    } finally {
+      this.loading = false;
+      this.spinner.hide();
+    }
   }
 
   passwordValidator(): ValidatorFn {

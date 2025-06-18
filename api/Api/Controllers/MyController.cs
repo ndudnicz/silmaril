@@ -7,8 +7,6 @@ namespace Api.Controllers;
 [Route("v1/[controller]")]
 public abstract class MyControllerV1: ControllerBase
 {
-    protected MyControllerV1() {}
-    
     protected Guid GetUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.Name)?.Value;
