@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.InteropServices.JavaScript;
 using System.Security.Claims;
 using System.Text;
 using Api.Entities;
@@ -42,36 +43,49 @@ public class AuthService(
             throw new InvalidPassword();
         }
         var jwt = GenerateJwtToken(user.Id);
-        var (refreshTokenStr, refreshToken) = GenerateRefreshToken(user.Id);
+        var (refreshTokenStr, refreshToken, refreshTokenExpiration) = GenerateRefreshToken(user.Id);
         await authRepository.UpsertAsync(refreshToken);
         return new AuthResponseDto
         {
             JwtToken = jwt,
-            RefreshToken = refreshTokenStr
+            RefreshToken = refreshTokenStr,
+            RefreshTokenExpiration = refreshTokenExpiration
         };
     }
 
-    public async Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken)
+    public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
     {
         var refreshTokenHash = CryptoHelper.Sha512(refreshToken);
         var existingRefreshToken = await authRepository.GetAsync(refreshTokenHash);
         if (existingRefreshToken == null)
         {
+            throw new UnknownRefreshToken();
+        }
+        try
+        {
+            ValidateRefreshToken(refreshToken);
+        }
+        catch (InvalidRefreshToken ex)
+        {
             throw new InvalidRefreshToken();
         }
-        if (existingRefreshToken.Expires < DateTime.UtcNow)
-        {
-            throw new ExpiredRefreshToken();
-        }
+        
         var user = await userService.GetUserAsync(existingRefreshToken.UserId);
         var jwt = GenerateJwtToken(user.Id);
-        var (newRefreshTokenStr, newRefreshToken) = GenerateRefreshToken(user.Id);
+        var (newRefreshTokenStr, newRefreshToken, refreshTokenExpiration) = GenerateRefreshToken(user.Id);
         await authRepository.UpsertAsync(newRefreshToken);
         return new AuthResponseDto
         {
             JwtToken = jwt,
-            RefreshToken = newRefreshTokenStr
+            RefreshToken = newRefreshTokenStr,
+            RefreshTokenExpiration = refreshTokenExpiration
         };
+    }
+    
+    public async Task<int> RevokeRefreshTokenAsync(string refreshToken)
+    {
+        var refreshTokenHash = CryptoHelper.Sha512(refreshToken);
+        return await authRepository.DeleteRefreshTokenAsync(refreshTokenHash);
     }
 
     private string GenerateJwtToken(Guid userId)
@@ -95,15 +109,41 @@ public class AuthService(
         return jwt;
     }
     
-    private (string, RefreshToken) GenerateRefreshToken(Guid userId)
+    private (string, RefreshToken, DateTime) GenerateRefreshToken(Guid userId)
     {
         var refreshTokenStr = CryptoHelper.GenerateRandomBase64Str(256);
         var refreshTokenHash = CryptoHelper.Sha512(refreshTokenStr);
+        var refreshTokenExpiration = DateTime.UtcNow.AddHours(_jwtRefreshTokenExpirationTimeInHours);
         return (refreshTokenStr, new RefreshToken
         {
             UserId = userId,
             TokenHash = refreshTokenHash,
-            Expires = DateTime.UtcNow.AddHours(_jwtRefreshTokenExpirationTimeInHours)
-        });
+            Expires = refreshTokenExpiration
+        }, refreshTokenExpiration);
+    }
+    
+    private ClaimsPrincipal? ValidateRefreshToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(jwtSecretKey);
+        var validationParams = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ClockSkew = TimeSpan.Zero
+        };
+
+        try
+        {
+            var principal = tokenHandler.ValidateToken(token, validationParams, out _);
+            return principal;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

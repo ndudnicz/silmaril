@@ -51,17 +51,42 @@ export class VaultComponent implements OnInit {
     }
   }
 
-  logout() {
+  async logout() {
     if (confirm('Are you sure you want to logout?')) {
       this.spinner.show();
       console.log('Logging out...');
-      this.vaultService.clearKey();
-      this.vaultService.clearSalt();
-      this.authService.clearLocalStorage();
-      ToastWrapper.success('Logged out successfully');
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000)
+      try {
+        await this.authService.logoutAsync();
+        this.vaultService.clearKey();
+        this.vaultService.clearSalt();
+        ToastWrapper.success('Logged out successfully');
+        setTimeout(() => {
+          this.spinner.hide();
+          window.location.reload();
+        }, 1500)
+
+      } catch (error: any) {
+        ToastWrapper.error('Logout failed: ', error.message ?? error);
+        console.error('Error during logout:', error);
+        this.spinner.hide();
+      } 
     }
   }
+
+  // async refreshToken() {
+  //   this.spinner.show();
+  //   try {
+  //     const result = await this.authService.refreshTokenAsync();
+  //     if (result) {
+  //       ToastWrapper.success('Token refreshed successfully');
+  //     } else {
+  //       ToastWrapper.error('Failed to refresh token', null);
+  //     }
+  //   } catch (error: any) {
+  //     ToastWrapper.error('Error refreshing token: ', error.message ?? error);
+  //     console.error('Error during token refresh:', error);
+  //   } finally {
+  //     this.spinner.hide();
+  //   }
+  // }
 }

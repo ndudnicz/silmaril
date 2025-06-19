@@ -1,4 +1,3 @@
-using Api.Controllers.Attributes;
 using Api.Entities.Dtos.Authentication;
 using Api.Exceptions;
 using Api.Services;
@@ -15,7 +14,14 @@ public class AuthController(
     {
         try
         {
-            return Ok(await authService.AuthAsync(authDto));
+            var authResponse = await authService.AuthAsync(authDto);
+            Response.Cookies.Append("refreshToken", authResponse.RefreshToken, new CookieOptions{
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = authResponse.RefreshTokenExpiration
+            });
+            return Ok(authResponse);
         }
         catch (Exception ex)
         {
@@ -25,11 +31,23 @@ public class AuthController(
     }
     
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken([FromBody] AuthRefreshDto authRefreshDto)
+    public async Task<IActionResult> RefreshToken()
     {
         try
         {
-            return Ok(await authService.RefreshTokenAsync(authRefreshDto.RefreshToken));
+            var refreshToken = HttpContext.Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return Unauthorized();
+            }
+            var authResponse = await authService.RefreshTokenAsync(refreshToken);
+            Response.Cookies.Append("refreshToken", authResponse.RefreshToken, new CookieOptions{
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = authResponse.RefreshTokenExpiration
+            });
+            return Ok(authResponse);
         }
         catch (InvalidRefreshToken ex)
         {
@@ -37,8 +55,33 @@ public class AuthController(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to refresh token for user with refresh token {RefreshToken}", authRefreshDto.RefreshToken);
-            return BadRequest("Failed to refresh token");
+            logger.LogError(ex, "Failed to refresh token for user");
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        try
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return BadRequest("No refresh token found");
+            }
+            var result = await authService.RevokeRefreshTokenAsync(refreshToken);
+            if (result > 0)
+            {
+                Response.Cookies.Delete("refreshToken");
+                return Ok("Logged out successfully");
+            }
+            return BadRequest("Failed to log out");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error during logout");
+            return BadRequest("An error occurred while logging out");
         }
     }
 }

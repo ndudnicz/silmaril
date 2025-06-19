@@ -1,4 +1,3 @@
-using Api.Controllers.Attributes;
 using Api.Entities.Dtos;
 using Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -56,12 +55,11 @@ public class UserController(
     }
     
     [HttpPut]
-    [ValidateUserIdMatchesDto]
     public async Task<IActionResult> UpdateAsync([FromBody] UpdateUserDto updateUserDto)
     {
         try
         {
-            return Ok(UserDto.FromUser(await userService.UpdateUserAsync(updateUserDto)));
+            return Ok(UserDto.FromUser(await userService.UpdateUserAsync(GetUserId(),updateUserDto)));
         }
         catch (Exception ex)
         {
@@ -72,12 +70,11 @@ public class UserController(
     
     [HttpPut]
     [Route("password")]
-    [ValidateUserIdMatchesDto("Id")]
     public async Task<IActionResult> UpdatePasswordAsync([FromBody] UpdateUserPasswordDto updateUserPasswordDto)
     {
         try
         {
-            return Ok(UserDto.FromUser(await userService.UpdateUserPasswordAsync(updateUserPasswordDto)));
+            return Ok(UserDto.FromUser(await userService.UpdateUserPasswordAsync(GetUserId(), updateUserPasswordDto)));
         }
         catch (Exception ex)
         {

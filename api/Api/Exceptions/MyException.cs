@@ -13,6 +13,7 @@ public abstract class MyException: Exception
 
 public class InvalidPassword() : MyException("Invalid password.");
 public class InvalidRefreshToken() : MyException("Invalid refresh token.");
+public class UnknownRefreshToken() : MyException("Unknown refresh token.");
 public class ExpiredRefreshToken() : MyException("Refresh token expired.");
 public class LoginNotFound(Guid id) : MyException($"Login with id '{id.ToString()}' not found.");
 public class TagAlreadyExistsForLogin(string tagName) : MyException($"This item already has the tag '{tagName}'.");

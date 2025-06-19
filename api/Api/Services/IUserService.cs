@@ -8,6 +8,6 @@ public interface IUserService
     public Task<User> GetUserByUserNameAsync(string username);
     public Task<User> GetUserAsync(Guid id);
     public Task<User> CreateUserAsync(CreateUserDto createUserDto);
-    public Task<User> UpdateUserAsync(UpdateUserDto updateUserDto);
-    public Task<User> UpdateUserPasswordAsync(UpdateUserPasswordDto updateUserPasswordDto);
+    public Task<User> UpdateUserAsync(Guid userId, UpdateUserDto updateUserDto);
+    public Task<User> UpdateUserPasswordAsync(Guid userId, UpdateUserPasswordDto updateUserPasswordDto);
 }

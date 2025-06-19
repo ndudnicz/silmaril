@@ -15,7 +15,6 @@ public class AuthRepository(AppDbContext db): IAuthRepository
     public async Task<RefreshToken> UpsertAsync(RefreshToken refreshToken)
     {
         var existing = await db.RefreshTokens
-            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.UserId == refreshToken.UserId);
         
         if (existing != null)
@@ -33,5 +32,12 @@ public class AuthRepository(AppDbContext db): IAuthRepository
         await db.SaveChangesAsync();
         return refreshToken;
     }
-    
+
+    public async Task<int> DeleteRefreshTokenAsync(string refreshTokenHash)
+    {
+        return await db.RefreshTokens
+            .Where(x => x.TokenHash == refreshTokenHash)
+            .ExecuteDeleteAsync();
+    }
+
 }

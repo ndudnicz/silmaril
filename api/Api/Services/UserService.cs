@@ -29,16 +29,16 @@ public class UserService(
         return await userRepository.CreateUserAsync(User.FromCreateUserDto(createUserDto));
     }
     
-    public async Task<User> UpdateUserAsync(UpdateUserDto updateUserDto)
+    public async Task<User> UpdateUserAsync(Guid userId, UpdateUserDto updateUserDto)
     {
-        var existingUser = await userRepository.GetUserAsync(updateUserDto.Id);
+        var existingUser = await userRepository.GetUserAsync(userId);
         existingUser.Username = updateUserDto.Username;
         return await userRepository.UpdateUserAsync(existingUser);
     }
 
-    public async Task<User> UpdateUserPasswordAsync(UpdateUserPasswordDto updateUserPasswordDto)
+    public async Task<User> UpdateUserPasswordAsync(Guid userId, UpdateUserPasswordDto updateUserPasswordDto)
     {
-        var existingUser = await userRepository.GetUserAsync(updateUserPasswordDto.Id);
+        var existingUser = await userRepository.GetUserAsync(userId);
         if (existingUser.PasswordHash != CryptoHelper.Sha512(updateUserPasswordDto.OldPassword))
         {
             throw new InvalidPassword();

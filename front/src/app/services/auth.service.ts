@@ -10,7 +10,6 @@ import { FetchService } from './fetch.service';
 export class AuthService {
   private apiEndpointV1 = environment.apiEndpoint + '/v1';
   private static JWT_TOKEN_KEY = 'jwtToken';
-  private static REFRESH_TOKEN_KEY = 'refreshToken';
   private static AUTHENTICATED_KEY = 'authenticated';
   private static JWT_EXPIRES = 'jwtExpires';
 
@@ -19,14 +18,12 @@ export class AuthService {
   private setLocalStorage(authResponse: AuthResponse): void {
     const parsedToken = jwtDecode(authResponse.jwtToken);
     localStorage.setItem(AuthService.JWT_TOKEN_KEY, authResponse.jwtToken);
-    localStorage.setItem(AuthService.REFRESH_TOKEN_KEY, authResponse.refreshToken);
     localStorage.setItem(AuthService.AUTHENTICATED_KEY, String(true));
     localStorage.setItem(AuthService.JWT_EXPIRES, String(parsedToken.exp));
   }
 
   public clearLocalStorage(): void {
     localStorage.removeItem(AuthService.JWT_TOKEN_KEY);
-    localStorage.removeItem(AuthService.REFRESH_TOKEN_KEY);
     localStorage.removeItem(AuthService.AUTHENTICATED_KEY);
     localStorage.removeItem(AuthService.JWT_EXPIRES);
   }
@@ -35,8 +32,10 @@ export class AuthService {
     try {
       const response = await this.fetchService.postAsync(
         `${this.apiEndpointV1}/auth`,
-        {'Content-Type': 'application/json'},
-        { username, password });
+        { 
+          body: JSON.stringify({ username, password }),
+          credentials: 'include'
+        });
       
       if (!response.ok) {
         throw new Error(await response.text());
@@ -53,9 +52,7 @@ export class AuthService {
   public async refreshTokenAsync(): Promise<boolean> {
     try {
       const response = await this.fetchService.postAsync(
-        `${this.apiEndpointV1}/auth/refresh-token`,
-        {'Content-Type': 'application/json'},
-        { refreshToken: localStorage.getItem('refreshToken') });
+        `${this.apiEndpointV1}/auth/refresh-token`, {credentials: 'include'});
       if (!response.ok) {
         throw new Error('Token refresh failed');
       }
@@ -64,6 +61,20 @@ export class AuthService {
       return response.ok;
     } catch (error) {
       console.error('Error during authentication:', error);
+      throw error;
+    }
+  }
+
+  public async logoutAsync(): Promise<void> {
+    try {
+      const response = await this.fetchService.postAsync(
+        `${this.apiEndpointV1}/auth/logout`, { credentials: 'include' });
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+      this.clearLocalStorage();
+    } catch (error) {
+      console.error('Error during logout:', error);
       throw error;
     }
   }
