@@ -70,6 +70,8 @@ export class AddLoginModalComponent implements OnInit {
 
   generatePassword() {
     this.dialog.open(GeneratePasswordModalComponent, {}).afterClosed().subscribe((generatedPassword: string | null) => {
+      console.log('Generated password:', generatedPassword);
+      
       if (generatedPassword) {
         this.passwordFormControl.setValue(generatedPassword);
       }
