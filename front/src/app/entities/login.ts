@@ -21,14 +21,14 @@ export interface LoginDecrypted {
 }
 
 export class DecryptedData {
-    name: string;
+    title: string;
     identifier: string;
     password: string;
     url: string;
     notes: string;
 
-    constructor(name: string, identifier: string, password: string, url: string, notes: string) {
-        this.name = name;
+    constructor(title: string, identifier: string, password: string, url: string, notes: string) {
+        this.title = title;
         this.identifier = identifier;
         this.password = password;
         this.url = url;
@@ -37,7 +37,7 @@ export class DecryptedData {
 
     public static fromObject(obj: any): DecryptedData {
         return new DecryptedData(
-            obj.name || '',
+            obj.title || '',
             obj.identifier || '',
             obj.password || '',
             obj.url || '',

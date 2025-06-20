@@ -6,12 +6,13 @@ import { routes } from './app/app.routes';
 
 import { importProvidersFrom } from '@angular/core';
 import { NgxSpinnerModule } from "ngx-spinner";
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule, provideAnimations } from '@angular/platform-browser/animations';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideHttpClient(),
     provideRouter(routes),
-    importProvidersFrom(BrowserAnimationsModule, NgxSpinnerModule)
+    importProvidersFrom(BrowserAnimationsModule, NgxSpinnerModule),
+    provideAnimations(), // ✅ obligatoire
   ]
 });

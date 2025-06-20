@@ -21,3 +21,8 @@ button,
     color: #44474e !important;
     border-radius: 4px !important;
 }
+
+.custom-modal .mat-mdc-dialog-container {
+   border-radius: 4px !important;
+   background-color: #faf9fd !important;
+}

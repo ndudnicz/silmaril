@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { VaultService } from '../../services/vault.service';
 import { LoginEncrypted } from '../../entities/login';
 import { LoginService } from '../../services/login.service';
@@ -9,6 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../services/auth.service';
 import { ToastWrapper } from '../../utils/toast.wrapper';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { AddLoginModalComponent } from './modals/add-login/add-login-modal.component';
 
 @Component({
   selector: 'app-vault',
@@ -17,12 +19,14 @@ import { ToastWrapper } from '../../utils/toast.wrapper';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
+    MatDialogModule
   ],
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'
 })
 export class VaultComponent implements OnInit {
 
+  readonly dialog = inject(MatDialog);
   private loginsEncrypted: LoginEncrypted[] = [];
 
   constructor(
@@ -89,4 +93,19 @@ export class VaultComponent implements OnInit {
   //     this.spinner.hide();
   //   }
   // }
+  openAddLoginModal() {
+    const dialogRef = this.dialog.open(AddLoginModalComponent,
+      {
+        panelClass: 'custom-modal',
+        width: '600px',
+        height: '600px',
+        disableClose: true,
+        autoFocus: false
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
+    });
+  }
 }

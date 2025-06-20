@@ -1,0 +1,58 @@
+<div id="add-login-modal" class="add-login-modal">
+    <h1 mat-dialog-title>Add Login</h1>
+    <mat-dialog-content>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <mat-form-field class="full-width" appearance="fill">
+                <mat-label>Title</mat-label>
+                <input matInput type="text" formControlName="titleFormControl" required>
+            </mat-form-field>
+            <br>
+            <mat-form-field class="full-width" appearance="fill">
+                <mat-label>Email or username</mat-label>
+                <input matInput type="text" formControlName="identifierFormControl">
+            </mat-form-field>
+
+            <br>
+            <div id="password-field" class="password-field">
+                <div id="password-input">
+                    <mat-form-field class="full-width modal-field" appearance="fill">
+                        <mat-label>Password</mat-label>
+                        <input matInput type="text" id="password" formControlName="passwordFormControl"
+                            [type]="showPassword ? 'text' : 'password'">
+                        <button mat-icon-button matSuffix (click)="togglePasswordVisibility()">
+                            <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+                        </button>
+                    </mat-form-field>
+                </div>
+                <div id="generate-password-button-container">
+                    <button mat-raised-button id="generate-password-button" (click)="generatePassword()">
+                        <mat-icon class="icon-display">autorenew</mat-icon>
+                    </button>
+                </div>
+            </div> 
+            <!-- <mat-form-field class="modal-field" appearance="fill">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" id="password" formControlName="passwordFormControl">
+                <button mat-icon-button matSuffix (click)="togglePasswordVisibility()">
+                    <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+                </button>
+            </mat-form-field> -->
+
+            <br>
+            <mat-form-field class="full-width" appearance="fill">
+                <mat-label>Url</mat-label>
+                <input matInput type="text" formControlName="urlFormControl">
+            </mat-form-field>
+            <br>
+
+            <mat-form-field class="full-width" appearance="fill">
+                <mat-label>Notes</mat-label>
+                <textarea matInput formControlName="notesFormControl"></textarea>
+            </mat-form-field>
+
+            <br>
+            <button style="position: relative; float: inline-end;" mat-raised-button color="primary" type="submit"
+                [disabled]="!form.valid || loading">Add Login</button>
+        </form>
+    </mat-dialog-content>
+</div>
