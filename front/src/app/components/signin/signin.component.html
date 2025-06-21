@@ -2,13 +2,13 @@
     <div>
         <h1>Sign in</h1>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
-            <mat-form-field appearance="fill">
+            <mat-form-field appearance="fill" floatLabel="always">
                 <mat-label>Username</mat-label>
                 <input matInput placeholder="" type="text" formControlName="username" required>
                 <mat-icon matSuffix>account_box</mat-icon>
             </mat-form-field>
             <br>
-            <mat-form-field appearance="fill">
+            <mat-form-field appearance="fill" floatLabel="always">
                 <mat-label>Password</mat-label>
                 <input matInput placeholder="" type="password" formControlName="password" required>
                 <mat-icon matSuffix>lock</mat-icon>

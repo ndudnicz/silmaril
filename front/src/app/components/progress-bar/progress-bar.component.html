@@ -1,0 +1,14 @@
+<div class="progress-container"
+    [ngStyle]="{
+        'height': height,
+        'border-radius': borderRadius,
+    }">
+    <div class="progress-fill" [ngStyle]="{
+    'width.%': value,
+    'background-color': color,
+    'height': height,
+    'border-radius': borderRadius
+    }">
+        <span class="progress-text" *ngIf="displayValue">{{ value }}%</span>
+    </div>
+</div>

@@ -26,3 +26,14 @@ button,
    border-radius: 4px !important;
    background-color: #faf9fd !important;
 }
+
+#close-dialog-button {
+    position: absolute !important;
+    right: 10px;
+    top: 10px;
+    cursor: pointer !important;
+}
+
+#close-dialog-button:hover {
+    color: #737373 !important;
+}

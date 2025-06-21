@@ -12,6 +12,7 @@ export class AuthService {
   private static JWT_TOKEN_KEY = 'jwtToken';
   private static AUTHENTICATED_KEY = 'authenticated';
   private static JWT_EXPIRES = 'jwtExpires';
+  private static USER_ID = 'userId';
 
   constructor(private fetchService: FetchService) { }
 
@@ -20,12 +21,14 @@ export class AuthService {
     localStorage.setItem(AuthService.JWT_TOKEN_KEY, authResponse.jwtToken);
     localStorage.setItem(AuthService.AUTHENTICATED_KEY, String(true));
     localStorage.setItem(AuthService.JWT_EXPIRES, String(parsedToken.exp));
+    localStorage.setItem(AuthService.USER_ID, String((parsedToken as any).unique_name));
   }
 
   public clearLocalStorage(): void {
     localStorage.removeItem(AuthService.JWT_TOKEN_KEY);
     localStorage.removeItem(AuthService.AUTHENTICATED_KEY);
     localStorage.removeItem(AuthService.JWT_EXPIRES);
+    localStorage.removeItem(AuthService.USER_ID);
   }
 
   public async authAsync(username: string, password: string): Promise<boolean> {
@@ -65,22 +68,26 @@ export class AuthService {
     }
   }
 
-  public async logoutAsync(): Promise<void> {
+  public async signoutAsync(): Promise<void> {
     try {
       const response = await this.fetchService.postAsync(
-        `${this.apiEndpointV1}/auth/logout`, { credentials: 'include' });
+        `${this.apiEndpointV1}/auth/signout`, { credentials: 'include' });
       if (!response.ok) {
-        throw new Error('Logout failed');
+        throw new Error('Signout failed');
       }
       this.clearLocalStorage();
     } catch (error) {
-      console.error('Error during logout:', error);
+      console.error('Error during signout:', error);
       throw error;
     }
   }
 
   public static getJwtToken(): string | null {
     return localStorage.getItem(this.JWT_TOKEN_KEY);
+  }
+
+  public static getUserId(): string | null {
+    return localStorage.getItem(this.USER_ID);
   }
 
   public static isTokenValid(): boolean {

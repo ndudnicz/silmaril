@@ -60,8 +60,8 @@ public class AuthController(
         }
     }
 
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    [HttpPost("signout")]
+    public async Task<IActionResult> Signout()
     {
         try
         {
@@ -76,12 +76,12 @@ public class AuthController(
                 Response.Cookies.Delete("refreshToken");
                 return Ok("Logged out successfully");
             }
-            return BadRequest("Failed to log out");
+            return BadRequest("Failed to sign out");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error during logout");
-            return BadRequest("An error occurred while logging out");
+            logger.LogError(ex, "Error during signout");
+            return BadRequest("An error occurred while signing out");
         }
     }
 }

@@ -23,6 +23,8 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
         {
             entity.Property(l => l.EncryptedData)
                 .HasColumnType("Blob");
+            entity.Property(l => l.InitializationVector)
+                .HasColumnType("TinyBlob");
         });
         modelBuilder.Entity<User>()
             .HasMany<Login>()

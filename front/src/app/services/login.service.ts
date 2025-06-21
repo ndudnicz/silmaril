@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FetchService } from './fetch.service';
-import { LoginEncrypted } from '../entities/login';
+import { CreateLoginDto, Login } from '../entities/login';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -11,15 +11,34 @@ export class LoginService {
 
   constructor(private fetchService: FetchService) { }
 
-  async getLoginsAsync(): Promise<LoginEncrypted[]> {
+  async getLoginsAsync(): Promise<Login[]> {
     try {
       const response = await this.fetchService.getAsync(`${this.apiEndpointV1}/login`, {});
       if (!response.ok) {
         throw new Error('Failed to fetch logins');
       }
-      return await response.json() as LoginEncrypted[];
+      const logins = await response.json() as Login[];
+      return logins.map(login => {
+        return Login.fromObject(login);
+      })
+      // return await response.json() as Login[];
     } catch (error) {
       console.error('Error fetching logins:', error);
+      throw error;
+    }
+  }
+
+  async createLoginAsync(createLoginDto: CreateLoginDto): Promise<Login> {
+    try {
+      const response = await this.fetchService.postAsync(`${this.apiEndpointV1}/login`, {
+        body: JSON.stringify(createLoginDto)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create login');
+      }
+      return Login.fromObject(await response.json());
+    } catch (error) {
+      console.error('Error creating login:', error);
       throw error;
     }
   }

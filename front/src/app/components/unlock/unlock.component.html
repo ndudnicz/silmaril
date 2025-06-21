@@ -2,8 +2,8 @@
     <div>
         <h3>Enter your master password</h3>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
-            <mat-form-field appearance="fill">
-                <mat-label>Password</mat-label>
+            <mat-form-field appearance="fill" floatLabel="always">
+                <mat-label>Master Password</mat-label>
                 <input matInput placeholder="" type="password" formControlName="password" required>
                 <mat-icon matSuffix>lock</mat-icon>
             </mat-form-field>

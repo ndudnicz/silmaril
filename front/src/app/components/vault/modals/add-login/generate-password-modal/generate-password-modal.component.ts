@@ -1,68 +1,158 @@
-import { Component, inject } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { Component, inject, OnInit } from '@angular/core';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { CommonModule } from '@angular/common';
+import { ProgressBarComponent } from '../../../../progress-bar/progress-bar.component';
 
-
-enum PasswordStyle {
-  Readable = 'readable',
-  NotReadable = 'not-readable'
-}
 
 interface PasswordOptions {
   minLength?: number;
-  style?: PasswordStyle;
+  readable?: boolean;
   letters?: boolean;
   numbers?: boolean;
   specialChar?: boolean;
   useWords?: boolean;
 }
 
+enum PasswordStrength {
+  WEAK = 'weak',
+  MEDIUM = 'medium',
+  STRONG = 'strong'
+}
+
 @Component({
+
   selector: 'app-generate-password-modal',
-  imports: [],
+  imports: [
+    MatDialogModule,
+    ReactiveFormsModule,
+    MatInputModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatSelectModule,
+    FormsModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatDividerModule,
+    MatProgressBarModule,
+    CommonModule,
+    ProgressBarComponent
+  ],
   templateUrl: './generate-password-modal.component.html',
   styleUrl: './generate-password-modal.component.css'
 })
-export class GeneratePasswordModalComponent {
+export class GeneratePasswordModalComponent implements OnInit {
 
   dialogRef = inject(MatDialogRef);
-  private minLength = 32;
+  private defaultMinLength = 32;
+  minLength = 8;
+  specialChars = '!@#$%^&*()-_=+[]{}|;:,.<>?';
+  minLengthFormControl = new FormControl(this.defaultMinLength, { nonNullable: true, validators: [Validators.min(this.minLength)] });
+  readableFormControl = new FormControl(false, { nonNullable: true });
+  lettersFormControl = new FormControl(true, { nonNullable: true });
+  numbersFormControl = new FormControl(true, { nonNullable: true });
+  specialCharFormControl = new FormControl(true, { nonNullable: true });
+  useWordsFormControl = new FormControl("true", { nonNullable: true });
+  generatedPassword = this.generatePassword({
+    minLength: this.minLengthFormControl.value || this.defaultMinLength,
+    readable: this.readableFormControl.value,
+    letters: this.lettersFormControl.value,
+    numbers: this.numbersFormControl.value,
+    specialChar: this.specialCharFormControl.value,
+    useWords: this.useWordsFormControl.value === 'true'
+  });
+  formGeneratePassword: FormGroup = new FormGroup({
+    minLengthFormControl: this.minLengthFormControl,
+    readableFormControl: this.readableFormControl,
+    lettersFormControl: this.lettersFormControl,
+    numbersFormControl: this.numbersFormControl,
+    specialCharFormControl: this.specialCharFormControl,
+    useWordsFormControl: this.useWordsFormControl
+  });
+
+  progressBarColors = {
+    [PasswordStrength.WEAK]: 'red',
+    [PasswordStrength.MEDIUM]: 'orange',
+    [PasswordStrength.STRONG]: 'green'
+  }
+  progressBarValue = 0;
+  progressBarColor = this.progressBarColors[PasswordStrength.WEAK];
+  passwordStrength = PasswordStrength.WEAK.toString();
 
   constructor() {
     console.log('GeneratePasswordModalComponent initialized');
   }
 
+  ngOnInit(): void {
+    this.formGeneratePassword.valueChanges.subscribe(this.setNewPassword.bind(this));
+    this.setProgressPasswordStrengthValues();
+  }
+
+  minLengthValidator(control: FormControl): { [key: string]: boolean } | null {
+    const value = control.value;
+    if (value < 8) {
+      return { 'minLength': true };
+    }
+    return null;
+  }
+
   onSubmit() {
-    this.dialogRef.close(this.generatePassword({
-      minLength: this.minLength,
-      style: PasswordStyle.Readable,
-      letters: true,
-      numbers: true,
-      specialChar: true,
-      useWords: true
-    }));
+    this.dialogRef.close(this.generatedPassword);
+  }
+
+  closeDialog() {
+    this.dialogRef.close(null);
+  }
+
+  setNewPassword() {
+    if (this.formGeneratePassword.valid) {
+      this.generatedPassword = this.generatePassword({
+        minLength: this.minLengthFormControl.value || this.defaultMinLength,
+        readable: this.readableFormControl.value,
+        letters: this.lettersFormControl.value,
+        numbers: this.numbersFormControl.value,
+        specialChar: this.specialCharFormControl.value,
+        useWords: this.useWordsFormControl.value === 'true'
+      });
+      this.formGeneratePassword.markAsPristine();
+      this.setProgressPasswordStrengthValues();
+    }
   }
 
   generatePassword(options: PasswordOptions = {
-    minLength: this.minLength,
-    style: PasswordStyle.NotReadable,
-    letters: true,
-    numbers: true,
+    minLength: this.defaultMinLength,
+    readable: false,
+    letters: true, // always true
+    numbers: true, // always true
     specialChar: true,
-    useWords: false
+    useWords: true
   }): string {
     // Base sets
-    const length = options.minLength || this.minLength;
-    const style = options.style || PasswordStyle.NotReadable;
-    const letters = options.letters !== undefined ? options.letters : true;
-    const numbers = options.numbers !== undefined ? options.numbers : true;
-    const specialChar = options.specialChar !== undefined ? options.specialChar : true;
-    const useWords = options.useWords !== undefined ? options.useWords : false;
+    // console.log('Generating password with options:', options);
+
+    const length = options.minLength || this.defaultMinLength;
+    const readable = options.readable;
+    const letters = options.letters;
+    const numbers = options.numbers;
+    const specialChar = options.specialChar;
+    const useWords = options.useWords;
 
     const allLettersSet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const readableLettersSet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ';  // sans i, l, o
     const numbersChars = '0123456789';
     const readableNumbers = '23456789'; // sans 0,1
-    const specialChars = '!@#$%^&*()-_=+[]{}|;:,.<>?';
+    const specialChars = this.specialChars;
 
     // Liste de mots simples (exemple réduit, tu peux remplacer par ta liste)
     const simpleWords = [
@@ -98,7 +188,7 @@ export class GeneratePasswordModalComponent {
     // Génère un charset lettres selon options style et uppercase
     function getLetterCharset() {
       let lettersSet = '';
-      if (style === PasswordStyle.Readable) {
+      if (readable) {
         lettersSet = readableLettersSet;
       } else {
         lettersSet = allLettersSet;
@@ -129,7 +219,7 @@ export class GeneratePasswordModalComponent {
         if (numbers) {
           let insertNumbers = '';
           const numberSetPart = [];
-          numberSetPart.push(style === PasswordStyle.Readable ? readableNumbers : numbersChars);
+          numberSetPart.push(readable ? readableNumbers : numbersChars);
           const numbersToAdd = 2;
           const numberSet = numberSetPart.join('');
           for (let i = 0; i < numbersToAdd; i++) {
@@ -146,7 +236,7 @@ export class GeneratePasswordModalComponent {
     // Génération classique
     let charset = '';
     if (letters) charset += getLetterCharset();
-    if (numbers) charset += style === 'readable' ? readableNumbers : numbersChars;
+    if (numbers) charset += readable ? readableNumbers : numbersChars;
     if (specialChar) charset += specialChars;
 
     if (!charset) {
@@ -160,4 +250,60 @@ export class GeneratePasswordModalComponent {
 
     return password;
   }
+
+  getPasswordStrength(password: string): { str: string, color: string, score: number} {
+    const hasLetters = /[a-zA-Z]/.test(password);
+    const lettersMatches = password.match(/[a-zA-Z]/g) || [];
+
+    const hasUpperCase = /[A-Z]/.test(password);
+    const upperCaseMatches = password.match(/[A-Z]/g) || [];
+
+    const hasNumbers = /[0-9]/.test(password);
+    const numbersMatches = password.match(/[0-9]/g) || [];
+
+    function escapeRegExp(str: string): string {
+      return str.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+    }
+    const specialReg = new RegExp(`[${escapeRegExp(this.specialChars)}]`, 'g');
+
+    const hasSpecial = specialReg.test(password);
+    const specialMatches = password.match(specialReg) || [];
+
+    let score = 0;
+    if (password.length >= 32) {
+      score += 40;
+    } else if (password.length >= 12) {
+      score += 20;
+    } else {
+      score += 0;
+    }
+
+    if (hasLetters) score += 1;
+    if (hasUpperCase) score += 2;
+    if (hasNumbers) score += 2;
+    if (hasSpecial) score += 10;
+
+    score += upperCaseMatches.length
+    + numbersMatches.length
+    + specialMatches.length * 3
+
+    if (score >= 100) {
+      return { str: PasswordStrength.STRONG, color: this.progressBarColors[PasswordStrength.STRONG], score: score };
+    } else if (score >= 50) {
+      return { str: PasswordStrength.MEDIUM, color: this.progressBarColors[PasswordStrength.MEDIUM], score: score };
+    } else {
+      return { str: PasswordStrength.WEAK, color: this.progressBarColors[PasswordStrength.WEAK], score: score };
+    }
+  }
+
+  setProgressPasswordStrengthValues(): void {
+    const strength = this.getPasswordStrength(this.generatedPassword);
+    this.progressBarValue = strength.score > 100 ? 100 : strength.score;
+    this.progressBarColor = strength.color;
+    this.passwordStrength = strength.str;
+  }
+
+  disableSubmit() {
+    return this.generatedPassword.length < this.minLength;
+  } 
 }

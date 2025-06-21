@@ -13,6 +13,8 @@ public class Login: MyEntity
     public byte[]? EncryptedData { get; set; }
     [Column("encryption_version")]
     public int? EncryptionVersion { get; set; }
+    [Column("initialization_vector")]
+    public byte[]? InitializationVector { get; set; }
     public List<Tag> Tags { get; set; } = new();
     
     public static Login FromCreateLoginDto(CreateLoginDto dto)
@@ -20,9 +22,10 @@ public class Login: MyEntity
         return new Login
         {
             UserId = dto.UserId,
-            EncryptedData = dto.EncryptedData,
+            EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty),
             Tags = dto.TagNames.Select(name => new Tag { Name = name }).ToList(),
-            EncryptionVersion = dto.EncryptionVersion
+            EncryptionVersion = dto.EncryptionVersion,
+            InitializationVector = Convert.FromBase64String(dto.InitializationVectorBase64 ?? string.Empty)
         };
     }
     
@@ -34,9 +37,24 @@ public class Login: MyEntity
             Created = dto.Created,
             Updated = dto.Updated,
             UserId = dto.UserId,
-            EncryptedData = dto.EncryptedData,
+            EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty),
             Tags = dto.Tags,
-            EncryptionVersion = dto.EncryptionVersion
+            EncryptionVersion = dto.EncryptionVersion,
+        };
+    }
+
+    public static Login FromLoginDto(LoginDto dto)
+    {
+        return new Login
+        {
+            Id = dto.Id,
+            Created = dto.Created,
+            Updated = dto.Updated,
+            UserId = dto.UserId,
+            EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty),
+            Tags = dto.Tags,
+            EncryptionVersion = dto.EncryptionVersion,
+            InitializationVector = Convert.FromBase64String(dto.InitializationVectorBase64 ?? string.Empty)
         };
     }
 }

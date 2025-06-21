@@ -6,7 +6,7 @@ public class UpdateLoginDto
     public DateTime Created { get; set; }
     public DateTime? Updated { get; set; }
     public Guid UserId { get; set; }
-    public byte[]? EncryptedData { get; set; }
+    public string? EncryptedDataBase64 { get; set; }
     public List<Tag> Tags { get; set; } = new();
     public int? EncryptionVersion { get; set; }
 }

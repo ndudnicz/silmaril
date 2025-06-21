@@ -6,21 +6,22 @@
         <span>Silmaril</span>
         <span class="example-spacer"></span>
         <div class="toolbar-button">
-        <button type="submit" mat-raised-button>
-            <mat-icon>key</mat-icon>Change Master Password
-        </button>
+            <button type="submit" mat-raised-button>
+                <mat-icon>key</mat-icon>Change Master Password
+            </button>
         </div>
         <div class="toolbar-button">
-        <button mat-icon-button (click)="openAddLoginModal()" class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
-            <mat-icon>add</mat-icon>
-        </button>
+            <button mat-icon-button (click)="openAddLoginModal()" class="example-icon favorite-icon"
+                aria-label="Example icon-button with heart icon">
+                <mat-icon>add</mat-icon>
+            </button>
         </div>
 
         <div class="toolbar-button">
-        <button mat-icon-button (click)="logout()" class="example-icon favorite-icon"
-            aria-label="Example icon-button with heart icon">
-            <mat-icon>logout</mat-icon>
-        </button>
+            <button mat-icon-button (click)="signout()" class="example-icon favorite-icon"
+                aria-label="Example icon-button with heart icon">
+                <mat-icon>signout</mat-icon>
+            </button>
         </div>
     </mat-toolbar>
 
