@@ -2,6 +2,58 @@
   flex: 1 1 auto;
 }
 
+.toolbar {
+  background-color: #faf9fd;
+}
+
 .toolbar-button {
-    margin: 0 8px;
+  margin: 0 8px;
+}
+
+.grid-container {
+  display: flex;
+  width: 100%;
+  height: 88vh;
+  background: red;
+  /* border-top: 1px solid #b1b1b1; */
+}
+
+#left-container {
+  background-color: #faf9fd;
+  width: 66.66%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  /* margin-right: 2px; */
+  border-right: 3px solid #b1b1b1;
+}
+
+#stacks-container {
+  background-color: green;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.card-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.right-container {
+  width: 33.33%;
+  background-color: #3851b5;
+}
+
+#vault-footer {
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  padding: 4px;
+  background-color: #faf9fd;
+  /* border-top: 1px solid #b1b1b1; */
 }

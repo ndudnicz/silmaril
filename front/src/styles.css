@@ -37,3 +37,8 @@ button,
 #close-dialog-button:hover {
     color: #737373 !important;
 }
+
+:host ::ng-deep .mat-chip {
+  border-radius: 5px !important;
+  /* container-shape-radius: 5px; */
+}

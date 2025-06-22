@@ -1,5 +1,3 @@
-using Api.Controllers.Attributes;
-using Api.Entities;
 using Api.Entities.Dtos;
 using Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -29,12 +27,11 @@ public class LoginController(
     }
     
     [HttpPost]
-    [ValidateUserIdMatchesDto]
     public async Task<IActionResult> CreateAsync([FromBody] CreateLoginDto createLoginDto)
     {
         try
         {
-            return Ok(await loginService.CreateLoginAsync(createLoginDto));
+            return Ok(await loginService.CreateLoginAsync(createLoginDto, GetUserId()));
         }
         catch (Exception ex)
         {
@@ -44,12 +41,11 @@ public class LoginController(
     }
 
     [HttpPut]
-    [ValidateUserIdMatchesDto]
     public async Task<IActionResult> UpdateAsync([FromBody] UpdateLoginDto updateLoginDto)
     {
         try
         {
-            return Ok(await loginService.UpdateLoginAsync(updateLoginDto));
+            return Ok(await loginService.UpdateLoginAsync(updateLoginDto, GetUserId()));
         }
         catch (Exception ex)
         {

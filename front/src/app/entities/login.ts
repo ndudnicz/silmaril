@@ -81,11 +81,6 @@ export class DecryptedData {
     }
 
     public static fromString(data: string): DecryptedData {
-        if (data == '[object Object]')
-            console.log('DecryptedData from string is [object Object], this might be a bug in the code');
-            
-        console.log('Parsing DecryptedData from string:', data);
-        
         try {
             const obj = JSON.parse(data);
             return DecryptedData.fromObject(obj);

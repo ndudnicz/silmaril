@@ -1,5 +1,5 @@
 <div class="vault-container">
-    <mat-toolbar>
+    <mat-toolbar class="toolbar">
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
             <mat-icon>diamond</mat-icon>
         </button>
@@ -16,20 +16,28 @@
                 <mat-icon>add</mat-icon>
             </button>
         </div>
-
         <div class="toolbar-button">
             <button mat-icon-button (click)="signout()" class="example-icon favorite-icon"
                 aria-label="Example icon-button with heart icon">
-                <mat-icon>signout</mat-icon>
+                <mat-icon>logout</mat-icon>
             </button>
         </div>
     </mat-toolbar>
 
-    <mat-grid-list cols="6" rowHeight="88vh" [gutterSize]="'1px'" [style.background]="'#f5f5f5'">
-        <mat-grid-tile [colspan]="4" [rowspan]="1" [style.background]="'#3f61b5'">2</mat-grid-tile>
-        <mat-grid-tile [colspan]="2" [rowspan]="1" [style.background]="'#3851b5'">3</mat-grid-tile>
-    </mat-grid-list>
-    <div id="vault-footer" style="display: flex; align-content: center; justify-content: center; padding: 4px;">
+    <div class="grid-container">
+        <div id="left-container">
+            <div id="stacks-container">
+                <app-card-stack class="card-stack" *ngFor="let entry of loginStackEntries" [logins]="entry.value"
+                    [title]="entry.key">
+                </app-card-stack>
+            </div>
+        </div>
+        <div class="right-container">
+            <app-selected-login></app-selected-login>
+        </div>
+    </div>
+
+    <div id="vault-footer">
         <i>Silmaril</i>
     </div>
 </div>

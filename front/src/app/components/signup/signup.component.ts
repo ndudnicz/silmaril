@@ -3,7 +3,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { FormGroup, FormControl, ReactiveFormsModule, ValidatorFn, AbstractControl } from '@angular/forms';
@@ -23,7 +22,6 @@ import { NgxSpinnerService } from 'ngx-spinner';
     ReactiveFormsModule,
     MatButtonModule,
     MatTooltipModule,
-    MatDividerModule,
     MatCardModule,
     RouterLink
   ],

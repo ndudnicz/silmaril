@@ -90,10 +90,6 @@ export class GeneratePasswordModalComponent implements OnInit {
   progressBarColor = this.progressBarColors[PasswordStrength.WEAK];
   passwordStrength = PasswordStrength.WEAK.toString();
 
-  constructor() {
-    console.log('GeneratePasswordModalComponent initialized');
-  }
-
   ngOnInit(): void {
     this.formGeneratePassword.valueChanges.subscribe(this.setNewPassword.bind(this));
     this.setProgressPasswordStrengthValues();

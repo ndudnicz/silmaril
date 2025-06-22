@@ -21,9 +21,10 @@ public class LoginService(
         return LoginDto.FromLogin(await loginRepository.GetLoginsWithByUserIdTagsAsync(userId));
     }
 
-    public async Task<LoginDto> CreateLoginAsync(CreateLoginDto createLoginDto)
+    public async Task<LoginDto> CreateLoginAsync(CreateLoginDto createLoginDto, Guid userId)
     {
         var login = Login.FromCreateLoginDto(createLoginDto);
+        login.UserId = userId;
         if (createLoginDto.TagNames.Length > 0)
         {
             login.Tags = await tagService.GetTagByNameBulkAsync(createLoginDto.TagNames);
@@ -44,13 +45,13 @@ public class LoginService(
         return LoginDto.FromLogin(await loginRepository.UpdateLoginAsync(login));
     }
 
-    public async Task<LoginDto> UpdateLoginAsync(UpdateLoginDto updateLoginDto)
+    public async Task<LoginDto> UpdateLoginAsync(UpdateLoginDto updateLoginDto, Guid userId)
     {
-        if (await userRepository.UserExistsAsync(updateLoginDto.UserId) == false)
+        if (await userRepository.UserExistsAsync(userId) == false)
         {
-            throw new UserNotFound(updateLoginDto.UserId);
+            throw new UserNotFound(userId);
         }
-        var existingLogin = await loginRepository.GetLoginWithByUserIdTagsAsync(updateLoginDto.Id, updateLoginDto.UserId);
+        var existingLogin = await loginRepository.GetLoginWithByUserIdTagsAsync(updateLoginDto.Id, userId);
         existingLogin.Tags = await tagService.GetTagByNameBulkAsync(updateLoginDto.Tags.Select(t => t.Name).ToArray());
         existingLogin.EncryptedData = Convert.FromBase64String(updateLoginDto.EncryptedDataBase64 ?? string.Empty);
         existingLogin.Updated = DateTime.UtcNow;

@@ -21,7 +21,6 @@ public class Login: MyEntity
     {
         return new Login
         {
-            UserId = dto.UserId,
             EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty),
             Tags = dto.TagNames.Select(name => new Tag { Name = name }).ToList(),
             EncryptionVersion = dto.EncryptionVersion,
@@ -36,7 +35,6 @@ public class Login: MyEntity
             Id = dto.Id,
             Created = dto.Created,
             Updated = dto.Updated,
-            UserId = dto.UserId,
             EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty),
             Tags = dto.Tags,
             EncryptionVersion = dto.EncryptionVersion,

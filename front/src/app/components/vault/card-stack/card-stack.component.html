@@ -1,0 +1,15 @@
+<div class="stack-container">
+    <div class="stack-header">
+        <div class="title-container">
+            <h2>{{title}}</h2>
+        </div>
+        <div class="divider-container">
+            <mat-divider></mat-divider>
+        </div>
+    </div>
+    <div class="stack-content">
+        @for (login of logins; track $index) {
+        <app-card (click)="setSelectedLogin(login)" [login]="login"></app-card>
+        }
+    </div>
+</div>

@@ -1,0 +1,33 @@
+.card {
+  width: 200px;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  margin: 5px;
+  cursor: pointer;
+  background-color: #4867e2;
+  color: #ebeaea;
+  height: 100px;
+}
+
+.card-content {
+  padding: 10px;
+}
+
+.card-title {
+  margin: 0 0 8px 0;
+  font-size: 1em;
+}
+
+.card-description {
+  margin: 0;
+  color: #666;
+}
+
+.card-footer {
+  padding: 12px;
+  /* background-color: #f5f5f5; */
+  /* border-top: 1px solid #e0e0e0; */
+  text-align: start;
+}

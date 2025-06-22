@@ -1,0 +1,22 @@
+import { Injectable } from '@angular/core';
+import { Login } from '../entities/login';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DataService {
+
+  constructor() { }
+
+  private _selectedLogin: BehaviorSubject<Login | null> = new BehaviorSubject<Login | null>(null);
+  public readonly selectedLogin: Observable<Login | null> = this._selectedLogin.asObservable();
+
+  setSelectedLogin(login: Login | null): void {
+    this._selectedLogin.next(login);
+  }
+
+  clearSelectedLogin(): void {
+    this._selectedLogin.next(null);
+  }
+}

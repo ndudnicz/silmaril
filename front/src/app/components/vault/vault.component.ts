@@ -12,6 +12,10 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AddLoginModalComponent } from './modals/add-login/add-login-modal.component';
 import { DecryptedData, Login } from '../../entities/login';
 import { CryptoUtilsV1 } from '../../utils/crypto.utils';
+import { CommonModule, KeyValue } from '@angular/common';
+import { CardStackComponent } from './card-stack/card-stack.component';
+import { DataService } from '../../services/data.service';
+import { SelectedLoginComponent } from "./selected-login/selected-login.component";
 
 @Component({
   selector: 'app-vault',
@@ -20,35 +24,60 @@ import { CryptoUtilsV1 } from '../../utils/crypto.utils';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
-    MatDialogModule
-  ],
+    MatDialogModule,
+    CardStackComponent,
+    CommonModule,
+    SelectedLoginComponent
+],
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'
 })
 export class VaultComponent implements OnInit {
 
   readonly dialog = inject(MatDialog);
-  private logins: Login[] = [];
+  logins: Login[] = [];
+  loginStackEntries: KeyValue<string, Login[]>[] = [];
+  selectedLogin: Login | null = null;
 
   constructor(
     private vaultService: VaultService,
     private authService: AuthService,
     private loginService: LoginService,
-    private spinner: NgxSpinnerService
+    private spinner: NgxSpinnerService,
+    private dataService: DataService
   ) { }
 
   async ngOnInit(): Promise<void> {
     this.spinner.show();
     try {
-      console.log('VaultComponent initialized', this.vaultService.isUnlocked(), this.vaultService.getKey());
+      // console.log('VaultComponent initialized', this.vaultService.isUnlocked(), this.vaultService.getKey());
       this.logins = await this.loginService.getLoginsAsync();
       this.logins = await this.decryptAllLogins(this.logins);
+      this.computeStacks();
+      this.dataService.selectedLogin.subscribe((login: Login | null) => {
+        this.selectedLogin = login;
+        console.log('VaultComponent : Selected login updated:', this.selectedLogin);
+      });
     } catch (error: any) {
       ToastWrapper.error('Failed to fetch data: ', error.message ?? error);
       console.error('Error fetching data:', error);
     } finally {
       this.spinner.hide();
     }
+  }
+
+  computeStacks() {
+    let loginStacks: any = {};
+    for (const login of this.logins) {
+      const stackName = login.decryptedData?.title.charAt(0).toLocaleUpperCase() || 'Uncategorized';
+      if (!loginStacks[stackName]) {
+        loginStacks[stackName] = [];
+      }
+      loginStacks[stackName].push(login);
+    }
+
+    this.loginStackEntries = Object.entries(loginStacks as Record<string, Login[]>)
+      .map(([key, value]) => ({ key, value }));
   }
 
   async decryptAllLogins(logins: Login[]): Promise<Login[]> {
@@ -60,7 +89,7 @@ export class VaultComponent implements OnInit {
           login.decryptedData = DecryptedData.fromString(decryptDataString);
           return login;
         }));
-        console.log('All logins decrypted:', this.logins);
+        // console.log('All logins decrypted:', this.logins);
         ToastWrapper.success('All logins decrypted successfully');
         return resolve(this.logins);
       } catch (error: any) {
@@ -76,12 +105,12 @@ export class VaultComponent implements OnInit {
   async signout() {
     if (confirm('Are you sure you want to signout?')) {
       this.spinner.show();
-      console.log('Logging out...');
+      console.log('Signing out...');
       try {
         await this.authService.signoutAsync();
         this.vaultService.clearKey();
         this.vaultService.clearSalt();
-        ToastWrapper.success('Logged out successfully');
+        ToastWrapper.success('Signed out successfully');
         setTimeout(() => {
           this.spinner.hide();
           window.location.reload();
@@ -110,5 +139,9 @@ export class VaultComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log(`Dialog result: ${result}`);
     });
+  }
+
+  select(login: Login) {
+    console.log('Card stack clicked');
   }
 }
