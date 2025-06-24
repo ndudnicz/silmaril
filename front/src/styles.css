@@ -27,18 +27,33 @@ button,
    background-color: #faf9fd !important;
 }
 
-#close-dialog-button {
-    position: absolute !important;
-    right: 10px;
-    top: 10px;
+.close-button {
     cursor: pointer !important;
 }
 
-#close-dialog-button:hover {
+.close-button:hover {
     color: #737373 !important;
+}
+
+.close-dialog-button {
+    position: absolute !important;
+    right: 10px;
+    top: 10px;
 }
 
 :host ::ng-deep .mat-chip {
   border-radius: 5px !important;
   /* container-shape-radius: 5px; */
+}
+
+.full-width {
+    width: 100%;
+}
+
+.my-textarea {
+    max-height: 300px;
+}
+
+.spacer {
+  flex: 1 1 auto;
 }

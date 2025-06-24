@@ -1,5 +1,58 @@
-@if (login) {
-    <p>login selected : {{ login.decryptedData?.title }}</p>
-} @else {
-    <p>No login selected</p>
-}
+<div id="selected-login-container">
+    <div class="selected-login-header">
+        <div>
+            <span class="selected-login-header-title">Login</span>
+        </div>
+        <span class="spacer"></span>
+        <div>
+            <mat-icon class="close-button unset-login-button" (click)="close()">close</mat-icon>
+        </div>
+    </div>
+    <div class="selected-login-body">
+        <form>
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-label>Title</mat-label>
+                <input matInput class="selected-login-field" type="text" [(ngModel)]="title" name="title"
+                    readonly="true" (click)="selectText($event)" [cdkCopyToClipboard]="title">
+            </mat-form-field>
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-label>Identifier</mat-label>
+                <input matInput class="selected-login-field" type="text" [(ngModel)]="identifier" name="identifier"
+                    readonly="true" (click)="selectText($event)" [cdkCopyToClipboard]="identifier">
+            </mat-form-field>
+            <br>
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-label>Password</mat-label>
+                <input matInput class="selected-login-field" type="text" id="password" [(ngModel)]="password"
+                    name="password" [type]="showPassword ? 'text' : 'password'" readonly="true"
+                    (click)="selectText($event)" [cdkCopyToClipboard]="password">
+                <button mat-icon-button matSuffix (click)="togglePasswordVisibility()">
+                    <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+                </button>
+            </mat-form-field>
+            <br>
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-label>Url</mat-label>
+                <input matInput class="selected-login-field" type="text" [(ngModel)]="url" name="url" readonly="true"
+                    (click)="selectText($event)" [cdkCopyToClipboard]="url">
+            </mat-form-field>
+            <br>
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-label>Notes</mat-label>
+                <textarea matInput class="my-textarea selected-login-notes" [(ngModel)]="notes" name="notes"
+                    readonly="true"></textarea>
+            </mat-form-field>
+            <br>
+        </form>
+    </div>
+    <div class="selected-login-footer">
+        <button mat-raised-button style="margin-right: 10px;" (click)="openDeleteModal()">
+            <mat-icon>delete</mat-icon>
+            Delete
+        </button>
+        <button mat-raised-button (click)="openEditModal()">
+            <mat-icon>edit</mat-icon>
+            Edit
+        </button>
+    </div>
+</div>

@@ -2,7 +2,7 @@ namespace Api.Entities.Dtos;
 
 public class LoginDto: MyEntity
 {
-    public List<Tag> Tags { get; set; } = new();
+    public List<string> TagNames { get; set; } = new();
     public Guid UserId { get; set; }
     public string? EncryptedDataBase64 { get; set; }
     public int? EncryptionVersion { get; set; }
@@ -17,7 +17,7 @@ public class LoginDto: MyEntity
             Updated = login.Updated,
             UserId = login.UserId,
             EncryptedDataBase64 = Convert.ToBase64String(login.EncryptedData ?? []),
-            Tags = login.Tags.ToList(),
+            TagNames = login.Tags.Select(x => x.Name).ToList(),
             EncryptionVersion = login.EncryptionVersion,
             InitializationVectorBase64 = Convert.ToBase64String(login.InitializationVector ?? [])
         };

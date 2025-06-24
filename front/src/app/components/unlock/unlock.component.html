@@ -8,7 +8,9 @@
                 <mat-icon matSuffix>lock</mat-icon>
             </mat-form-field>
             <br>
-            <button type="submit" mat-raised-button [disabled]="masterPasswordFormControl.invalid || loading">Submit</button>
+            <div class="unlock-footer">
+                <button type="submit" mat-raised-button [disabled]="masterPasswordFormControl.invalid || loading">Submit</button>
+            </div>
         </form>
     </div>
 </div>

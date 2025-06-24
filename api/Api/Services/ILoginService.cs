@@ -5,7 +5,6 @@ namespace Api.Services;
 
 public interface ILoginService
 {
-    // public Task<Login> GetLoginAsync(Guid id);
     public Task<LoginDto> GetLoginByUserIdAsync(Guid id, Guid userId);
     public Task<IEnumerable<LoginDto>> GetLoginsByUserIdAsync(Guid userId);
     public Task<LoginDto> CreateLoginAsync(CreateLoginDto createLoginDto, Guid userId);

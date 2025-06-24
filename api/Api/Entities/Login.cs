@@ -27,32 +27,4 @@ public class Login: MyEntity
             InitializationVector = Convert.FromBase64String(dto.InitializationVectorBase64 ?? string.Empty)
         };
     }
-    
-    public static Login FromUpdateLoginDto(UpdateLoginDto dto)
-    {
-        return new Login
-        {
-            Id = dto.Id,
-            Created = dto.Created,
-            Updated = dto.Updated,
-            EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty),
-            Tags = dto.Tags,
-            EncryptionVersion = dto.EncryptionVersion,
-        };
-    }
-
-    public static Login FromLoginDto(LoginDto dto)
-    {
-        return new Login
-        {
-            Id = dto.Id,
-            Created = dto.Created,
-            Updated = dto.Updated,
-            UserId = dto.UserId,
-            EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty),
-            Tags = dto.Tags,
-            EncryptionVersion = dto.EncryptionVersion,
-            InitializationVector = Convert.FromBase64String(dto.InitializationVectorBase64 ?? string.Empty)
-        };
-    }
 }

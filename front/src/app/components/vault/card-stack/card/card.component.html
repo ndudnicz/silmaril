@@ -3,6 +3,6 @@
     <h2 class="card-title">{{login.decryptedData?.title}}</h2>
   </div>
   <div class="card-footer">
-    <app-chip *ngFor="let tag of login.tags; let i = index" [label]="tag.name"></app-chip>
+    <app-chip *ngFor="let tagName of login.tagNames; let i = index" [label]="tagName"></app-chip>
   </div>
 </div>

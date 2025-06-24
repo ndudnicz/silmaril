@@ -11,7 +11,6 @@ import { GeneratePasswordModalComponent } from './generate-password-modal/genera
 import { CreateLoginDto, DecryptedData, Login } from '../../../../entities/login';
 import { CryptoUtilsV1, uint8ArrayToBase64 } from '../../../../utils/crypto.utils';
 import { VaultService } from '../../../../services/vault.service';
-import { AuthService } from '../../../../services/auth.service';
 import { LoginService } from '../../../../services/login.service';
 import { ToastWrapper } from '../../../../utils/toast.wrapper';
 
@@ -31,11 +30,15 @@ import { ToastWrapper } from '../../../../utils/toast.wrapper';
 export class AddLoginModalComponent {
   data = inject(MAT_DIALOG_DATA);
   dialog = inject(MatDialog);
-  titleFormControl = new FormControl('', [Validators.required]);
-  identifierFormControl = new FormControl('');
-  passwordFormControl = new FormControl('');
-  urlFormControl = new FormControl('');
-  notesFormControl = new FormControl('');
+  characterLimit = 2000;
+  passwordCharacterLimit = 10000;
+  notesCharacterCount = 0;
+  titleFormControl = new FormControl('', [Validators.required, Validators.maxLength(this.characterLimit)]);
+  identifierFormControl = new FormControl('', [Validators.maxLength(this.characterLimit)]);
+  passwordFormControl = new FormControl('', [Validators.maxLength(this.passwordCharacterLimit)]);
+  urlFormControl = new FormControl('', [Validators.maxLength(this.characterLimit)]);
+  notesFormControl = new FormControl('', [Validators.maxLength(this.characterLimit)]);
+
   form: FormGroup = new FormGroup({
       titleFormControl: this.titleFormControl,
       identifierFormControl: this.identifierFormControl,
@@ -53,7 +56,9 @@ export class AddLoginModalComponent {
     private loginService: LoginService,
     private dialogRef: MatDialogRef<AddLoginModalComponent>
   ) {
-
+    this.notesFormControl.valueChanges.subscribe(value => {
+      this.notesCharacterCount = value ? value.length : 0;
+    });
   }
 
   async onSubmit() {
@@ -73,7 +78,6 @@ export class AddLoginModalComponent {
     });
     const encryptionResult = await CryptoUtilsV1.encryptDataAsync(this.vaultService.getKey(), decryptedData.toString());
     const createLogin: CreateLoginDto = {
-      userId: AuthService.getUserId()!,
       encryptedDataBase64: uint8ArrayToBase64(encryptionResult.ciphertext),
       initializationVectorBase64: uint8ArrayToBase64(encryptionResult.initializationVector),
       encryptionVersion: encryptionResult.encryptionVersion,
@@ -81,7 +85,6 @@ export class AddLoginModalComponent {
     };
     try {
       const login: Login = await this.loginService.createLoginAsync(createLogin);
-      // console.log('Login created successfully:', login);
       login.decryptedData = decryptedData; // Attach decrypted data to the login object
       this.dialogRef.close(login);
     } catch (error: any) {

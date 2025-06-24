@@ -1,4 +1,4 @@
-import { base64ToUint8Array, uint8ArrayToBase64 } from "../utils/crypto.utils";
+import { base64ToUint8Array } from "../utils/crypto.utils";
 import { Tag } from "./tag";
 
 export class Login {
@@ -10,18 +10,18 @@ export class Login {
     encryptionVersion?: number;
     initializationVector?: Uint8Array;
     initializationVectorBase64?: string;
-    tags: Tag[];
+    tagNames: string[];
     created: Date;
     updated?: Date;
 
-    constructor(id: string, userId: string, encryptedDataBase64?: string, initializationVectorBase64?: string, tags: Tag[] = [], created?: Date, updated?: Date, encryptionVersion?: number) {
+    constructor(id: string, userId: string, encryptedDataBase64?: string, initializationVectorBase64?: string, tagNames: string[] = [], created?: Date, updated?: Date, encryptionVersion?: number) {
         this.id = id;
         this.userId = userId;
         this.encryptedDataBase64 = encryptedDataBase64;
         this.encryptedData = encryptedDataBase64 ? base64ToUint8Array(encryptedDataBase64) : undefined;
         this.initializationVector = initializationVectorBase64 ? base64ToUint8Array(initializationVectorBase64) : undefined;
         this.initializationVectorBase64 = initializationVectorBase64;
-        this.tags = tags;
+        this.tagNames = tagNames;
         this.created = created || new Date();
         this.updated = updated;
         this.encryptionVersion = encryptionVersion;
@@ -96,9 +96,16 @@ export class DecryptedData {
 }
 
 export interface CreateLoginDto {
-    userId: string;
     encryptedDataBase64: string;
     initializationVectorBase64: string;
     tagNames: string[];
+    encryptionVersion?: number;
+}
+
+export interface UpdateLoginDto {
+    id: string;
+    encryptedDataBase64?: string;
+    initializationVectorBase64?: string;
+    tagNames?: string[];
     encryptionVersion?: number;
 }

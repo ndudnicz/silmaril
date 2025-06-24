@@ -1,0 +1,41 @@
+#selected-login-container {
+    height: 100%;
+    padding: 0px 12px;
+}
+
+.unset-login-button {
+    position: relative !important;
+    top: 0 !important;
+    cursor: pointer;
+}
+
+.selected-login-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.selected-login-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 4px;
+}
+
+.selected-login-notes {
+    height: 200px;
+}
+
+::ng-deep .selected-login-field  {
+  cursor: pointer;
+}
+
+::ng-deep .selected-login-field.mat-focused .mat-form-field-underline {
+  cursor: pointer;
+}
+
+::ng-deep .selected-login-field input {
+  caret-color: rgba(255, 255, 255, 0);
+  cursor: pointer;
+}

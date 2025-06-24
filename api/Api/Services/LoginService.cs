@@ -52,9 +52,10 @@ public class LoginService(
             throw new UserNotFound(userId);
         }
         var existingLogin = await loginRepository.GetLoginWithByUserIdTagsAsync(updateLoginDto.Id, userId);
-        existingLogin.Tags = await tagService.GetTagByNameBulkAsync(updateLoginDto.Tags.Select(t => t.Name).ToArray());
+        existingLogin.Tags = await tagService.GetTagByNameBulkAsync(updateLoginDto.TagNames.ToArray());
         existingLogin.EncryptedData = Convert.FromBase64String(updateLoginDto.EncryptedDataBase64 ?? string.Empty);
         existingLogin.Updated = DateTime.UtcNow;
+        existingLogin.EncryptionVersion = updateLoginDto.EncryptionVersion;
         return LoginDto.FromLogin(await loginRepository.UpdateLoginAsync(existingLogin));
     }
 }

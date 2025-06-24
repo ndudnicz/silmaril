@@ -1,7 +1,3 @@
-.example-spacer {
-  flex: 1 1 auto;
-}
-
 .toolbar {
   background-color: #faf9fd;
 }
@@ -18,15 +14,18 @@
   /* border-top: 1px solid #b1b1b1; */
 }
 
-#left-container {
+.left-container {
   background-color: #faf9fd;
-  width: 66.66%;
+  width: 60%;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
-  /* margin-right: 2px; */
   border-right: 3px solid #b1b1b1;
+}
+
+.left-container-fullscreen {
+  width: 100%;
 }
 
 #stacks-container {
@@ -47,8 +46,8 @@
 }
 
 .right-container {
-  width: 33.33%;
-  background-color: #3851b5;
+  width: 40%;
+  background-color: #faf9fd;
 }
 
 #vault-footer {

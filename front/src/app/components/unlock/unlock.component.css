@@ -4,3 +4,8 @@
     align-items: center;
     height: 100%;
 }
+
+.unlock-footer {
+    display: flex;
+    justify-content: flex-end;
+}

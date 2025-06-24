@@ -1,33 +1,39 @@
 <div class="vault-container">
     <mat-toolbar class="toolbar">
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+        <button mat-icon-button class="example-icon">
             <mat-icon>diamond</mat-icon>
         </button>
         <span>Silmaril</span>
-        <span class="example-spacer"></span>
+        <span class="spacer"></span>
         <div class="toolbar-button">
-            <button mat-icon-button (click)="openAddLoginModal()" class="example-icon favorite-icon"
-                aria-label="Example icon-button with heart icon">
+            <button mat-icon-button (click)="openAddLoginModal()">
                 <mat-icon>add</mat-icon>
             </button>
         </div>
-        <div class="toolbar-button">
+        <!-- <div class="toolbar-button">
             <button type="submit" mat-raised-button>
                 <mat-icon>key</mat-icon>Change Master Password
             </button>
+        </div> -->
+        <div class="toolbar-button">
+            <button mat-icon-button (click)="settings()">
+                <mat-icon>settings</mat-icon>
+            </button>
         </div>
         <div class="toolbar-button">
-            <button mat-icon-button (click)="signout()" class="example-icon favorite-icon"
-                aria-label="Example icon-button with heart icon">
+            <button mat-icon-button (click)="signout()">
                 <mat-icon>logout</mat-icon>
             </button>
         </div>
     </mat-toolbar>
 
     <div class="grid-container">
-        <div id="left-container">
+        <div [ngClass]="{
+            'left-container': true,
+            'left-container-fullscreen': selectedLogin == null
+            }">
             <div id="stacks-container">
-                @if (logins.length == 0) {
+                @if (logins.length == 0 && loading == false) {
                 <div id="no-data">
                     <span>No data yet</span>
                     <br>
@@ -44,8 +50,8 @@
                 </app-card-stack>
             </div>
         </div>
-        <div class="right-container">
-            <app-selected-login></app-selected-login>
+        <div [hidden]="selectedLogin == null" class="right-container">
+            <app-selected-login ></app-selected-login>
         </div>
     </div>
 

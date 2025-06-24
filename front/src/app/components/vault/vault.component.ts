@@ -28,7 +28,7 @@ import { SelectedLoginComponent } from "./selected-login/selected-login.componen
     CardStackComponent,
     CommonModule,
     SelectedLoginComponent
-],
+  ],
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'
 })
@@ -38,6 +38,7 @@ export class VaultComponent implements OnInit {
   logins: Login[] = [];
   loginStackEntries: KeyValue<string, Login[]>[] = [];
   selectedLogin: Login | null = null;
+  loading = false;
 
   constructor(
     private vaultService: VaultService,
@@ -49,11 +50,14 @@ export class VaultComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.spinner.show();
+    this.loading = true;
     try {
       // console.log('VaultComponent initialized', this.vaultService.isUnlocked(), this.vaultService.getKey());
       this.logins = await this.loginService.getLoginsAsync();
       this.logins = await this.decryptAllLogins(this.logins);
       this.computeStacks();
+      console.log('vault selectedLogin:', this.selectedLogin);
+
       this.dataService.selectedLogin.subscribe((login: Login | null) => {
         this.selectedLogin = login;
         console.log('VaultComponent : Selected login updated:', this.selectedLogin);
@@ -63,6 +67,7 @@ export class VaultComponent implements OnInit {
       console.error('Error fetching data:', error);
     } finally {
       this.spinner.hide();
+      this.loading = false;
     }
   }
 
@@ -98,12 +103,6 @@ export class VaultComponent implements OnInit {
       this.spinner.show();
       try {
         this.logins = await Promise.all(logins.map(this.decryptLoginData.bind(this)));
-        // this.logins = await Promise.all(this.logins.map(async (login: Login) => {
-        //   const decryptDataString = await CryptoUtilsV1.decryptDataAsync(this.vaultService.getKey(), login.encryptedData!, login.initializationVector!);
-        //   login.decryptedData = DecryptedData.fromString(decryptDataString);
-        //   return login;
-        // }));
-        // console.log('All logins decrypted:', this.logins);
         ToastWrapper.success('All logins decrypted successfully');
         return resolve(this.logins);
       } catch (error: any) {
@@ -151,13 +150,20 @@ export class VaultComponent implements OnInit {
     );
 
     dialogRef.afterClosed().subscribe(async (result: Login) => {
-      this.logins.push(result);
-      this.computeStacks();
-      console.log(`Add login :`, result);
+      if (result) {
+        this.logins.push(result);
+        this.computeStacks();
+        console.log(`Add login :`, result);
+      }
     });
   }
 
   select(login: Login) {
     console.log('Card stack clicked');
+  }
+
+  settings() {
+    console.log('Settings clicked');
+    // Implement settings logic here
   }
 }

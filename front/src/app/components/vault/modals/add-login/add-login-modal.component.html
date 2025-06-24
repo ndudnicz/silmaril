@@ -1,19 +1,30 @@
 <div id="add-login-modal" class="add-login-modal">
     <h1 mat-dialog-title>Add Login</h1>
-    <mat-icon id="close-dialog-button" (click)="closeDialog()">close</mat-icon>
+    <mat-icon class="close-button close-dialog-button" (click)="closeDialog()">close</mat-icon>
     <mat-dialog-content>
         <form [formGroup]="form">
             <mat-form-field class="full-width" appearance="fill" floatLabel="always">
                 <mat-label>Title</mat-label>
                 <input matInput type="text" formControlName="titleFormControl" required>
+                @if (titleFormControl.hasError('maxlength')) {
+                <mat-error>
+                    Too long : {{ titleFormControl.value?.length }} / {{ characterLimit }}
+                </mat-error>
+                }
             </mat-form-field>
             <br>
-            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
-                <mat-label>Email or username</mat-label>
-                <input matInput type="text" formControlName="identifierFormControl">
-            </mat-form-field>
 
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-label>Identifier : email or username</mat-label>
+                <input matInput type="text" formControlName="identifierFormControl">
+                @if (identifierFormControl.hasError('maxlength')) {
+                <mat-error>
+                    Too long : {{ identifierFormControl.value?.length }} / {{ characterLimit }}
+                </mat-error>
+                }
+            </mat-form-field>
             <br>
+
             <div id="password-field" class="password-field">
                 <div id="password-input">
                     <mat-form-field class="full-width modal-field" appearance="fill" floatLabel="always">
@@ -23,6 +34,11 @@
                         <button mat-icon-button matSuffix (click)="togglePasswordVisibility()">
                             <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
                         </button>
+                        @if (passwordFormControl.hasError('maxlength')) {
+                        <mat-error>
+                            Too long : {{ passwordFormControl.value?.length }} / {{ passwordCharacterLimit}}
+                        </mat-error>
+                        }
                     </mat-form-field>
                 </div>
                 <div id="generate-password-button-container">
@@ -31,27 +47,26 @@
                     </button>
                 </div>
             </div>
-            <!-- <mat-form-field class="modal-field" appearance="fill">
-                <mat-label>Password</mat-label>
-                <input matInput type="password" id="password" formControlName="passwordFormControl">
-                <button mat-icon-button matSuffix (click)="togglePasswordVisibility()">
-                    <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
-                </button>
-            </mat-form-field> -->
-
             <br>
+
             <mat-form-field class="full-width" appearance="fill" floatLabel="always">
                 <mat-label>Url</mat-label>
                 <input matInput type="text" formControlName="urlFormControl">
+                @if (urlFormControl.hasError('maxlength')) {
+                <mat-error>
+                    Too long : {{ urlFormControl.value?.length }} / {{ characterLimit }}
+                </mat-error>
+                }
             </mat-form-field>
             <br>
 
             <mat-form-field class="full-width" appearance="fill" floatLabel="always">
                 <mat-label>Notes</mat-label>
                 <textarea matInput formControlName="notesFormControl"></textarea>
+                <mat-hint>Length limit : {{ notesCharacterCount }} / 2000</mat-hint>
             </mat-form-field>
-
             <br>
+
             <button style="position: relative; float: inline-end;" mat-raised-button color="primary" type="submit"
                 [disabled]="!form.valid || loading" (click)="onSubmit()">Add Login</button>
         </form>
