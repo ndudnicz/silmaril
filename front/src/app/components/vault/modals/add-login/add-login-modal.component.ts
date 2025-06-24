@@ -3,7 +3,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,7 +14,6 @@ import { VaultService } from '../../../../services/vault.service';
 import { AuthService } from '../../../../services/auth.service';
 import { LoginService } from '../../../../services/login.service';
 import { ToastWrapper } from '../../../../utils/toast.wrapper';
-import { DialogRef } from '@angular/cdk/dialog';
 
 @Component({
   selector: 'app-add-login-modal',
@@ -52,7 +51,7 @@ export class AddLoginModalComponent {
     private spinner: NgxSpinnerService,
     private vaultService: VaultService,
     private loginService: LoginService,
-    private dialogRef: DialogRef<AddLoginModalComponent>
+    private dialogRef: MatDialogRef<AddLoginModalComponent>
   ) {
 
   }
@@ -82,8 +81,9 @@ export class AddLoginModalComponent {
     };
     try {
       const login: Login = await this.loginService.createLoginAsync(createLogin);
-      console.log('Login created successfully:', login);
-      this.dialog.closeAll();
+      // console.log('Login created successfully:', login);
+      login.decryptedData = decryptedData; // Attach decrypted data to the login object
+      this.dialogRef.close(login);
     } catch (error: any) {
       console.error('Error creating login:', error);
       ToastWrapper.error('Failed to create login: ', error.message || 'Unknown error');

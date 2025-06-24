@@ -11,6 +11,7 @@ import { Router, RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { toast } from 'ngx-sonner';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { ToastWrapper } from '../../utils/toast.wrapper';
 
 @Component({
   standalone: true,
@@ -61,6 +62,7 @@ export class SignupComponent {
       this.router.navigate(['/signin']);
     } catch (error) {
       console.error('Error during user creation:', error);
+      ToastWrapper.error('Error during user creation', error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       this.loading = false;
       this.spinner.hide();

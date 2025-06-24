@@ -25,20 +25,6 @@ public class UserController(
         }
     }
     
-    [HttpGet("username/{username}")]
-    public async Task<IActionResult> GetByUserNameAsync([FromRoute] string username)
-    {
-        try
-        {
-            return Ok(UserDto.FromUser(await userService.GetUserByUserNameAsync(username)));
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error getting user");
-            return BadRequest(ex.Message);
-        }
-    }
-    
     [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> CreateAsync([FromBody] CreateUserDto createUserDto)

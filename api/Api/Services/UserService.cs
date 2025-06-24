@@ -22,6 +22,10 @@ public class UserService(
 
     public async Task<User> CreateUserAsync(CreateUserDto createUserDto)
     {
+        if (await userRepository.UserExistsAsync(CryptoHelper.Sha512(createUserDto.Username)))
+        {
+            throw new UserNameAlreadyExists();
+        }
         if (AuthService.ValidatePasswordFormat(createUserDto.Password) == false)
         {
             throw new InvalidPasswordFormat();
@@ -31,8 +35,12 @@ public class UserService(
     
     public async Task<User> UpdateUserAsync(Guid userId, UpdateUserDto updateUserDto)
     {
+        if (await userRepository.UserExistsAsync(CryptoHelper.Sha512(updateUserDto.Username)))
+        {
+            throw new UserNameAlreadyExists();
+        }
         var existingUser = await userRepository.GetUserAsync(userId);
-        existingUser.Username = updateUserDto.Username;
+        existingUser.UsernameHash = CryptoHelper.Sha512(updateUserDto.Username);
         return await userRepository.UpdateUserAsync(existingUser);
     }
 

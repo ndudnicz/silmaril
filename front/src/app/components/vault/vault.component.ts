@@ -75,20 +75,34 @@ export class VaultComponent implements OnInit {
       }
       loginStacks[stackName].push(login);
     }
-
     this.loginStackEntries = Object.entries(loginStacks as Record<string, Login[]>)
       .map(([key, value]) => ({ key, value }));
+    this.loginStackEntries.sort((a, b) => a.key.localeCompare(b.key));
+  }
+
+  async decryptLoginData(login: Login): Promise<Login> {
+    return new Promise<Login>(async (resolve, reject) => {
+      try {
+        const decryptDataString = await CryptoUtilsV1.decryptDataAsync(this.vaultService.getKey(), login.encryptedData!, login.initializationVector!);
+        login.decryptedData = DecryptedData.fromString(decryptDataString);
+        return resolve(login);
+      } catch (error: any) {
+        reject(error);
+      } finally {
+      }
+    });
   }
 
   async decryptAllLogins(logins: Login[]): Promise<Login[]> {
     return new Promise<Login[]>(async (resolve, reject) => {
       this.spinner.show();
       try {
-        this.logins = await Promise.all(this.logins.map(async (login: Login) => {
-          const decryptDataString = await CryptoUtilsV1.decryptDataAsync(this.vaultService.getKey(), login.encryptedData!, login.initializationVector!);
-          login.decryptedData = DecryptedData.fromString(decryptDataString);
-          return login;
-        }));
+        this.logins = await Promise.all(logins.map(this.decryptLoginData.bind(this)));
+        // this.logins = await Promise.all(this.logins.map(async (login: Login) => {
+        //   const decryptDataString = await CryptoUtilsV1.decryptDataAsync(this.vaultService.getKey(), login.encryptedData!, login.initializationVector!);
+        //   login.decryptedData = DecryptedData.fromString(decryptDataString);
+        //   return login;
+        // }));
         // console.log('All logins decrypted:', this.logins);
         ToastWrapper.success('All logins decrypted successfully');
         return resolve(this.logins);
@@ -136,8 +150,10 @@ export class VaultComponent implements OnInit {
       }
     );
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log(`Dialog result: ${result}`);
+    dialogRef.afterClosed().subscribe(async (result: Login) => {
+      this.logins.push(result);
+      this.computeStacks();
+      console.log(`Add login :`, result);
     });
   }
 

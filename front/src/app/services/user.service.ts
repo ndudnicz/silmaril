@@ -31,14 +31,17 @@ export class UserService {
       const response = await this.fetchService.postAsync(
         `${this.apiEndpointV1}/user`,
         { body: JSON.stringify({ username, password, confirmPassword })});
+        console.log('Response from user creation:', response);
+        
       if (!response.ok) {
-        throw new Error('User creation failed');
+        throw new Error(response.body ? await response.text() : 'Failed to create user');
+      } else {
+        return response.ok;
       }
-      return response.ok;
     }
     catch (error) {
       console.error('Error during user creation:', error);
-      return false;
+      throw error;
     }
   }
 }

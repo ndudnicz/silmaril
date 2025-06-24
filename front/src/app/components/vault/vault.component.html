@@ -6,14 +6,14 @@
         <span>Silmaril</span>
         <span class="example-spacer"></span>
         <div class="toolbar-button">
-            <button type="submit" mat-raised-button>
-                <mat-icon>key</mat-icon>Change Master Password
-            </button>
-        </div>
-        <div class="toolbar-button">
             <button mat-icon-button (click)="openAddLoginModal()" class="example-icon favorite-icon"
                 aria-label="Example icon-button with heart icon">
                 <mat-icon>add</mat-icon>
+            </button>
+        </div>
+        <div class="toolbar-button">
+            <button type="submit" mat-raised-button>
+                <mat-icon>key</mat-icon>Change Master Password
             </button>
         </div>
         <div class="toolbar-button">
@@ -27,6 +27,18 @@
     <div class="grid-container">
         <div id="left-container">
             <div id="stacks-container">
+                @if (logins.length == 0) {
+                <div id="no-data">
+                    <span>No data yet</span>
+                    <br>
+                    <span>Add your first login</span>
+                    <br>
+                    <button mat-icon-button (click)="openAddLoginModal()" class="example-icon favorite-icon"
+                        aria-label="Example icon-button with heart icon">
+                        <mat-icon id="no-data-button">add</mat-icon>
+                    </button>
+                </div>
+                }
                 <app-card-stack class="card-stack" *ngFor="let entry of loginStackEntries" [logins]="entry.value"
                     [title]="entry.key">
                 </app-card-stack>

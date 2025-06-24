@@ -23,3 +23,4 @@ public class TagNamesNotFound(string names): MyException($"Tag with names '{name
 public class UserNotFound(Guid id): MyException($"User with id {id.ToString()} not found.");
 public class UserNameNotFound(string name): MyException($"User with name '{name}' not found.");
 public class InvalidPasswordFormat() : MyException("Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number and one special character.");
+public class UserNameAlreadyExists() : MyException("Username already exists.");

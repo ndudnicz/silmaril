@@ -11,9 +11,9 @@ public class UserRepository(AppDbContext db): IUserRepository
         return await db.Users.FirstAsync(u => u.Id == id);
     }
     
-    public async Task<User> GetUserByUserNameAsync(string username)
+    public async Task<User> GetUserByUserNameAsync(string usernameHash)
     {
-        return await db.Users.FirstAsync(x => x.Username == username);
+        return await db.Users.FirstAsync(x => x.UsernameHash == usernameHash);
     }
     
     public async Task<bool> UserExistsAsync(Guid id)
@@ -21,6 +21,13 @@ public class UserRepository(AppDbContext db): IUserRepository
         return await db.Users
             .AsNoTracking()
             .AnyAsync(x => x.Id == id);
+    }
+    
+    public async Task<bool> UserExistsAsync(string usernameHash)
+    {
+        return await db.Users
+            .AsNoTracking()
+            .AnyAsync(x => x.UsernameHash == usernameHash);
     }
 
     public async Task<User> CreateUserAsync(User user)

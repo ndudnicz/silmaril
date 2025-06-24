@@ -30,7 +30,7 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
             .HasMany<Login>()
             .WithOne();
         modelBuilder.Entity<User>()
-            .HasIndex(u => u.Username)
+            .HasIndex(u => u.UsernameHash)
             .IsUnique();
         modelBuilder.Entity<Login>()
             .HasMany(e => e.Tags)

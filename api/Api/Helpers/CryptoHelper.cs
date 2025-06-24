@@ -8,7 +8,6 @@ public static class CryptoHelper
 {
     public static string Sha512(string str)
     {
-        Argon2idHash(str);
         var hashBytes = SHA512.HashData(Encoding.UTF8.GetBytes(str));
         return BitConverter.ToString(hashBytes).Replace("-", "");
     }
@@ -29,7 +28,6 @@ public static class CryptoHelper
         };
 
         var hash = Argon2.Hash(config);
-        // var hash = config.EncodeString(null); // Contient tous les paramètres + le hash encodé
         return hash;
     }
     

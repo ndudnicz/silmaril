@@ -8,9 +8,9 @@ namespace Api.Entities;
 [Table("users")]
 public class User: MyEntity
 {
-    [Column("username")]
-    [MaxLength(MaxStringLength)]
-    public required string Username { get; set; }
+    [Column("username_hash")]
+    [MaxLength(Sha512HashLength)]
+    public required string UsernameHash { get; set; }
     [Column("password_hash")]
     [MaxLength(Argon2idHashLength)]
     public required string PasswordHash { get; set; }
@@ -21,7 +21,7 @@ public class User: MyEntity
     {
         return new User
         {
-            Username = createUserDto.Username,
+            UsernameHash = CryptoHelper.Sha512(createUserDto.Username),
             PasswordHash = CryptoHelper.Argon2idHash(createUserDto.Password),
             Salt = CryptoHelper.GenerateSalt128()
         };
