@@ -23,7 +23,7 @@ public static class CryptoHelper
             Lanes = 4,
             Threads = Environment.ProcessorCount,
             Password = System.Text.Encoding.UTF8.GetBytes(password),
-            Salt = GenerateSalt128(),
+            Salt = GenerateRandomByte(16), // 128 bits
             HashLength = 32
         };
 
@@ -35,20 +35,17 @@ public static class CryptoHelper
     {
         return Argon2.Verify(hash, password);
     }
+
+    public static byte[] GenerateRandomByte(int length)
+    {
+        var randomBytes = new byte[length];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomBytes);
+        return randomBytes;
+    }
     
     public static string GenerateRandomBase64Str(int length)
     {
-        using var rng = RandomNumberGenerator.Create();
-        var secretKey = new byte[length]; // 256 bits
-        rng.GetBytes(secretKey);
-        return Convert.ToBase64String(secretKey);
-    }
-    
-    public static byte[] GenerateSalt128()
-    {
-        var salt = new byte[16];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(salt);
-        return salt;
+        return Convert.ToBase64String(GenerateRandomByte(length));
     }
 }

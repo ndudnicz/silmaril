@@ -15,7 +15,7 @@ public class AuthService(
     IUserService userService,
     IAuthRepository authRepository,
     ConfigurationManager configuration,
-    string jwtSecretKey
+    byte[] jwtSecretKey
     ): IAuthService
 {
     private readonly int _jwtTokenExpirationTimeInMinutes = 20; // Set JWT token expiration to 20 minutes
@@ -91,7 +91,6 @@ public class AuthService(
     private string GenerateJwtToken(Guid userId)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(jwtSecretKey);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new[] {
@@ -99,7 +98,7 @@ public class AuthService(
             }),
             Expires = DateTime.UtcNow.AddMinutes(_jwtTokenExpirationTimeInMinutes),
             SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key),
+                new SymmetricSecurityKey(jwtSecretKey),
                 SecurityAlgorithms.HmacSha256Signature),
             Issuer = configuration["Jwt:ValidIssuer"],
             Audience = configuration["Jwt:ValidAudience"]
@@ -125,14 +124,13 @@ public class AuthService(
     private ClaimsPrincipal? ValidateRefreshToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(jwtSecretKey);
         var validationParams = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
+            IssuerSigningKey = new SymmetricSecurityKey(jwtSecretKey),
             ClockSkew = TimeSpan.Zero
         };
 

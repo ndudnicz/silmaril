@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
         }
     }
     
-    public static void AddJwtAuthentication(this IServiceCollection services, ConfigurationManager configuration, string jwtSecretKey)
+    public static void AddJwtAuthentication(this IServiceCollection services, ConfigurationManager configuration, byte[] jwtSecretKey)
     { 
         services.AddAuthentication(options =>
             {
@@ -50,7 +50,7 @@ public static class ServiceCollectionExtensions
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = configuration["Jwt:ValidIssuer"],
                     ValidAudience = configuration["Jwt:ValidAudience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+                    IssuerSigningKey = new SymmetricSecurityKey(jwtSecretKey)
                 };
             });
     }
@@ -63,7 +63,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthRepository, AuthRepository>();
     }
     
-    public static void AddServices(this IServiceCollection services, ConfigurationManager configuration, string jwtSecretKey)
+    public static void AddServices(this IServiceCollection services, ConfigurationManager configuration, byte[] jwtSecretKey)
     {
         services.AddScoped<IAuthService>(s => new AuthService(
             s.GetService<IUserService>()!,

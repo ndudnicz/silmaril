@@ -23,7 +23,7 @@ public class User: MyEntity
         {
             UsernameHash = CryptoHelper.Sha512(createUserDto.Username),
             PasswordHash = CryptoHelper.Argon2idHash(createUserDto.Password),
-            Salt = CryptoHelper.GenerateSalt128()
+            Salt = CryptoHelper.GenerateRandomByte(16) // 128 bits
         };
     }
 }

@@ -9,7 +9,7 @@ var configuration = builder.Configuration;
 
 // Add services to the container.
 builder.Services.AddContexts(configuration);
-var jwtSecretKey = CryptoHelper.GenerateRandomBase64Str(32);
+var jwtSecretKey = CryptoHelper.GenerateRandomByte(32);
 builder.Services.AddJwtAuthentication(configuration, jwtSecretKey);
 builder.Services.AddRepositories();
 builder.Services.AddServices(configuration, jwtSecretKey);
