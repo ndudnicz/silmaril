@@ -39,7 +39,7 @@ public class UserService(
     public async Task<User> UpdateUserPasswordAsync(Guid userId, UpdateUserPasswordDto updateUserPasswordDto)
     {
         var existingUser = await userRepository.GetUserAsync(userId);
-        if (existingUser.PasswordHash != CryptoHelper.Sha512(updateUserPasswordDto.OldPassword))
+        if (!CryptoHelper.Argon2idVerify(updateUserPasswordDto.OldPassword, existingUser.PasswordHash))
         {
             throw new InvalidPassword();
         }
@@ -48,7 +48,7 @@ public class UserService(
         {
             throw new InvalidPasswordFormat();
         }
-        existingUser.PasswordHash = CryptoHelper.Sha512(updateUserPasswordDto.NewPassword);
+        existingUser.PasswordHash = CryptoHelper.Argon2idHash(updateUserPasswordDto.NewPassword);
         return await userRepository.UpdateUserAsync(existingUser);
     }
 }

@@ -4,3 +4,9 @@
     align-items: center;
     height: 100%;
 }
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}

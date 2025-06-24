@@ -14,10 +14,12 @@
                 <mat-icon matSuffix>lock</mat-icon>
             </mat-form-field>
             <br>
+            <div class="buttons">
+                <a class="a-button" style="margin-right: 10px;" mat-button routerLink="/signup">Signup</a>
                 <button type="submit" mat-raised-button
                     [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || loading">Sign
                     in</button>
-                <a class="a-button" style="margin-left: 10px;" mat-button routerLink="/signup">Signup</a>
+            </div>
         </form>
     </div>
 </div>

@@ -23,7 +23,7 @@ public class AuthService(
     
     public static bool ValidatePasswordFormat(string password)
     {
-        // Password must be at least 8 characters long, contain at least one letter, one digit,
+        // The password must be at least 8 characters long, contain at least one letter, one digit,
         // one uppercase letter, one lowercase letter and contains at least one special character.
         const string specialCharacters = "!@#$%^&*()-_=+[]{}|;:',.<>?/";
         return !string.IsNullOrEmpty(password)
@@ -38,7 +38,7 @@ public class AuthService(
     public async Task<AuthResponseDto> AuthAsync(AuthDto authDto)
     {
         var user = await userService.GetUserByUserNameAsync(authDto.Username);
-        if (user!.PasswordHash != CryptoHelper.Sha512(authDto.Password))
+        if (!CryptoHelper.Argon2idVerify(authDto.Password, user!.PasswordHash))
         {
             throw new InvalidPassword();
         }

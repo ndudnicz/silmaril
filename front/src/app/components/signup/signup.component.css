@@ -8,10 +8,13 @@
 .error-message {
     color: red;
     font-size: 12px;
-    /* margin-top:10px; */
     margin-bottom:10px;
-    /* padding-top: 10px; */
     background-color: #d11c3125;
     border-radius: 4px;
-    /* padding: 10px; */
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }

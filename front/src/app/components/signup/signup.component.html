@@ -10,36 +10,38 @@
             <br>
             <mat-form-field appearance="fill" floatLabel="always">
                 <mat-label>Password</mat-label>
-                <input matInput placeholder="" on-focusout="inputFocusOut()" type="password" formControlName="password" required>
+                <input matInput placeholder="" on-focusout="inputFocusOut()" type="password" formControlName="password"
+                    required>
                 <mat-icon matSuffix>lock</mat-icon>
             </mat-form-field>
             <br>
-
             <mat-form-field appearance="fill" floatLabel="always">
                 <mat-label>Confirm Password</mat-label>
                 <input matInput placeholder="" type="password" formControlName="confirmPassword" required>
                 <mat-icon matSuffix>lock</mat-icon>
             </mat-form-field>
             <br>
-                    @if (displayPasswordRequirements) {
-        <mat-card appearance="outlined" class="error-message">
-            <mat-card-content>
-                Password Requirements :
-                <ul>
-                    <li>At least 8 characters</li>
-                    <li>At least one letter</li>
-                    <li>At least one digit</li>
-                    <li>At least one uppercase letter</li>
-                    <li>At least one lowercase letter</li>
-                    <li>At least one special character</li>
-                </ul>
-            </mat-card-content>
-         </mat-card>
-        }
-
-            <button mat-raised-button type="submit" matButton [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || confirmPasswordFormControl.invalid || loading">Sign
-                up</button>
-            <a class="a-button" style="margin-left: 10px;" mat-button routerLink="/signin">Signin</a>
+            @if (displayPasswordRequirements) {
+            <mat-card appearance="outlined" class="error-message">
+                <mat-card-content>
+                    Password Requirements :
+                    <ul>
+                        <li>At least 8 characters</li>
+                        <li>At least one letter</li>
+                        <li>At least one digit</li>
+                        <li>At least one uppercase letter</li>
+                        <li>At least one lowercase letter</li>
+                        <li>At least one special character</li>
+                    </ul>
+                </mat-card-content>
+            </mat-card>
+            }
+            <div class="buttons">
+                <a class="a-button" style="margin-right: 10px;" mat-button routerLink="/signin">Signin</a>
+                <button mat-raised-button type="submit" matButton
+                    [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || confirmPasswordFormControl.invalid || loading">Sign
+                    up</button>
+            </div>
         </form>
     </div>
 </div>

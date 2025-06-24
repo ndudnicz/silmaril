@@ -12,7 +12,7 @@ public class User: MyEntity
     [MaxLength(MaxStringLength)]
     public required string Username { get; set; }
     [Column("password_hash")]
-    [MaxLength(Sha512HashLength)]
+    [MaxLength(Argon2idHashLength)]
     public required string PasswordHash { get; set; }
     [Column("salt")]
     public required byte[] Salt { get; set; }
@@ -22,16 +22,8 @@ public class User: MyEntity
         return new User
         {
             Username = createUserDto.Username,
-            PasswordHash = CryptoHelper.Sha512(createUserDto.Password),
+            PasswordHash = CryptoHelper.Argon2idHash(createUserDto.Password),
             Salt = CryptoHelper.GenerateSalt128()
         };
     }
-
-    // public static User FromUpdateUserDto(UpdateUserDto updateUserDto)
-    // {
-    //     return new User
-    //     {
-    //         Id
-    //     }
-    // }
 }
