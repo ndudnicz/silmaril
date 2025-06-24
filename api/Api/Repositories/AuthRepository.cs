@@ -6,10 +6,10 @@ namespace Api.Repositories;
 
 public class AuthRepository(AppDbContext db): IAuthRepository
 {
-    public async Task<RefreshToken> GetAsync(string refreshTokenHash)
+    public async Task<RefreshToken?> GetAsync(string refreshTokenHash)
     {
         return await db.RefreshTokens.AsNoTracking()
-            .FirstAsync(x => x.TokenHash == refreshTokenHash);
+            .FirstOrDefaultAsync(x => x.TokenHash == refreshTokenHash);
     }
     
     public async Task<RefreshToken> UpsertAsync(RefreshToken refreshToken)

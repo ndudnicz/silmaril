@@ -46,11 +46,12 @@ dotnet run
 
 ## 🧱 Architecture & Security
 
-- JWT authentication with random secret generation at api launch
-- The master password never leaves your device.
-- Keys derived on client side using PBKDF2.
-- The backend can only sees the encrypted data
-- AES-256-GCM encryption for data entries.
+- User password hashed using Argon2id [https://en.wikipedia.org/wiki/Argon2](https://en.wikipedia.org/wiki/Argon2)
+- Authentication using JWT signed with HS256 and random secret generated
+- The master password never leaves your device
+- Keys derived from master password on client side using PBKDF2
+- The backend can only see the encrypted data
+- AES-256-GCM encryption for data entries
 
 ---
 

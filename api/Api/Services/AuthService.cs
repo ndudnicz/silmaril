@@ -55,21 +55,7 @@ public class AuthService(
 
     public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
     {
-        var refreshTokenHash = CryptoHelper.Sha512(refreshToken);
-        var existingRefreshToken = await authRepository.GetAsync(refreshTokenHash);
-        if (existingRefreshToken == null)
-        {
-            throw new UnknownRefreshToken();
-        }
-        try
-        {
-            ValidateRefreshToken(refreshToken);
-        }
-        catch (InvalidRefreshToken ex)
-        {
-            throw new InvalidRefreshToken();
-        }
-        
+        var existingRefreshToken = await ValidateRefreshToken(refreshToken);
         var user = await userService.GetUserAsync(existingRefreshToken.UserId);
         var jwt = GenerateJwtToken(user.Id);
         var (newRefreshTokenStr, newRefreshToken, refreshTokenExpiration) = GenerateRefreshToken(user.Id);
@@ -121,27 +107,19 @@ public class AuthService(
         }, refreshTokenExpiration);
     }
     
-    private ClaimsPrincipal? ValidateRefreshToken(string token)
+    private async Task<RefreshToken> ValidateRefreshToken(string refreshToken)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var validationParams = new TokenValidationParameters
+        var refreshTokenHash = CryptoHelper.Sha512(refreshToken);
+        var existingRefreshToken = await authRepository.GetAsync(refreshTokenHash);
+        if (existingRefreshToken == null)
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(jwtSecretKey),
-            ClockSkew = TimeSpan.Zero
-        };
+            throw new UnknownRefreshToken();
+        }
+        if (existingRefreshToken.Expires < DateTime.UtcNow)
+        {
+            throw new ExpiredRefreshToken();
+        }
 
-        try
-        {
-            var principal = tokenHandler.ValidateToken(token, validationParams, out _);
-            return principal;
-        }
-        catch
-        {
-            return null;
-        }
+        return existingRefreshToken;
     }
 }
