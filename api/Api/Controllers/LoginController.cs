@@ -53,4 +53,18 @@ public class LoginController(
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteAsync([FromRoute] Guid id)
+    {
+        try
+        {
+            return Ok(await loginService.DeleteLoginByUserIdAsync(id, GetUserId()));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error deleting login with ID {Id}", id);
+            return BadRequest(ex.InnerException?.Message ?? ex.Message);
+        }
+    }
 }

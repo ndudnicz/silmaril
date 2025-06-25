@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.InteropServices.JavaScript;
 using System.Security.Claims;
 using System.Text;
+using Api.Configuration;
 using Api.Entities;
 using Api.Entities.Dtos.Authentication;
 using Api.Exceptions;
@@ -14,8 +15,7 @@ namespace Api.Services;
 public class AuthService(
     IUserService userService,
     IAuthRepository authRepository,
-    ConfigurationManager configuration,
-    byte[] jwtSecretKey
+    JwtConfiguration jwtConfiguration
     ): IAuthService
 {
     private readonly int _jwtTokenExpirationTimeInMinutes = 20; // Set JWT token expiration to 20 minutes
@@ -97,10 +97,10 @@ public class AuthService(
             }),
             Expires = DateTime.UtcNow.AddMinutes(_jwtTokenExpirationTimeInMinutes),
             SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(jwtSecretKey),
+                new SymmetricSecurityKey(jwtConfiguration.JwtSecretKey),
                 SecurityAlgorithms.HmacSha256Signature),
-            Issuer = configuration["Jwt:ValidIssuer"],
-            Audience = configuration["Jwt:ValidAudience"]
+            Issuer = jwtConfiguration.JwtValidIssuer,
+            Audience = jwtConfiguration.JwtValidAudience
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var jwt = tokenHandler.WriteToken(token);

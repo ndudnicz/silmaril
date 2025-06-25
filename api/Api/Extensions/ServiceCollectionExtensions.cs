@@ -1,3 +1,4 @@
+using Api.Configuration;
 using Api.Repositories;
 using Api.Repositories.EFContext;
 using Api.Services;
@@ -9,7 +10,7 @@ namespace Api.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddContexts(this IServiceCollection services, ConfigurationManager configuration)
+    public static void AddContexts(this IServiceCollection services, MySqlConfiguration mySqlConfiguration)
     {
         const int retryCount = 5;
         const int retryDelaySeconds = 30;
@@ -21,8 +22,8 @@ public static class ServiceCollectionExtensions
             services.AddDbContextPool<T>(options =>
             {
                 options.UseMySql(
-                    configuration["ConnectionString"],
-                    ServerVersion.AutoDetect(configuration["ConnectionString"]),
+                    mySqlConfiguration.ConnectionString,
+                    ServerVersion.AutoDetect(mySqlConfiguration.ConnectionString),
                     opt => opt.EnableRetryOnFailure(
                         maxRetryCount: retryCount,
                         maxRetryDelay: System.TimeSpan.FromSeconds(retryDelaySeconds),
@@ -32,7 +33,7 @@ public static class ServiceCollectionExtensions
         }
     }
     
-    public static void AddJwtAuthentication(this IServiceCollection services, ConfigurationManager configuration, byte[] jwtSecretKey)
+    public static void AddJwtAuthentication(this IServiceCollection services, JwtConfiguration jwtConfiguration)
     { 
         services.AddAuthentication(options =>
             {
@@ -47,9 +48,9 @@ public static class ServiceCollectionExtensions
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = configuration["Jwt:ValidIssuer"],
-                    ValidAudience = configuration["Jwt:ValidAudience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(jwtSecretKey)
+                    ValidIssuer = jwtConfiguration.JwtValidIssuer,
+                    ValidAudience = jwtConfiguration.JwtValidAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(jwtConfiguration.JwtSecretKey)
                 };
             });
     }
@@ -62,13 +63,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthRepository, AuthRepository>();
     }
     
-    public static void AddServices(this IServiceCollection services, ConfigurationManager configuration, byte[] jwtSecretKey)
+    public static void AddServices(this IServiceCollection services, JwtConfiguration jwtConfiguration)
     {
         services.AddScoped<IAuthService>(s => new AuthService(
             s.GetService<IUserService>()!,
             s.GetService<IAuthRepository>()!,
-            configuration,
-            jwtSecretKey));
+            jwtConfiguration));
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITagService, TagService>();

@@ -38,7 +38,9 @@ npm start
 
 # api
 cd api/Api
-export SILMARIL_JWT_SECRET_KEY_BASE64='your-jwt-secret-key-base64'
+export Jwt__SecretKeyBase64='your-jwt-secret-key-base64'
+export Jwt__ValidIssuer='valid-issuer'
+export Jwt__ValidAudience='valid-audience'
 dotnet run
 # running on http://localhost:5000
 ```

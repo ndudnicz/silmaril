@@ -19,14 +19,14 @@ public class LoginRepository(AppDbContext db): ILoginRepository
             .FirstAsync(x => x.Id == id);
     }
 
-    public async Task<Login> GetLoginWithByUserIdTagsAsync(Guid id, Guid userId)
+    public async Task<Login> GetLoginWithTagsByUserIdAsync(Guid id, Guid userId)
     {
         return await db.Logins
             .Include(l => l.Tags)
             .FirstAsync(x => x.Id == id && x.UserId == userId);
     }
 
-    public async Task<IEnumerable<Login>> GetLoginsWithByUserIdTagsAsync(Guid userId)
+    public async Task<IEnumerable<Login>> GetLoginsWithTagsByUserIdAsync(Guid userId)
     {
         return await db.Logins
             .AsNoTracking()
@@ -49,5 +49,12 @@ public class LoginRepository(AppDbContext db): ILoginRepository
         db.Logins.Update(login);
         await db.SaveChangesAsync();
         return login;
+    }
+    
+    public async Task<int> DeleteLoginByUserIdAsync(Guid id, Guid userId)
+    {
+        return await db.Logins
+            .Where(x => x.UserId == id && x.Id == userId)
+            .ExecuteDeleteAsync();
     }
 }
