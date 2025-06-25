@@ -38,6 +38,7 @@ npm start
 
 # api
 cd api/Api
+export SILMARIL_JWT_SECRET_KEY_BASE64='your-jwt-secret-key-base64'
 dotnet run
 # running on http://localhost:5000
 ```
@@ -47,7 +48,7 @@ dotnet run
 ## 🧱 Architecture & Security
 
 - User password hashed using Argon2id [https://en.wikipedia.org/wiki/Argon2](https://en.wikipedia.org/wiki/Argon2)
-- Authentication using JWT signed with HS256 and random secret generated
+- Authentication using JWT signed with HS256
 - The master password never leaves your device
 - Keys derived from master password on client side using PBKDF2
 - The backend can only see the encrypted data
