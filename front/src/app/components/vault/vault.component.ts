@@ -52,7 +52,6 @@ export class VaultComponent implements OnInit {
     this.spinner.show();
     this.loading = true;
     try {
-      // console.log('VaultComponent initialized', this.vaultService.isUnlocked(), this.vaultService.getKey());
       this.logins = await this.loginService.getLoginsAsync();
       this.logins = await this.decryptAllLogins(this.logins);
       this.computeStacks();
@@ -121,14 +120,11 @@ export class VaultComponent implements OnInit {
       console.log('Signing out...');
       try {
         await this.authService.signoutAsync();
-        this.vaultService.clearKey();
-        this.vaultService.clearSalt();
         ToastWrapper.success('Signed out successfully');
         setTimeout(() => {
           this.spinner.hide();
           window.location.reload();
         }, 1500)
-
       } catch (error: any) {
         ToastWrapper.error('Signout failed: ', error.message ?? error);
         console.error('Error during signout:', error);

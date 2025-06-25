@@ -73,5 +73,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITagService, TagService>();
+        // Wipe all refresh tokens on startup
+        Console.WriteLine("Wiping all refresh tokens...");
+        var authService = services.BuildServiceProvider().GetRequiredService<IAuthService>();
+        authService.RevokeAllRefreshTokensAsync();
+        Console.WriteLine("All refresh tokens wiped.");
     }
 }

@@ -12,6 +12,7 @@ import { UserService } from '../../services/user.service';
 import { toast } from 'ngx-sonner';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../utils/toast.wrapper';
+import { VaultService } from '../../services/vault.service';
 
 @Component({
   standalone: true,
@@ -45,7 +46,8 @@ export class SignupComponent {
   constructor(
     private userService: UserService,
     private spinner: NgxSpinnerService,
-    private router: Router
+    private router: Router,
+    private vaultService: VaultService
   ) { }
 
   async onSubmit() {

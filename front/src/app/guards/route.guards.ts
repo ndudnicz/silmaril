@@ -5,8 +5,9 @@ import { VaultService } from '../services/vault.service';
 
 export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
+  const authService = inject(AuthService);
 
-  if (AuthService.isAuthenticated()) {
+  if (authService.isAuthenticated()) {
     return true;
   } else {
     return router.createUrlTree(['/signin']);
@@ -15,8 +16,9 @@ export const authGuard: CanActivateFn = () => {
 
 export const authNoAuthGuard: CanActivateFn = () => {
   const router = inject(Router);
+  const authService = inject(AuthService);
 
-  if (AuthService.isAuthenticated()) {
+  if (authService.isAuthenticated()) {
     return router.createUrlTree(['/unlock']);
   } else {
     return true;

@@ -37,7 +37,7 @@ export class UnlockComponent implements OnInit {
   constructor(
     private vaultService: VaultService,
     private router: Router,
-    private spinner: NgxSpinnerService,
+    private spinner: NgxSpinnerService
   ) { }
 
   ngOnInit() {
@@ -51,7 +51,7 @@ export class UnlockComponent implements OnInit {
       this.loading = true;
       this.spinner.show();
       console.log('Form submitted:', this.form.value);
-      await this.vaultService.setMasterPasswordAsync(this.masterPasswordFormControl.value!);
+      await this.vaultService.setKeyAsync(this.masterPasswordFormControl.value!);
       ToastWrapper.success('Vault unlocked successfully');
       this.router.navigate(['/vault']);
     } catch (error: any) {

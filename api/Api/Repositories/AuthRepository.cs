@@ -26,6 +26,7 @@ public class AuthRepository(AppDbContext db): IAuthRepository
         }
         else
         {
+            refreshToken.Created = DateTime.UtcNow;
             db.RefreshTokens.Add(refreshToken);
         }
 
@@ -33,11 +34,16 @@ public class AuthRepository(AppDbContext db): IAuthRepository
         return refreshToken;
     }
 
-    public async Task<int> DeleteRefreshTokenAsync(string refreshTokenHash)
+    public async Task<int> DeleteRefreshTokenByUserIdAsync(Guid userId)
     {
         return await db.RefreshTokens
-            .Where(x => x.TokenHash == refreshTokenHash)
+            .Where(x => x.UserId == userId)
             .ExecuteDeleteAsync();
     }
 
+    public async Task<int> DeleteAllRefreshTokensAsync()
+    {
+        return await db.RefreshTokens
+            .ExecuteDeleteAsync();
+    }
 }

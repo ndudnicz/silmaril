@@ -3,5 +3,5 @@ export interface User {
     username: string;
     created: Date;
     updated: Date;
-    salt: Uint8Array | null;
+    saltBase64: string;
 }

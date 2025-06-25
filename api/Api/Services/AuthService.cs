@@ -55,7 +55,16 @@ public class AuthService(
 
     public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
     {
-        var existingRefreshToken = await ValidateRefreshToken(refreshToken);
+        var refreshTokenHash = CryptoHelper.Sha512(refreshToken);
+        var existingRefreshToken = await authRepository.GetAsync(refreshTokenHash);
+        if (existingRefreshToken == null)
+        {
+            throw new UnknownRefreshToken();
+        }
+        if (existingRefreshToken.Expires < DateTime.UtcNow)
+        {
+            throw new ExpiredRefreshToken();
+        }
         var user = await userService.GetUserAsync(existingRefreshToken.UserId);
         var jwt = GenerateJwtToken(user.Id);
         var (newRefreshTokenStr, newRefreshToken, refreshTokenExpiration) = GenerateRefreshToken(user.Id);
@@ -68,10 +77,14 @@ public class AuthService(
         };
     }
     
-    public async Task<int> RevokeRefreshTokenAsync(string refreshToken)
+    public async Task<int> RevokeRefreshTokenByUserIdAsync(Guid userId)
     {
-        var refreshTokenHash = CryptoHelper.Sha512(refreshToken);
-        return await authRepository.DeleteRefreshTokenAsync(refreshTokenHash);
+        return await authRepository.DeleteRefreshTokenByUserIdAsync(userId);
+    }
+
+    public async Task<int> RevokeAllRefreshTokensAsync()
+    {
+        return await authRepository.DeleteAllRefreshTokensAsync();
     }
 
     private string GenerateJwtToken(Guid userId)
@@ -105,21 +118,5 @@ public class AuthService(
             TokenHash = refreshTokenHash,
             Expires = refreshTokenExpiration
         }, refreshTokenExpiration);
-    }
-    
-    private async Task<RefreshToken> ValidateRefreshToken(string refreshToken)
-    {
-        var refreshTokenHash = CryptoHelper.Sha512(refreshToken);
-        var existingRefreshToken = await authRepository.GetAsync(refreshTokenHash);
-        if (existingRefreshToken == null)
-        {
-            throw new UnknownRefreshToken();
-        }
-        if (existingRefreshToken.Expires < DateTime.UtcNow)
-        {
-            throw new ExpiredRefreshToken();
-        }
-
-        return existingRefreshToken;
     }
 }

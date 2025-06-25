@@ -65,18 +65,9 @@ public class AuthController(
     {
         try
         {
-            var refreshToken = Request.Cookies["refreshToken"];
-            if (string.IsNullOrEmpty(refreshToken))
-            {
-                return BadRequest("No refresh token found");
-            }
-            var result = await authService.RevokeRefreshTokenAsync(refreshToken);
-            if (result > 0)
-            {
-                Response.Cookies.Delete("refreshToken");
-                return Ok("Logged out successfully");
-            }
-            return BadRequest("Failed to sign out");
+            var result = await authService.RevokeRefreshTokenByUserIdAsync(GetUserId());
+            Response.Cookies.Delete("refreshToken");
+            return Ok("Logged out successfully");
         }
         catch (Exception ex)
         {

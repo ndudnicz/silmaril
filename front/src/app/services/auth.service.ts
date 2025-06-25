@@ -2,49 +2,72 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { jwtDecode } from "jwt-decode";
 import { AuthResponse } from '../entities/authentication/authResponse';
-import { FetchService } from './fetch.service';
+import { VaultService } from './vault.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private apiEndpointV1 = environment.apiEndpoint + '/v1';
-  private static JWT_TOKEN_KEY = 'jwtToken';
-  private static AUTHENTICATED_KEY = 'authenticated';
-  private static JWT_EXPIRES = 'jwtExpires';
-  private static USER_ID = 'userId';
+  private JWT_TOKEN_KEY = 'jwtToken';
+  private AUTHENTICATED_KEY = 'authenticated';
+  private JWT_EXPIRES = 'jwtExpires';
+  private USER_ID = 'userId';
+  private timeoutRefreshToken: any = null;
 
-  constructor(private fetchService: FetchService) { }
+  constructor(
+    private vaultService: VaultService
+  ) { }
 
   private setLocalStorage(authResponse: AuthResponse): void {
     const parsedToken = jwtDecode(authResponse.jwtToken);
-    localStorage.setItem(AuthService.JWT_TOKEN_KEY, authResponse.jwtToken);
-    localStorage.setItem(AuthService.AUTHENTICATED_KEY, String(true));
-    localStorage.setItem(AuthService.JWT_EXPIRES, String(parsedToken.exp));
-    localStorage.setItem(AuthService.USER_ID, String((parsedToken as any).unique_name));
+    localStorage.setItem(this.JWT_TOKEN_KEY, authResponse.jwtToken);
+    localStorage.setItem(this.AUTHENTICATED_KEY, String(true));
+    localStorage.setItem(this.JWT_EXPIRES, String(parsedToken.exp));
+    localStorage.setItem(this.USER_ID, String((parsedToken as any).unique_name));
   }
 
   public clearLocalStorage(): void {
-    localStorage.removeItem(AuthService.JWT_TOKEN_KEY);
-    localStorage.removeItem(AuthService.AUTHENTICATED_KEY);
-    localStorage.removeItem(AuthService.JWT_EXPIRES);
-    localStorage.removeItem(AuthService.USER_ID);
+    console.log('Clearing local storage');
+    localStorage.removeItem(this.JWT_TOKEN_KEY);
+    localStorage.removeItem(this.AUTHENTICATED_KEY);
+    localStorage.removeItem(this.JWT_EXPIRES);
+    localStorage.removeItem(this.USER_ID);
+
+    if (this.timeoutRefreshToken) {
+      clearTimeout(this.timeoutRefreshToken);
+      this.timeoutRefreshToken = null;
+    }
+  }
+
+  private setRefreshTokenTimeout(): void {
+    var jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES))
+    console.log(`JWT Expires at: ${jwtExpires}, next refresh in: ${jwtExpires - Math.floor(Date.now() / 1000)} seconds`);
+    if (jwtExpires) {
+      const now = Math.floor(Date.now() / 1000);
+      const refreshTime = jwtExpires - now - 60; // Refresh 1 minute before expiration
+      this.timeoutRefreshToken = setTimeout(() => {
+        this.refreshTokenAsync().catch(error => console.error('Error refreshing token:', error));
+      }, refreshTime * 1000);
+    }
   }
 
   public async authAsync(username: string, password: string): Promise<boolean> {
     try {
-      const response = await this.fetchService.postAsync(
-        `${this.apiEndpointV1}/auth`,
-        { 
-          body: JSON.stringify({ username, password }),
-          credentials: 'include'
-        });
-      
+      const response = await fetch(`${this.apiEndpointV1}/auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error(await response.text());
       }
       const data = await response.json() as AuthResponse;
       this.setLocalStorage(data);
+      this.setRefreshTokenTimeout();
       return response.ok;
     } catch (error) {
       console.error('Error during authentication:', error);
@@ -54,13 +77,21 @@ export class AuthService {
 
   public async refreshTokenAsync(): Promise<boolean> {
     try {
-      const response = await this.fetchService.postAsync(
-        `${this.apiEndpointV1}/auth/refresh-token`, {credentials: 'include'});
+      console.log('Refreshing token...');
+      const response = await fetch(`${this.apiEndpointV1}/auth/refresh-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error('Token refresh failed');
       }
       const data = await response.json() as AuthResponse;
       this.setLocalStorage(data);
+      console.log('Token refreshed successfully');
+      this.setRefreshTokenTimeout();
       return response.ok;
     } catch (error) {
       console.error('Error during authentication:', error);
@@ -70,11 +101,18 @@ export class AuthService {
 
   public async signoutAsync(): Promise<void> {
     try {
-      const response = await this.fetchService.postAsync(
-        `${this.apiEndpointV1}/auth/signout`, { credentials: 'include' });
+      const response = await fetch(`${this.apiEndpointV1}/auth/signout`, {
+        method: 'POST',
+        headers: this.addAuthHeader({
+          'Content-Type': 'application/json'
+        }),
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error('Signout failed');
       }
+      this.vaultService.clearKey();
+      this.vaultService.clearSalt();
       this.clearLocalStorage();
     } catch (error) {
       console.error('Error during signout:', error);
@@ -82,22 +120,22 @@ export class AuthService {
     }
   }
 
-  public static getJwtToken(): string | null {
+  public getJwtToken(): string | null {
     return localStorage.getItem(this.JWT_TOKEN_KEY);
   }
 
-  public static getUserId(): string | null {
+  public getUserId(): string | null {
     return localStorage.getItem(this.USER_ID);
   }
 
-  public static isTokenValid(): boolean {
+  public isTokenValid(): boolean {
     if (!this.getJwtToken()) {
       return false;
     }
     return Number(localStorage.getItem('jwtExpires')) > Math.floor(Date.now() / 1000);
   }
 
-  public static addAuthHeader(headers: HeadersInit): Headers {
+  public addAuthHeader(headers: HeadersInit): Headers {
     if (!this.getJwtToken() || !this.isTokenValid()) {
       return new Headers(headers || {});
     }
@@ -106,7 +144,7 @@ export class AuthService {
     return h;
   }
 
-  public static isAuthenticated(): boolean {
-    return Boolean(localStorage.getItem(AuthService.AUTHENTICATED_KEY)) && AuthService.isTokenValid();
+  public isAuthenticated(): boolean {
+    return Boolean(localStorage.getItem(this.AUTHENTICATED_KEY)) && this.isTokenValid();
   }
 }

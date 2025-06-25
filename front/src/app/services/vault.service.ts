@@ -1,42 +1,56 @@
 // src/app/services/vault.service.ts
 
 import { Injectable } from '@angular/core';
-import { ToastWrapper } from '../utils/toast.wrapper';
-import { CryptoUtilsV1 } from '../utils/crypto.utils';
+import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
 
 @Injectable({ providedIn: 'root' })
 export class VaultService {
-  private static SALT_KEY_NAME = 'vault-salt';
-  private salt: Uint8Array;
+  private SALT_KEY_NAME = 'vault-salt';
+  // private salt!: Uint8Array | null;
   private key: CryptoKey | null = null;
-  private static instance: VaultService | null = null;
 
   constructor() {
-    const storedSalt = localStorage.getItem(VaultService.SALT_KEY_NAME);
-    if (storedSalt) {
-      this.salt = new Uint8Array(JSON.parse(storedSalt));
-    } else {
-      const errorMessage = 'Salt not found. Please contact support. 1';
-      ToastWrapper.error(errorMessage, null)
-      throw new Error(errorMessage);
-    }
+    // const storedSalt = localStorage.getItem(VaultService.SALT_KEY_NAME);
+    // if (storedSalt) {
+    //   this.salt = new Uint8Array(JSON.parse(storedSalt));
+    // } else {
+    //   const errorMessage = 'Salt not found. Please contact support. 1';
+    //   ToastWrapper.error(errorMessage, null)
+    //   throw new Error(errorMessage);
+    // }
   }
 
-  public static setSalt(salt: Uint8Array | null): void {
+  public setSalt(salt: string): void {
+    console.log(`Setting salt: ${salt}`, typeof salt);
+    
     if (!salt) {
-      const errorMessage = 'Salt not found. Please contact support. 2';
-      ToastWrapper.error(errorMessage, null)
+      const errorMessage = 'Salt not found. Please contact support.';
+      // ToastWrapper.error(errorMessage, null)
+      throw new Error(errorMessage);
     }
-    localStorage.setItem(VaultService.SALT_KEY_NAME, JSON.stringify(Array.from(salt!)));
+    // this.salt = salt!;
+    
+    localStorage.setItem(this.SALT_KEY_NAME, salt);
   }
 
   public clearSalt(): void {
-    localStorage.removeItem(VaultService.SALT_KEY_NAME);
+    console.log('Clearing salt');
+    localStorage.removeItem(this.SALT_KEY_NAME);
+    // this.salt = null;
   }
 
-  public async setMasterPasswordAsync(password: string): Promise<void> {
+  public async setKeyAsync(masterPassword: string): Promise<void> {
+    const storedSaltBase64 = localStorage.getItem(this.SALT_KEY_NAME);
+
+    if (!storedSaltBase64) {
+      const errorMessage = 'Salt not set. Please set the salt before setting the master password.';
+      throw new Error(errorMessage);
+    }
     try {
-      this.key = await CryptoUtilsV1.deriveKeyFromPasswordAsync(password, this.salt);
+      console.log(`Setting master password with salt b64: ${storedSaltBase64}`);
+      const saltUint8Array = base64ToUint8Array(storedSaltBase64);
+      console.log(`Salt Uint8Array: ${saltUint8Array}`);
+      this.key = await CryptoUtilsV1.deriveKeyFromPasswordAsync(masterPassword, saltUint8Array);
     }
     catch (error) {
       console.log(error);
@@ -52,7 +66,7 @@ export class VaultService {
   }
 
   clearKey(): void {
+    console.log('Clearing key');
     this.key = null;
   }
-
 }

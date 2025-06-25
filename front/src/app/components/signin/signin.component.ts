@@ -35,14 +35,16 @@ export class SigninComponent {
     username: this.usernameFormControl,
     password: this.passwordFormControl
   });
+  loading = false;
 
   constructor(
     private spinner: NgxSpinnerService,
     private router: Router,
     private authService: AuthService,
-    private userService: UserService
-  ) { }
-  loading = false;
+    private userService: UserService,
+    private vaultService: VaultService
+  ) { 
+  }
 
   async onSubmit() {
     try {
@@ -51,7 +53,9 @@ export class SigninComponent {
       const result = await this.authService.authAsync(this.form.value.username, this.form.value.password)
       ToastWrapper.success('Authentication successful');
       const user = await this.userService.getUserAsync();
-      VaultService.setSalt(user.salt);
+      console.log('user:', user);
+      
+      this.vaultService.setSalt(user.saltBase64);
       this.router.navigate(['/home']);
     } catch (error: any) {
       console.log(error);

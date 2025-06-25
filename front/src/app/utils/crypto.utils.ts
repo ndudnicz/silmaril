@@ -48,7 +48,7 @@ export class CryptoUtilsV1 {
       key!,
       encryptedData
     );
-    
+
     return new TextDecoder().decode(decrypted);
   }
 
@@ -73,5 +73,14 @@ export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
 }
 
 export function base64ToUint8Array(base64: string): Uint8Array {
-  return new Uint8Array(atob(base64).split('').map(char => char.charCodeAt(0)));
+  base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+  while (base64.length % 4 !== 0) {
+    base64 += '=';
+  }
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
 }

@@ -3,6 +3,7 @@ import { environment } from '../../environments/environment';
 import { FetchService } from './fetch.service';
 import { User } from '../entities/user';
 import { ToastWrapper } from '../utils/toast.wrapper';
+import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,9 @@ export class UserService {
       if (!response.ok) {
         throw new Error('Failed to fetch user data');
       }
-      return await response.json() as User;
+      let user = await response.json() as User;
+      console.log('User data fetched:', user);
+      return user;
     } catch (error) {
       ToastWrapper.error('Error fetching user data', null);
       console.error('Error fetching user data:', error);
