@@ -24,11 +24,8 @@ export class UserService {
       if (!response.ok) {
         throw new Error('Failed to fetch user data');
       }
-      let user = await response.json() as User;
-      console.log('User data fetched:', user);
-      return user;
+      return await response.json() as User;
     } catch (error) {
-      ToastWrapper.error('Error fetching user data', null);
       console.error('Error fetching user data:', error);
       throw error;
     }
@@ -38,14 +35,11 @@ export class UserService {
     try {
       const response = await this.fetchService.postAsync(
         `${this.apiEndpointV1}/user`,
-        { body: JSON.stringify({ username, password, confirmPassword })});
-        console.log('Response from user creation:', response);
-        
+        { body: JSON.stringify({ username, password, confirmPassword }) });
       if (!response.ok) {
         throw new Error(response.body ? await response.text() : 'Failed to create user');
-      } else {
-        return response.ok;
       }
+      return response.ok;
     }
     catch (error) {
       console.error('Error during user creation:', error);
@@ -55,16 +49,9 @@ export class UserService {
 
   async changePasswordAsync(oldPassword: string, newPassword: string): Promise<boolean> {
     try {
-      const headers = this.authService.addCsrfHeader(new Headers({
-        'Content-Type': 'application/json'
-      }));
       const response = await this.fetchService.putAsync(
         `${this.apiEndpointV1}/user/password`,
-        {
-          body: JSON.stringify({ oldPassword, newPassword }),
-          headers: headers,
-          credentials: 'include'
-        }
+        { body: JSON.stringify({ oldPassword, newPassword }) }
       );
       if (!response.ok) {
         throw new Error(response.body ? await response.text() : 'Failed to change password');
