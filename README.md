@@ -1,4 +1,4 @@
-# 🔐 Silmaril
+# 💎 Silmaril
 
 **Silmaril** is a zero-knowledge, open-source password manager. Security is at the heart of its design: your data remains **encrypted locally**, and **nothing is ever stored in plaintext** on any remote server.
 

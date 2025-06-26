@@ -31,7 +31,9 @@ public class AuthServiceTests
             {
                 JwtValidIssuer = "TestIssuer",
                 JwtValidAudience = "TestAudience",
-                JwtSecretKey = _jwtSecretKey
+                JwtSecretKey = _jwtSecretKey,
+                AccessTokenExpirationMinutes = 15,
+                RefreshTokenExpirationHours = 1
             }
         );
     }
