@@ -6,22 +6,27 @@
         <span>Silmaril</span>
         <span class="spacer"></span>
         <div class="toolbar-button">
-            <button mat-icon-button (click)="openAddLoginModal()">
+            <button mat-icon-button (click)="openAddLoginModal()" matTooltip="Add Login">
                 <mat-icon>add</mat-icon>
             </button>
         </div>
-        <!-- <div class="toolbar-button">
-            <button type="submit" mat-raised-button>
-                <mat-icon>key</mat-icon>Change Master Password
-            </button>
-        </div> -->
         <div class="toolbar-button">
-            <button mat-icon-button (click)="settings()">
+            <button mat-icon-button (click)="openDeletedLoginsModal()" matTooltip="Open Trash Bin">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </div>
+        <div class="toolbar-button">
+            <button mat-icon-button (click)="openSettingsModal()" matTooltip="Update Password">
                 <mat-icon>settings</mat-icon>
             </button>
         </div>
         <div class="toolbar-button">
-            <button mat-icon-button (click)="signout()">
+            <a mat-icon-button href="/faq" target="_blank" matTooltip="FAQ">
+                <mat-icon>help</mat-icon>
+            </a>
+        </div>
+        <div class="toolbar-button">
+            <button mat-icon-button (click)="signout()" matTooltip="Sign Out">
                 <mat-icon>logout</mat-icon>
             </button>
         </div>
@@ -51,7 +56,7 @@
             </div>
         </div>
         <div [hidden]="selectedLogin == null" class="right-container">
-            <app-selected-login ></app-selected-login>
+            <app-selected-login></app-selected-login>
         </div>
     </div>
 </div>

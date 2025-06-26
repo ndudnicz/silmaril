@@ -1,3 +1,4 @@
+using System.Diagnostics.Contracts;
 using Api.Configuration;
 using Api.Entities;
 using Api.Entities.Dtos.Authentication;
@@ -14,7 +15,6 @@ public class AuthServiceTests
     private readonly Mock<IUserService> _userServiceMock;
     private readonly Mock<IAuthRepository> _authRepositoryMock;
     private readonly Mock<IConfiguration> _configurationMock;
-    private readonly byte[] _jwtSecretKey;
     private readonly AuthService _authService;
 
     public AuthServiceTests()
@@ -22,7 +22,6 @@ public class AuthServiceTests
         _userServiceMock = new Mock<IUserService>();
         _authRepositoryMock = new Mock<IAuthRepository>();
         _configurationMock = new Mock<IConfiguration>();
-        _jwtSecretKey = "ThisIsASuperSecretKeyForJWTDoNotShareItWithAnyone"u8.ToArray();
         
         _authService = new AuthService(
             _userServiceMock.Object,
@@ -31,14 +30,14 @@ public class AuthServiceTests
             {
                 JwtValidIssuer = "TestIssuer",
                 JwtValidAudience = "TestAudience",
-                JwtSecretKey = _jwtSecretKey,
+                JwtSecretKey = CryptoHelper.GenerateRandomByte(32),
                 AccessTokenExpirationMinutes = 15,
                 RefreshTokenExpirationHours = 1
             }
         );
     }
     
-    private User CreateTestUser(string username = "testUser", string password = "password", Guid userId = new())
+    private static User CreateTestUser(string username = "testUser", string password = "password", Guid userId = new())
     {
         return new User
         {

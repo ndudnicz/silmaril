@@ -46,8 +46,7 @@ export class SignupComponent {
   constructor(
     private userService: UserService,
     private spinner: NgxSpinnerService,
-    private router: Router,
-    private vaultService: VaultService
+    private router: Router
   ) { }
 
   async onSubmit() {
@@ -94,10 +93,7 @@ export class SignupComponent {
   }
 
   keypress(event: KeyboardEvent) {
-    if (this.usernameFormControl.valid
-      && this.passwordFormControl.valid
-      && this.confirmPasswordFormControl.valid
-      && event.key === 'Enter') {
+    if (this.form.valid && event.key === 'Enter') {
       event.stopImmediatePropagation();
       event.preventDefault();
       this.onSubmit();

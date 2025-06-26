@@ -1,3 +1,4 @@
+using System.Diagnostics.Contracts;
 using System.Security.Cryptography;
 using System.Text;
 using Isopoh.Cryptography.Argon2;
@@ -43,7 +44,7 @@ public static class CryptoHelper
         rng.GetBytes(randomBytes);
         return randomBytes;
     }
-    
+
     public static string GenerateRandomBase64Str(int length)
     {
         return Convert.ToBase64String(GenerateRandomByte(length));

@@ -54,7 +54,6 @@ export class SigninComponent {
       ToastWrapper.success('Authentication successful');
       const user = await this.userService.getUserAsync();
       console.log('user:', user);
-      
       this.vaultService.setSalt(user.saltBase64);
       this.router.navigate(['/home']);
     } catch (error: any) {
@@ -69,9 +68,7 @@ export class SigninComponent {
   }
 
   keypress(event: KeyboardEvent) {
-    if (this.passwordFormControl.valid
-      && this.usernameFormControl.valid
-      && event.key === 'Enter') {
+    if (this.form.valid && event.key === 'Enter') {
       event.stopImmediatePropagation();
       event.preventDefault();
       this.onSubmit();

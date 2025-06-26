@@ -9,3 +9,9 @@
     display: flex;
     justify-content: flex-end;
 }
+
+#what-is-master-password-link {
+    color: #007bff;
+    text-decoration: none;
+    margin-bottom: 10px !important;
+}

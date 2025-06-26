@@ -56,6 +56,7 @@ public class LoginService(
         existingLogin.EncryptedData = Convert.FromBase64String(updateLoginDto.EncryptedDataBase64 ?? string.Empty);
         existingLogin.Updated = DateTime.UtcNow;
         existingLogin.EncryptionVersion = updateLoginDto.EncryptionVersion;
+        existingLogin.Deleted = updateLoginDto.Deleted;
         return LoginDto.FromLogin(await loginRepository.UpdateLoginAsync(existingLogin));
     }
 

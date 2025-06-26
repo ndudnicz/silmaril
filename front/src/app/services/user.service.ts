@@ -4,6 +4,8 @@ import { FetchService } from './fetch.service';
 import { User } from '../entities/user';
 import { ToastWrapper } from '../utils/toast.wrapper';
 import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
+import { AuthHelper } from '../components/helpers/auth.helper';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +13,10 @@ import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
 export class UserService {
   private apiEndpointV1 = environment.apiEndpoint + '/v1';
 
-  constructor(private fetchService: FetchService) { }
+  constructor(
+    private fetchService: FetchService,
+    private authService: AuthService
+  ) { }
 
   async getUserAsync(): Promise<User> {
     try {
@@ -44,6 +49,29 @@ export class UserService {
     }
     catch (error) {
       console.error('Error during user creation:', error);
+      throw error;
+    }
+  }
+
+  async changePasswordAsync(oldPassword: string, newPassword: string): Promise<boolean> {
+    try {
+      const headers = this.authService.addCsrfHeader(new Headers({
+        'Content-Type': 'application/json'
+      }));
+      const response = await this.fetchService.putAsync(
+        `${this.apiEndpointV1}/user/password`,
+        {
+          body: JSON.stringify({ oldPassword, newPassword }),
+          headers: headers,
+          credentials: 'include'
+        }
+      );
+      if (!response.ok) {
+        throw new Error(response.body ? await response.text() : 'Failed to change password');
+      }
+      return response.ok;
+    } catch (error) {
+      console.error('Error during password change:', error);
       throw error;
     }
   }

@@ -29,13 +29,6 @@ import { ToastWrapper } from '../../../utils/toast.wrapper';
 })
 export class SelectedLoginComponent {
   login!: Login | null;
-  // form: FormGroup = new FormGroup({
-  //   title: new FormControl(''),
-  //   identifier: new FormControl(''),
-  //   password: new FormControl(''),
-  //   url: new FormControl(''),
-  //   notes: new FormControl('')
-  // });
   showPassword = false;
   title = '';
   identifier = '';

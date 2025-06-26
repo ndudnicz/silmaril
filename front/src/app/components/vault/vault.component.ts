@@ -16,6 +16,8 @@ import { CommonModule, KeyValue } from '@angular/common';
 import { CardStackComponent } from './card-stack/card-stack.component';
 import { DataService } from '../../services/data.service';
 import { SelectedLoginComponent } from "./selected-login/selected-login.component";
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { SettingsModalComponent } from './modals/settings/settings-modal.component';
 
 @Component({
   selector: 'app-vault',
@@ -27,7 +29,8 @@ import { SelectedLoginComponent } from "./selected-login/selected-login.componen
     MatDialogModule,
     CardStackComponent,
     CommonModule,
-    SelectedLoginComponent
+    SelectedLoginComponent,
+    MatTooltipModule
   ],
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'
@@ -158,8 +161,24 @@ export class VaultComponent implements OnInit {
     console.log('Card stack clicked');
   }
 
-  async settings() {
+  async openSettingsModal() {
     console.log('Settings clicked');
-    // Implement settings logic here
+    const dialogRef = this.dialog.open(SettingsModalComponent,
+      {
+        panelClass: 'custom-modal',
+        width: '400px',
+        height: 'auto',
+        closeOnNavigation: false,
+        disableClose: true,
+        autoFocus: true
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(_ => {});
+  }
+
+  async openDeletedLoginsModal() {
+    // Implement logic to open deleted logins modal
+    console.log('Open deleted logins modal');
   }
 }

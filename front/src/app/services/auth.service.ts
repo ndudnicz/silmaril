@@ -146,12 +146,17 @@ export class AuthService {
     return Number(localStorage.getItem('jwtExpires')) > Math.floor(Date.now() / 1000);
   }
 
-  public addAuthHeader(headers: HeadersInit): Headers {
-    if (!this.getJwtToken() || !this.isTokenValid()) {
-      return new Headers(headers || {});
-    }
+  public addAuthHeader(headers: HeadersInit = new Headers({})): Headers {
     const h = new Headers(headers || {});
-    h.append('Authorization', `Bearer ${this.getJwtToken()}`);
+    if (this.getJwtToken() && this.isTokenValid()) {
+      h.append('Authorization', `Bearer ${this.getJwtToken()}`);
+    }
+    return h;
+  }
+
+  public addCsrfHeader(headers: HeadersInit = new Headers({})): Headers {
+    const h = new Headers(headers || {});
+    h.append(this.CSRF_HEADER_NAME, this.getCsrfToken() ?? '');
     return h;
   }
 

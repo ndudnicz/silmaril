@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.Contracts;
 using Api.Entities.Dtos;
 
 namespace Api.Entities;
@@ -16,6 +17,8 @@ public class Login: MyEntity
     [Column("initialization_vector")]
     public byte[]? InitializationVector { get; set; }
     public List<Tag> Tags { get; set; } = new();
+    [Column("deleted")]
+    public bool Deleted { get; set; } = false;
     
     public static Login FromCreateLoginDto(CreateLoginDto dto)
     {

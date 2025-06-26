@@ -1,0 +1,50 @@
+<div id="settings-modal">
+    <h1 mat-dialog-title>Change Password</h1>
+    <mat-icon class="close-button close-dialog-button" (click)="closeDialog()">close</mat-icon>
+    <mat-dialog-content>
+        <div class="settings-title-container">
+            <div class="settings-title-text">
+                <strong>This is <u>not</u> your master password</strong>
+            </div>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-label>Old Password</mat-label>
+                <input matInput placeholder="" type="password" formControlName="oldPassword" required>
+                <mat-icon matSuffix>lock</mat-icon>
+            </mat-form-field>
+            <br>
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-label>New Password</mat-label>
+                <input matInput placeholder="" on-focusout="inputFocusOut()" type="password"
+                    formControlName="newPassword" required>
+                <mat-icon matSuffix>lock</mat-icon>
+            </mat-form-field>
+            <br>
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-label>Confirm New Password</mat-label>
+                <input matInput placeholder="" type="password" formControlName="confirmNewPassword" required>
+                <mat-icon matSuffix>lock</mat-icon>
+            </mat-form-field>
+            <br>
+            @if (displayPasswordRequirements) {
+            <mat-card appearance="outlined" class="error-message">
+                <mat-card-content>
+                    Password Requirements :
+                    <ul>
+                        <li>At least 8 characters</li>
+                        <li>At least one letter</li>
+                        <li>At least one digit</li>
+                        <li>At least one uppercase letter</li>
+                        <li>At least one lowercase letter</li>
+                        <li>At least one special character</li>
+                    </ul>
+                </mat-card-content>
+            </mat-card>
+            }
+            <div class="buttons">
+                <button mat-raised-button type="submit" matButton [disabled]="form.invalid || loading">Update</button>
+            </div>
+        </form>
+    </mat-dialog-content>
+</div>
