@@ -2,13 +2,10 @@ using Api.Helpers;
 
 namespace Api.Entities.Dtos;
 
-public class UserDto
+public class UserDto: MyEntity
 {
-    public required Guid Id { get; set; }
     public required string UsernameHash { get; set; }
     public required string SaltBase64 { get; set; }
-    public required DateTime Created { get; set; }
-    public required DateTime? Updated { get; set; }
 
     public static UserDto FromUser(User user)
     {

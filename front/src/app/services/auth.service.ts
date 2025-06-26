@@ -8,12 +8,16 @@ import { VaultService } from './vault.service';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiEndpointV1 = environment.apiEndpoint + '/v1';
-  private JWT_TOKEN_KEY = 'jwtToken';
-  private AUTHENTICATED_KEY = 'authenticated';
-  private JWT_EXPIRES = 'jwtExpires';
-  private USER_ID = 'userId';
+  private readonly apiEndpointV1 = environment.apiEndpoint + '/v1';
+  private readonly JWT_TOKEN_KEY = 'jwtToken';
+  private readonly AUTHENTICATED_KEY = 'authenticated';
+  private readonly JWT_EXPIRES = 'jwtExpires';
+  private readonly USER_ID = 'userId';
+  private readonly CSRF_TOKEN_KEY = 'csrfToken';
+  private readonly CSRF_COOKIE_NAME = 'XSRF-TOKEN';
+  private readonly CSRF_HEADER_NAME = 'X-CSRF-TOKEN';
   private timeoutRefreshToken: any = null;
+  private refreshTokenDelay = 60; // seconds
 
   constructor(
     private vaultService: VaultService
@@ -33,6 +37,7 @@ export class AuthService {
     localStorage.removeItem(this.AUTHENTICATED_KEY);
     localStorage.removeItem(this.JWT_EXPIRES);
     localStorage.removeItem(this.USER_ID);
+    localStorage.removeItem(this.CSRF_TOKEN_KEY);
 
     if (this.timeoutRefreshToken) {
       clearTimeout(this.timeoutRefreshToken);
@@ -41,11 +46,15 @@ export class AuthService {
   }
 
   private setRefreshTokenTimeout(): void {
+    if (this.timeoutRefreshToken) {
+      clearTimeout(this.timeoutRefreshToken);
+      this.timeoutRefreshToken = null;
+    }
     var jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES))
     console.log(`JWT Expires at: ${jwtExpires}, next refresh in: ${jwtExpires - Math.floor(Date.now() / 1000)} seconds`);
     if (jwtExpires) {
       const now = Math.floor(Date.now() / 1000);
-      const refreshTime = jwtExpires - now - 60; // Refresh 1 minute before expiration
+      const refreshTime = jwtExpires - now - this.refreshTokenDelay; // Refresh 1 minute before expiration
       this.timeoutRefreshToken = setTimeout(() => {
         this.refreshTokenAsync().catch(error => console.error('Error refreshing token:', error));
       }, refreshTime * 1000);
@@ -68,6 +77,7 @@ export class AuthService {
       const data = await response.json() as AuthResponse;
       this.setLocalStorage(data);
       this.setRefreshTokenTimeout();
+      this.setCsrfToken(this.getCookie(this.CSRF_COOKIE_NAME) ?? '');
       return response.ok;
     } catch (error) {
       console.error('Error during authentication:', error);
@@ -80,9 +90,10 @@ export class AuthService {
       console.log('Refreshing token...');
       const response = await fetch(`${this.apiEndpointV1}/auth/refresh-token`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: new Headers([
+          ['Content-Type', 'application/json'],
+          [this.CSRF_HEADER_NAME, this.getCsrfToken() ?? '']
+        ]),
         credentials: 'include'
       });
       if (!response.ok) {
@@ -146,5 +157,24 @@ export class AuthService {
 
   public isAuthenticated(): boolean {
     return Boolean(localStorage.getItem(this.AUTHENTICATED_KEY)) && this.isTokenValid();
+  }
+
+  public getCookie(name: string): string | null {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+    return null;
+  }
+
+  public setCsrfToken(token: string): void {
+    localStorage.setItem(this.CSRF_TOKEN_KEY, token);
+  }
+
+  public getCsrfToken(): string | null {
+    return localStorage.getItem(this.CSRF_TOKEN_KEY);
+  }
+
+  public clearCsrfToken(): void {
+    localStorage.removeItem(this.CSRF_TOKEN_KEY);
   }
 }

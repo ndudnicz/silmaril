@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Api.Entities.Dtos;
 
-public class CreateLoginDto
+public record CreateLoginDto
 {
     public string? EncryptedDataBase64 { get; set; }
     public string[] TagNames { get; set; } = [];

@@ -50,14 +50,6 @@
   background-color: #faf9fd;
 }
 
-#vault-footer {
-  display: flex;
-  align-content: center;
-  justify-content: center;
-  padding: 4px;
-  background-color: #faf9fd;
-}
-
 #no-data {
   display: flex;
   flex-direction: column;

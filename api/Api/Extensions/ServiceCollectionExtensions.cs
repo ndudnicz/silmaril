@@ -63,14 +63,20 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthRepository, AuthRepository>();
     }
     
-    public static void AddServices(this IServiceCollection services, JwtConfiguration jwtConfiguration)
+    public static void AddServices(this IServiceCollection services)
     {
-        services.AddScoped<IAuthService>(s => new AuthService(
-            s.GetService<IUserService>()!,
-            s.GetService<IAuthRepository>()!,
-            jwtConfiguration));
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITagService, TagService>();
+    }
+
+    public static void AddCsrf(this IServiceCollection services, CsrfConfiguration csrfConfiguration)
+    {
+        services.AddAntiforgery(options =>
+        {
+            options.HeaderName = csrfConfiguration.HeaderName;
+            options.Cookie.Name = csrfConfiguration.SessionCookieName;
+        });
     }
 }

@@ -38,7 +38,7 @@ npm start
 
 # api
 cd api/Api
-export Jwt__SecretKeyBase64='your-jwt-secret-key-base64'
+export Jwt__SecretKeyBase64='your-jwt-secret-key-base64' # requires a 256 bits key length
 export Jwt__ValidIssuer='valid-issuer'
 export Jwt__ValidAudience='valid-audience'
 dotnet run

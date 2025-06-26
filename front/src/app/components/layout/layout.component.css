@@ -1,0 +1,17 @@
+#layout-body {
+    height: 96.6vh;
+    width: 100%;
+}
+
+#layout-footer {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    padding: 4px;
+    background-color: #faf9fd;
+    height: 2.4vh;
+}
+
+.footer-element:last-child {
+    margin-left: 10px;
+}

@@ -1,6 +1,6 @@
 namespace Api.Entities.Dtos.Authentication;
 
-public class AuthDto
+public record AuthDto
 {
     public required string Username { get; set; }
     public required string Password { get; set; }

@@ -1,6 +1,6 @@
 namespace Api.Entities.Dtos.Authentication;
 
-public class AuthRefreshDto
+public record AuthRefreshDto
 {
     public required string RefreshToken { get; set; }
 }

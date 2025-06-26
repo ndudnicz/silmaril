@@ -158,7 +158,7 @@ export class VaultComponent implements OnInit {
     console.log('Card stack clicked');
   }
 
-  settings() {
+  async settings() {
     console.log('Settings clicked');
     // Implement settings logic here
   }

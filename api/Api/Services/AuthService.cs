@@ -18,8 +18,8 @@ public class AuthService(
     JwtConfiguration jwtConfiguration
     ): IAuthService
 {
-    private readonly int _jwtTokenExpirationTimeInMinutes = 20; // Set JWT token expiration to 20 minutes
-    private readonly int _jwtRefreshTokenExpirationTimeInHours = 1; // Set refresh token expiration to 1 hour
+    private readonly int _jwtTokenExpirationTimeInMinutes = jwtConfiguration.AccessTokenExpirationMinutes;
+    private readonly int _jwtRefreshTokenExpirationTimeInHours = jwtConfiguration.RefreshTokenExpirationHours; 
     
     public static bool ValidatePasswordFormat(string password)
     {
