@@ -1,0 +1,10 @@
+<div id="confirm-modal">
+    <h1 mat-dialog-title>{{data.title}}</h1>
+    <mat-dialog-content>
+        <p>{{data.message}}</p>
+        <div class="button-container">
+            <button mat-raised-button color="warn" (click)="onCancel()">{{data.cancelText}}</button>
+            <button mat-raised-button color="primary" (click)="onConfirm()">{{data.confirmText}}</button>
+        </div>
+    </mat-dialog-content>
+</div>

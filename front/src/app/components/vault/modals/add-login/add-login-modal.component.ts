@@ -29,7 +29,6 @@ import { ToastWrapper } from '../../../../utils/toast.wrapper';
 })
 export class AddLoginModalComponent {
   data = inject(MAT_DIALOG_DATA);
-  dialog = inject(MatDialog);
   characterLimit = 2000;
   passwordCharacterLimit = 10000;
   notesCharacterCount = 0;
@@ -54,7 +53,8 @@ export class AddLoginModalComponent {
     private spinner: NgxSpinnerService,
     private vaultService: VaultService,
     private loginService: LoginService,
-    private dialogRef: MatDialogRef<AddLoginModalComponent>
+    private dialogRef: MatDialogRef<AddLoginModalComponent>,
+    private dialog: MatDialog
   ) {
     this.notesFormControl.valueChanges.subscribe(value => {
       this.notesCharacterCount = value ? value.length : 0;

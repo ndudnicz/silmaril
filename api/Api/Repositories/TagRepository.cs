@@ -6,6 +6,11 @@ namespace Api.Repositories;
 
 public class TagRepository(AppDbContext db): ITagRepository
 {
+    public async Task<List<Tag>> GetTagsAsync()
+    {
+        return await db.Tags.ToListAsync();
+    }
+
     public async Task<Tag> GetTagAsync(Guid id)
     {
         return await db.Tags.FirstAsync(x => x.Id == id);

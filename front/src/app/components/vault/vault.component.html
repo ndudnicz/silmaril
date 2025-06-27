@@ -16,7 +16,12 @@
             </button>
         </div>
         <div class="toolbar-button">
-            <button mat-icon-button (click)="openSettingsModal()" matTooltip="Update Password">
+            <button mat-icon-button (click)="openChangeMasterPasswordModal()" matTooltip="Change Master Password">
+                <mat-icon>vpn_key</mat-icon>
+            </button>
+        </div>
+        <div class="toolbar-button">
+            <button mat-icon-button (click)="openSettingsModal()" matTooltip="Change Password">
                 <mat-icon>settings</mat-icon>
             </button>
         </div>
@@ -38,7 +43,7 @@
             'left-container-fullscreen': selectedLogin == null
             }">
             <div id="stacks-container">
-                @if (logins.length == 0 && loading == false) {
+                @if (displayedLogins.length == 0 && loading == false) {
                 <div id="no-data">
                     <span>No data yet</span>
                     <br>
@@ -50,9 +55,12 @@
                     </button>
                 </div>
                 }
-                <app-card-stack class="card-stack" *ngFor="let entry of loginStackEntries" [logins]="entry.value"
-                    [title]="entry.key">
-                </app-card-stack>
+                @for (entry of displayedLoginStackEntries; track $index) {
+                    @if (entry.value.length > 0) {
+                    <app-card-stack class="card-stack" [logins]="entry.value" [title]="entry.key">
+                    </app-card-stack>
+                    }
+                }
             </div>
         </div>
         <div [hidden]="selectedLogin == null" class="right-container">

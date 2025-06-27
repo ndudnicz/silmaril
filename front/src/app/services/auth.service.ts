@@ -72,7 +72,7 @@ export class AuthService {
         credentials: 'include'
       });
       if (!response.ok) {
-        throw new Error(await response.text());
+        throw new Error(`Authentication failed: ${response.body ? await response.text() : 'Unknown error'}`);
       }
       const data = await response.json() as AuthResponse;
       this.setLocalStorage(data);
@@ -97,7 +97,7 @@ export class AuthService {
         credentials: 'include'
       });
       if (!response.ok) {
-        throw new Error('Token refresh failed');
+        throw new Error(`Token refresh failed: ${response.body ? await response.text() : 'Unknown error'}`);
       }
       const data = await response.json() as AuthResponse;
       this.setLocalStorage(data);
@@ -120,7 +120,7 @@ export class AuthService {
         credentials: 'include'
       });
       if (!response.ok) {
-        throw new Error('Signout failed');
+        throw new Error(`Signout failed: ${response.body ? await response.text() : 'Unknown error'}`);
       }
       this.vaultService.clearKey();
       this.vaultService.clearSalt();

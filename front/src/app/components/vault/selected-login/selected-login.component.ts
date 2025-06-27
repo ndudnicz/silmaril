@@ -10,6 +10,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import {ClipboardModule} from '@angular/cdk/clipboard';
 import { ToastWrapper } from '../../../utils/toast.wrapper';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmModalComponent } from '../../modals/confirm-modal/confirm-modal.component';
+import { LoginService } from '../../../services/login.service';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   standalone: true,
@@ -22,7 +26,8 @@ import { ToastWrapper } from '../../../utils/toast.wrapper';
     FormsModule,
     MatInputModule,
     MatButtonModule,
-    ClipboardModule
+    ClipboardModule,
+    MatDialogModule
   ],
   templateUrl: './selected-login.component.html',
   styleUrl: './selected-login.component.css'
@@ -35,8 +40,14 @@ export class SelectedLoginComponent {
   password = '';
   url = '';
   notes = '';
+  loading = false;
 
-  constructor(private dataService: DataService) {
+  constructor(
+    private dataService: DataService,
+    private dialog: MatDialog,
+    private loginService: LoginService,
+    private spinner: NgxSpinnerService
+  ) {
     console.log('SelectedLoginComponent initialized');
     this.dataService.selectedLogin.subscribe((login: Login | null) => {
       this.login = login;
@@ -54,11 +65,6 @@ export class SelectedLoginComponent {
       this.password = this.login.decryptedData?.password || '';
       this.url = this.login.decryptedData?.url || '';
       this.notes = this.login.decryptedData?.notes || '';
-      // this.form.get('title')?.setValue(this.login?.decryptedData?.title || '');
-      // this.form.get('identifier')?.setValue(this.login?.decryptedData?.identifier || '');
-      // this.form.get('password')?.setValue(this.login?.decryptedData?.password || '');
-      // this.form.get('url')?.setValue(this.login?.decryptedData?.url || '');
-      // this.form.get('notes')?.setValue(this.login?.decryptedData?.notes || '');
     }
   }
 
@@ -80,12 +86,46 @@ export class SelectedLoginComponent {
   }
 
   openDeleteModal() {
-    console.log('Open delete modal for login:', this.login);
-  }
-
-  getIdentifier() {
-    // ToastWrapper.info('Value copied to clipboard');
-    return this.login?.decryptedData?.identifier || '';
+    this.dialog.open(ConfirmModalComponent, {
+      panelClass: 'custom-modal',
+      data: {
+        title: `Delete Login ${this.login?.decryptedData?.title}`,
+        message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? \n\nThe data will be sent to the trash bin and can be restored later.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        width: '400px',
+        height: 'auto',
+        closeOnNavigation: false,
+        disableClose: true,
+        autoFocus: true
+      }
+    }).afterClosed().subscribe(async (confirmed: boolean) => {
+      console.log('Delete modal closed with confirmation:', confirmed);
+      if (confirmed) {
+        this.spinner.show();
+        this.loading = true;
+        try {
+          this.login!.deleted = true;
+          const updatedLogin = await this.loginService.updateLoginAsync({
+            id: this.login!.id,
+            deleted: this.login!.deleted,
+            encryptedDataBase64: this.login!.encryptedDataBase64,
+            initializationVectorBase64: this.login!.initializationVectorBase64,
+            tagNames: this.login!.tagNames,
+            encryptionVersion: this.login!.encryptionVersion
+          });
+          this.dataService.setDeleteLogin(updatedLogin);
+          this.dataService.setSelectedLogin(null);
+          ToastWrapper.success('Login deleted successfully');
+        } catch (error: any) {
+          ToastWrapper.error('Failed to delete login: ', error.message || 'Unknown error');
+          console.error('Error during login deletion:', error);
+        } finally {
+          this.loading = false;
+          this.spinner.hide();
+        }
+      }
+    })
   }
 
   selectText(event: Event) {

@@ -41,6 +41,8 @@ export class CryptoUtilsV1 {
 
 
   static async decryptDataAsync(key: CryptoKey | null, encryptedData: Uint8Array, initializationVector: Uint8Array): Promise<string> {
+    console.log(`Decrypting data with key: ${key ? 'exists' : 'null'}`, encryptedData, initializationVector);
+    
     if (!key) throw new Error('Vault is locked');
 
     const decrypted = await crypto.subtle.decrypt(

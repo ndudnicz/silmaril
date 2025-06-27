@@ -1,30 +1,41 @@
-import { base64ToUint8Array } from "../utils/crypto.utils";
-import { Tag } from "./tag";
+import { base64ToUint8Array, uint8ArrayToBase64 } from "../utils/crypto.utils";
 
 export class Login {
     id: string;
     userId: string;
-    encryptedDataBase64?: string;
-    encryptedData?: Uint8Array;
-    decryptedData?: DecryptedData;
-    encryptionVersion?: number;
-    initializationVector?: Uint8Array;
-    initializationVectorBase64?: string;
+    encryptedDataBase64?: string | null;
+    encryptedData?: Uint8Array | null;
+    decryptedData?: DecryptedData | null;
+    encryptionVersion?: number | null;
+    initializationVector?: Uint8Array | null;
+    initializationVectorBase64?: string | null;
     tagNames: string[];
     created: Date;
-    updated?: Date;
+    updated?: Date | null;
+    deleted: boolean;
 
-    constructor(id: string, userId: string, encryptedDataBase64?: string, initializationVectorBase64?: string, tagNames: string[] = [], created?: Date, updated?: Date, encryptionVersion?: number) {
+    constructor(
+        id: string, 
+        userId: string,
+        deleted: boolean,
+        created: Date,
+        encryptedDataBase64?: string | null,
+        initializationVectorBase64?: string | null,
+        tagNames: string[] = [],
+        updated?: Date | null,
+        encryptionVersion?: number | null
+        ) {
         this.id = id;
         this.userId = userId;
         this.encryptedDataBase64 = encryptedDataBase64;
-        this.encryptedData = encryptedDataBase64 ? base64ToUint8Array(encryptedDataBase64) : undefined;
-        this.initializationVector = initializationVectorBase64 ? base64ToUint8Array(initializationVectorBase64) : undefined;
+        this.encryptedData = encryptedDataBase64 ? base64ToUint8Array(encryptedDataBase64) : null;
+        this.initializationVector = initializationVectorBase64 ? base64ToUint8Array(initializationVectorBase64) : null;
         this.initializationVectorBase64 = initializationVectorBase64;
         this.tagNames = tagNames;
-        this.created = created || new Date();
+        this.created = created;
         this.updated = updated;
         this.encryptionVersion = encryptionVersion;
+        this.deleted = deleted;
     }
 
     public static fromObject(obj: any): Login {
@@ -35,15 +46,34 @@ export class Login {
             throw new Error('Invalid properties in object for Login');
         }
         return new Login(
-            obj.id,
-            obj.userId,
-            obj.encryptedDataBase64 || '',
-            obj.initializationVectorBase64 || '',
-            obj.tags || [],
-            obj.created ? new Date(obj.created) : undefined,
+            obj.id || '',
+            obj.userId || '',
+            obj.deleted || false,
+            new Date(obj.created),
+            obj.encryptedDataBase64 || undefined,
+            obj.initializationVectorBase64 || undefined,
+            Array.isArray(obj.tagNames) ? obj.tagNames : [],
             obj.updated ? new Date(obj.updated) : undefined,
-            obj.encryptionVersion
+            typeof obj.encryptionVersion === 'number' ? obj.encryptionVersion : undefined
         );
+    }
+
+    public copy(): Login {
+        return new Login(
+            this.id,
+            this.userId,
+            this.deleted,
+            new Date(this.created),
+            this.encryptedDataBase64,
+            this.initializationVectorBase64,
+            [...this.tagNames],
+            this.updated ? new Date(this.updated) : undefined,
+            this.encryptionVersion
+        );
+    }
+
+    public toString(): string {
+        return JSON.stringify(this);
     }
 }
 
@@ -104,8 +134,36 @@ export interface CreateLoginDto {
 
 export interface UpdateLoginDto {
     id: string;
-    encryptedDataBase64?: string;
-    initializationVectorBase64?: string;
+    deleted: boolean;
+    encryptedDataBase64?: string | null;
+    initializationVectorBase64?: string | null;
     tagNames?: string[];
-    encryptionVersion?: number;
+    encryptionVersion?: number | null;
+}
+
+export class UpdateLoginDto {
+    constructor(
+        public id: string,
+        public deleted: boolean,
+        public encryptedDataBase64?: string | null,
+        public initializationVectorBase64?: string | null,
+        public tagNames?: string[],
+        public encryptionVersion?: number | null
+    ) {}
+
+    public static fromLogin(login: Login): UpdateLoginDto {
+        if (login === null || login === undefined || !login.encryptedData || !login.initializationVector) {
+            throw new Error('Invalid login object for UpdateLoginDto: ' + login.toString());
+        }
+        console.log('Creating UpdateLoginDto from login:', login);
+        
+        return new UpdateLoginDto(
+            login.id,
+            login.deleted,
+            uint8ArrayToBase64(login.encryptedData ?? new Uint8Array()),
+            uint8ArrayToBase64(login.initializationVector ?? new Uint8Array()),
+            login.tagNames,
+            login.encryptionVersion
+        );
+    }
 }

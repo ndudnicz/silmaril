@@ -10,14 +10,14 @@ import { AuthService } from '../../services/auth.service';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AddLoginModalComponent } from './modals/add-login/add-login-modal.component';
-import { DecryptedData, Login } from '../../entities/login';
-import { CryptoUtilsV1 } from '../../utils/crypto.utils';
+import { Login, UpdateLoginDto } from '../../entities/login';
 import { CommonModule, KeyValue } from '@angular/common';
 import { CardStackComponent } from './card-stack/card-stack.component';
 import { DataService } from '../../services/data.service';
 import { SelectedLoginComponent } from "./selected-login/selected-login.component";
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SettingsModalComponent } from './modals/settings/settings-modal.component';
+import { ChangeMasterPasswordModalComponent } from './modals/change-master-password-modal/change-master-password-modal.component';
 
 @Component({
   selector: 'app-vault',
@@ -38,8 +38,9 @@ import { SettingsModalComponent } from './modals/settings/settings-modal.compone
 export class VaultComponent implements OnInit {
 
   readonly dialog = inject(MatDialog);
-  logins: Login[] = [];
-  loginStackEntries: KeyValue<string, Login[]>[] = [];
+  allLogins: Login[] = [];
+  displayedLogins: Login[] = [];
+  displayedLoginStackEntries: KeyValue<string, Login[]>[] = [];
   selectedLogin: Login | null = null;
   loading = false;
 
@@ -49,21 +50,46 @@ export class VaultComponent implements OnInit {
     private loginService: LoginService,
     private spinner: NgxSpinnerService,
     private dataService: DataService
-  ) { }
+  ) {
+    this.dataService.selectedLogin.subscribe((login: Login | null) => {
+      this.selectedLogin = login;
+      console.log('VaultComponent : Selected login updated:', this.selectedLogin);
+    });
+
+    this.dataService.deletedLogin.subscribe((login: Login | null) => {
+      if (login) {
+        console.log('VaultComponent : Deleted login received:', login);
+        this.allLogins = this.allLogins.filter(l => l.id !== login.id);
+        this.computeStacks();
+        ToastWrapper.success('Login deleted successfully');
+      }
+    });
+
+    this.dataService.updatedLogin.subscribe((login: Login | null) => {
+      if (login) {
+        console.log('VaultComponent : Updated login received:', login);
+        const index = this.allLogins.findIndex(l => l.id === login.id);
+        if (index !== -1) {
+          this.allLogins[index] = login;
+          this.computeStacks();
+          ToastWrapper.success('Login updated successfully');
+        } else {
+          console.warn('Updated login not found in current logins:', login);
+        }
+      }
+    });
+    console.log('VaultComponent initialized');
+  }
 
   async ngOnInit(): Promise<void> {
     this.spinner.show();
     this.loading = true;
     try {
-      this.logins = await this.loginService.getLoginsAsync();
-      this.logins = await this.decryptAllLogins(this.logins);
+      this.allLogins = await this.loginService.getLoginsAsync();
+      this.allLogins = await this.vaultService.decryptAllLogins(this.allLogins);
+      this.displayedLogins = this.allLogins.filter(login => !login.deleted);
       this.computeStacks();
       console.log('vault selectedLogin:', this.selectedLogin);
-
-      this.dataService.selectedLogin.subscribe((login: Login | null) => {
-        this.selectedLogin = login;
-        console.log('VaultComponent : Selected login updated:', this.selectedLogin);
-      });
     } catch (error: any) {
       ToastWrapper.error('Failed to fetch data: ', error.message ?? error);
       console.error('Error fetching data:', error);
@@ -75,46 +101,16 @@ export class VaultComponent implements OnInit {
 
   computeStacks() {
     let loginStacks: any = {};
-    for (const login of this.logins) {
+    for (const login of this.displayedLogins) {
       const stackName = login.decryptedData?.title.charAt(0).toLocaleUpperCase() || 'Uncategorized';
       if (!loginStacks[stackName]) {
         loginStacks[stackName] = [];
       }
       loginStacks[stackName].push(login);
     }
-    this.loginStackEntries = Object.entries(loginStacks as Record<string, Login[]>)
+    this.displayedLoginStackEntries = Object.entries(loginStacks as Record<string, Login[]>)
       .map(([key, value]) => ({ key, value }));
-    this.loginStackEntries.sort((a, b) => a.key.localeCompare(b.key));
-  }
-
-  async decryptLoginData(login: Login): Promise<Login> {
-    return new Promise<Login>(async (resolve, reject) => {
-      try {
-        const decryptDataString = await CryptoUtilsV1.decryptDataAsync(this.vaultService.getKey(), login.encryptedData!, login.initializationVector!);
-        login.decryptedData = DecryptedData.fromString(decryptDataString);
-        return resolve(login);
-      } catch (error: any) {
-        reject(error);
-      } finally {
-      }
-    });
-  }
-
-  async decryptAllLogins(logins: Login[]): Promise<Login[]> {
-    return new Promise<Login[]>(async (resolve, reject) => {
-      this.spinner.show();
-      try {
-        this.logins = await Promise.all(logins.map(this.decryptLoginData.bind(this)));
-        ToastWrapper.success('All logins decrypted successfully');
-        return resolve(this.logins);
-      } catch (error: any) {
-        ToastWrapper.error('Failed to decrypt logins: ', error.message ?? error);
-        console.error('Error decrypting logins:', error);
-        reject(error);
-      } finally {
-        this.spinner.hide();
-      }
-    });
+    this.displayedLoginStackEntries.sort((a, b) => a.key.localeCompare(b.key));
   }
 
   async signout() {
@@ -150,7 +146,8 @@ export class VaultComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(async (result: Login) => {
       if (result) {
-        this.logins.push(result);
+        this.allLogins.push(result);
+        this.displayedLogins.push(result);
         this.computeStacks();
         console.log(`Add login :`, result);
       }
@@ -161,7 +158,7 @@ export class VaultComponent implements OnInit {
     console.log('Card stack clicked');
   }
 
-  async openSettingsModal() {
+  openSettingsModal() {
     console.log('Settings clicked');
     const dialogRef = this.dialog.open(SettingsModalComponent,
       {
@@ -173,8 +170,52 @@ export class VaultComponent implements OnInit {
         autoFocus: true
       }
     );
+    dialogRef.afterClosed().subscribe(_ => { });
+  }
 
-    dialogRef.afterClosed().subscribe(_ => {});
+  openChangeMasterPasswordModal() {
+    const dialogRef = this.dialog.open(ChangeMasterPasswordModalComponent,
+      {
+        panelClass: 'custom-modal',
+        width: '400px',
+        height: 'auto',
+        closeOnNavigation: false,
+        disableClose: true,
+        autoFocus: true
+      }
+    );
+    dialogRef.afterClosed().subscribe(async newMasterPassword => {
+      if (newMasterPassword != null) {
+        try {
+          this.spinner.show();
+          this.loading = true;
+          console.log('Master password changed, re-encrypting all logins... old key', this.vaultService.exportKey());
+          this.vaultService.clearKey();
+          await this.vaultService.setKeyAsync(newMasterPassword);
+          console.log('Master password changed, re-encrypting all logins... new key', this.vaultService.exportKey());
+          
+          this.dataService.setSelectedLogin(null);
+          console.log('Changing master password...', this.allLogins);
+          
+          this.allLogins = await this.vaultService.encryptAllLogins(this.allLogins);
+          let updatedLogins = await this.loginService.updateLoginBulkAsync(this.allLogins.map(l => UpdateLoginDto.fromLogin(l)));
+          updatedLogins = await this.vaultService.decryptAllLogins(updatedLogins);
+          console.log('Logins before changing master password:', this.allLogins);
+          
+          console.log('Updated logins after changing master password:', updatedLogins);
+          
+        } catch (error: any) {
+          ToastWrapper.error('Failed to change master password: ', error.message ?? error);
+          console.error('Error changing master password:', error);
+          this.loading = false;
+          this.spinner.hide();
+        } finally {
+          this.loading = false;
+          this.spinner.hide();
+          ToastWrapper.success('Master password changed successfully');
+        }
+      }
+    });
   }
 
   async openDeletedLoginsModal() {

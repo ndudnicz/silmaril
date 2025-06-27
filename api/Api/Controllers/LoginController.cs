@@ -16,8 +16,7 @@ public class LoginController(
     {
         try
         {
-            var r = await loginService.GetLoginsByUserIdAsync(GetUserId());
-            return Ok(r);
+            return Ok(await loginService.GetLoginsByUserIdAsync(GetUserId()));
         }
         catch (Exception ex)
         {
@@ -51,6 +50,20 @@ public class LoginController(
         {
             logger.LogError(ex, "Error updating login with ID {Id}", updateLoginDto.Id);
             return BadRequest(ex.Message);
+        }
+    }
+    
+    [HttpPut("bulk")]
+    public async Task<IActionResult> UpdateBulkAsync([FromBody] List<UpdateLoginDto> updateLoginDtos)
+    {
+        try
+        {
+            return Ok(await loginService.UpdateLoginBulkAsync(updateLoginDtos, GetUserId()));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating bulk logins");
+            return BadRequest(ex.InnerException?.Message ?? ex.Message);
         }
     }
 

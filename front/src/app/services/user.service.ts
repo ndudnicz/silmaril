@@ -2,9 +2,6 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { FetchService } from './fetch.service';
 import { User } from '../entities/user';
-import { ToastWrapper } from '../utils/toast.wrapper';
-import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
-import { AuthHelper } from '../components/helpers/auth.helper';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -22,7 +19,7 @@ export class UserService {
     try {
       const response = await this.fetchService.getAsync(`${this.apiEndpointV1}/user`, {});
       if (!response.ok) {
-        throw new Error('Failed to fetch user data');
+        throw new Error(`Failed to fetch user data: ${response.body ? await response.text() : 'Unknown error'}`);
       }
       return await response.json() as User;
     } catch (error) {
@@ -37,7 +34,7 @@ export class UserService {
         `${this.apiEndpointV1}/user`,
         { body: JSON.stringify({ username, password, confirmPassword }) });
       if (!response.ok) {
-        throw new Error(response.body ? await response.text() : 'Failed to create user');
+        throw new Error(`Failed to create user: ${response.body ? await response.text() : 'Unknown error'}`);
       }
       return response.ok;
     }
@@ -54,7 +51,7 @@ export class UserService {
         { body: JSON.stringify({ oldPassword, newPassword }) }
       );
       if (!response.ok) {
-        throw new Error(response.body ? await response.text() : 'Failed to change password');
+        throw new Error(`Failed to change password: ${response.body ? await response.text() : 'Unknown error'}`);
       }
       return response.ok;
     } catch (error) {

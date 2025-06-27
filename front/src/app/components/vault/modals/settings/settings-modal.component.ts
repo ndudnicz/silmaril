@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { UserService } from '../../../../services/user.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../../../utils/toast.wrapper';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../../services/auth.service';
+import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-settings-modal',
@@ -45,7 +46,8 @@ export class SettingsModalComponent {
     private userService: UserService,
     private dialogRef: MatDialogRef<SettingsModalComponent>,
     private spinner: NgxSpinnerService,
-    private authService: AuthService
+    private authService: AuthService,
+    private dialog: MatDialog
   ) {
     // Initialization logic can go here
   }
@@ -69,7 +71,26 @@ export class SettingsModalComponent {
 
   // Add methods to handle settings actions
   async onSubmit() {
-    console.log('Settings saved');
+    this.dialog.open(ConfirmModalComponent, {
+      panelClass: 'custom-modal',
+      data: {
+        title: 'Confirm Password Change',
+        message: 'Are you sure you want to change your password? This is not your master password.',
+        confirmText: 'Change Password',
+        cancelText: 'Cancel'
+      }
+    }).afterClosed().subscribe(async (confirmed: boolean) => {
+      console.log('Confirm modal closed with confirmation:', confirmed);
+      if (confirmed) {
+        await this.saveSettings();
+      } else {
+        this.closeDialog();
+      }
+    });
+ 
+  }
+
+  async saveSettings() {
     this.spinner.show();
     if (this.form.invalid) {
       console.error('Form is invalid:', this.form.errors);
@@ -93,6 +114,8 @@ export class SettingsModalComponent {
       console.error('Error changing password:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       ToastWrapper.error('Failed to change password', errorMessage);
+      this.spinner.hide();
+      this.loading = false;
     }
   }
 

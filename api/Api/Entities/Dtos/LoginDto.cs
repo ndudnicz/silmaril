@@ -7,6 +7,7 @@ public class LoginDto: MyEntity
     public string? EncryptedDataBase64 { get; set; }
     public int? EncryptionVersion { get; set; }
     public string? InitializationVectorBase64 { get; set; }
+    public bool Deleted { get; set; }
     
     public static LoginDto FromLogin(Login login)
     {
@@ -19,12 +20,13 @@ public class LoginDto: MyEntity
             EncryptedDataBase64 = Convert.ToBase64String(login.EncryptedData ?? []),
             TagNames = login.Tags.Select(x => x.Name).ToList(),
             EncryptionVersion = login.EncryptionVersion,
-            InitializationVectorBase64 = Convert.ToBase64String(login.InitializationVector ?? [])
+            InitializationVectorBase64 = Convert.ToBase64String(login.InitializationVector ?? []),
+            Deleted = login.Deleted
         };
     }
     
-    public static IEnumerable<LoginDto> FromLogin(IEnumerable<Login> logins)
+    public static List<LoginDto> FromLogin(IEnumerable<Login> logins)
     {
-        return logins.Select(FromLogin);
+        return logins.Select(FromLogin).ToList();
     }
 }
