@@ -8,6 +8,7 @@ export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
 
   if (authService.isAuthenticated()) {
+    authService.setRefreshTokenTimeout();
     return true;
   } else {
     return router.createUrlTree(['/signin']);

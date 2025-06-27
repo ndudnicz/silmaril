@@ -45,16 +45,16 @@ export class AuthService {
     }
   }
 
-  private setRefreshTokenTimeout(): void {
+  public setRefreshTokenTimeout(): void {
     if (this.timeoutRefreshToken) {
       clearTimeout(this.timeoutRefreshToken);
       this.timeoutRefreshToken = null;
     }
     var jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES))
-    console.log(`JWT Expires at: ${jwtExpires}, next refresh in: ${jwtExpires - Math.floor(Date.now() / 1000)} seconds`);
     if (jwtExpires) {
       const now = Math.floor(Date.now() / 1000);
       const refreshTime = jwtExpires - now - this.refreshTokenDelay; // Refresh 1 minute before expiration
+      console.log(`JWT Expires at: ${jwtExpires}, next refresh in: ${refreshTime} seconds`);
       this.timeoutRefreshToken = setTimeout(() => {
         this.refreshTokenAsync().catch(error => console.error('Error refreshing token:', error));
       }, refreshTime * 1000);
