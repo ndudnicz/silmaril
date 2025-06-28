@@ -7,7 +7,7 @@ public static class ConfigurationParser
         var jwtSecretKeyBae64 = configuration["Jwt:SecretKeyBase64"];
         if (string.IsNullOrEmpty(jwtSecretKeyBae64))
         {
-            throw new InvalidOperationException("The environment variable 'SILMARIL_JWT_SECRET_KEY_BASE64' is not defined. ");
+            throw new InvalidOperationException("The environment variable 'Jwt:SecretKeyBase64' is not defined. ");
         }
         if (jwtSecretKeyBae64 is "6a5PsnpMFNt6lu0VtNwWoPniQNecHT4rL5W3PXm8mfw=")
         {

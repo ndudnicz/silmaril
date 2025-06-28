@@ -1,0 +1,40 @@
+services:
+  front:
+    build: front
+    image: silmaril-front
+    ports:
+      - 4200:80
+  api:
+    build: api
+    image: silmaril-api
+    ports:
+      - 5000:5000
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+    environment:
+      - ConnectionStrings__MySql=Server=db;Port=3306;Database=silmaril;User ID=root;Password=root;
+  db:
+    image: mariadb:latest
+    environment:
+      - MARIADB_DATABASE=silmaril
+      - MARIADB_USER=root
+      - MARIADB_PASSWORD=root
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  migrator:
+    build:
+      context: api
+      dockerfile: Dockerfile.migrator
+    image: silmaril-migrator
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__MySql=Server=db;Port=3306;Database=silmaril;User ID=root;Password=root;
