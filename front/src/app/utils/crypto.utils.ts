@@ -1,5 +1,11 @@
 // src/app/utils/crypto.util.ts
 
+export interface EncryptionResult {
+  ciphertext: Uint8Array;
+  initializationVector: Uint8Array;
+  encryptionVersion: number;
+}
+
 export class CryptoUtilsV1 {
   static async deriveKeyFromPasswordAsync(password: string, salt: Uint8Array): Promise<CryptoKey> {
     const enc = new TextEncoder();
@@ -42,7 +48,7 @@ export class CryptoUtilsV1 {
 
   static async decryptDataAsync(key: CryptoKey | null, encryptedData: Uint8Array, initializationVector: Uint8Array): Promise<string> {
     console.log(`Decrypting data with key: ${key ? 'exists' : 'null'}`, encryptedData, initializationVector);
-    
+
     if (!key) throw new Error('Vault is locked');
 
     const decrypted = await crypto.subtle.decrypt(
@@ -54,7 +60,7 @@ export class CryptoUtilsV1 {
     return new TextDecoder().decode(decrypted);
   }
 
-  static async encryptDataAsync(key: CryptoKey | null, plaintext: string): Promise<{ ciphertext: Uint8Array; initializationVector: Uint8Array, encryptionVersion: number }> {
+  static async encryptDataAsync(key: CryptoKey | null, plaintext: string): Promise<EncryptionResult> {
     if (!key) throw new Error('Vault is locked');
 
     const initializationVector = crypto.getRandomValues(new Uint8Array(12));

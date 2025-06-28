@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Login } from '../../../entities/login';
+import { Login, UpdateLoginDto } from '../../../entities/login';
 import { DataService } from '../../../services/data.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,6 +14,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmModalComponent } from '../../modals/confirm-modal/confirm-modal.component';
 import { LoginService } from '../../../services/login.service';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { AddEditLoginModalComponent } from '../modals/add-edit-login/add-edit-login-modal.component';
 
 @Component({
   standalone: true,
@@ -82,7 +83,28 @@ export class SelectedLoginComponent {
   }
 
   openEditModal() {
-    console.log('Open edit modal for login:', this.login);
+   const dialogRef = this.dialog.open(AddEditLoginModalComponent,
+      {
+        panelClass: 'custom-modal',
+        width: '600px',
+        height: 'auto',
+        closeOnNavigation: false,
+        disableClose: true,
+        autoFocus: true,
+        data: {
+          mode: AddEditLoginModalComponent.MODAL_MOD.EDIT,
+          login: this.login
+        }
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(async (result: Login) => {
+      if (result) {
+        console.log('Edit login result:', result);
+        this.dataService.setUpdatedLogin(result);
+        this.dataService.setSelectedLogin(result); // Clear selected login after edit
+      }
+    });
   }
 
   openDeleteModal() {
@@ -90,7 +112,7 @@ export class SelectedLoginComponent {
       panelClass: 'custom-modal',
       data: {
         title: `Delete Login ${this.login?.decryptedData?.title}`,
-        message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? \n\nThe data will be sent to the trash bin and can be restored later.`,
+        message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? The data will be sent to the trash bin and can be restored later.`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
         width: '400px',
@@ -106,15 +128,10 @@ export class SelectedLoginComponent {
         this.loading = true;
         try {
           this.login!.deleted = true;
-          const updatedLogin = await this.loginService.updateLoginAsync({
-            id: this.login!.id,
-            deleted: this.login!.deleted,
-            encryptedDataBase64: this.login!.encryptedDataBase64,
-            initializationVectorBase64: this.login!.initializationVectorBase64,
-            tagNames: this.login!.tagNames,
-            encryptionVersion: this.login!.encryptionVersion
-          });
-          this.dataService.setDeleteLogin(updatedLogin);
+          const updatedLogin = await this.loginService.updateLoginAsync(UpdateLoginDto.fromLogin(this.login!));
+          console.log('Login deleted successfully:', updatedLogin);
+          
+          this.dataService.setUpdatedLogin(updatedLogin);
           this.dataService.setSelectedLogin(null);
           ToastWrapper.success('Login deleted successfully');
         } catch (error: any) {

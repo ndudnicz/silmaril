@@ -12,7 +12,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { CommonModule } from '@angular/common';
-import { ProgressBarComponent } from '../../../../progress-bar/progress-bar.component';
+import { ProgressBarComponent } from '../../../progress-bar/progress-bar.component';
 
 
 interface PasswordOptions {

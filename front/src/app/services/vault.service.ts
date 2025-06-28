@@ -58,29 +58,13 @@ export class VaultService {
   public getKey(): CryptoKey | null {
     return this.key;
   }
-
-  public exportKey(): Promise<ArrayBuffer> {
-    return new Promise<ArrayBuffer>(async (resolve, reject) => {
-      try {
-        if (!this.key) {
-          throw new VaultServiceError('Vault is not unlocked. Please set the master password.');
-        }
-        const exportedKey = await CryptoUtilsV1.exportKeyAsync(this.key);
-        console.log('Exported key successfully:', exportedKey);
-        return resolve(exportedKey);
-      } catch (error: any) {
-        console.error('Error exporting key:', error);
-        reject(new VaultServiceError('Error exporting key:' + (error instanceof Error ? error.message : 'Unknown error')));
-      }
-    });
-  }
   
   public clearKey(): void {
     console.log('Clearing key');
     this.key = null;
   }
 
-  async encryptLoginData(login: Login): Promise<Login> {
+  async encryptLoginDataAsync(login: Login): Promise<Login> {
     return new Promise<Login>(async (resolve, reject) => {
       try {
         if (!this.key) {
@@ -105,13 +89,13 @@ export class VaultService {
     });
   }
 
-  async encryptAllLogins(logins: Login[]): Promise<Login[]> {
+  async encryptAllLoginsAsync(logins: Login[]): Promise<Login[]> {
     return new Promise<Login[]>(async (resolve, reject) => {
       try {
         if (!this.key) {
           throw new VaultServiceError('Vault is not unlocked. Please set the master password.');
         }
-        const encryptedLogins = await Promise.all(logins.map(this.encryptLoginData.bind(this)));
+        const encryptedLogins = await Promise.all(logins.map(this.encryptLoginDataAsync.bind(this)));
         console.log('All logins encrypted successfully');
         return resolve(encryptedLogins);
       } catch (error: any) {
@@ -121,7 +105,7 @@ export class VaultService {
     });
   }
 
-  async decryptLoginData(login: Login): Promise<Login> {
+  async decryptLoginDataAsync(login: Login): Promise<Login> {
     return new Promise<Login>(async (resolve, reject) => {
       try {
         if (!this.key) {
@@ -138,13 +122,13 @@ export class VaultService {
     });
   }
 
-  async decryptAllLogins(logins: Login[]): Promise<Login[]> {
+  async decryptAllLoginsAsync(logins: Login[]): Promise<Login[]> {
     return new Promise<Login[]>(async (resolve, reject) => {
       try {
         if (!this.key) {
           throw new VaultServiceError('Vault is not unlocked. Please set the master password.');
         }
-        const decryptedLogins = await Promise.all(logins.map(this.decryptLoginData.bind(this)));
+        const decryptedLogins = await Promise.all(logins.map(this.decryptLoginDataAsync.bind(this)));
         console.log('All logins decrypted successfully');
         return resolve(decryptedLogins);
       } catch (error: any) {

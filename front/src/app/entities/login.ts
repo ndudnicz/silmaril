@@ -129,15 +129,6 @@ export interface CreateLoginDto {
     encryptedDataBase64: string;
     initializationVectorBase64: string;
     tagNames: string[];
-    encryptionVersion?: number;
-}
-
-export interface UpdateLoginDto {
-    id: string;
-    deleted: boolean;
-    encryptedDataBase64?: string | null;
-    initializationVectorBase64?: string | null;
-    tagNames?: string[];
     encryptionVersion?: number | null;
 }
 

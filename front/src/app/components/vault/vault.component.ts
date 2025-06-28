@@ -9,7 +9,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../services/auth.service';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { AddLoginModalComponent } from './modals/add-login/add-login-modal.component';
+import { AddEditLoginModalComponent } from './modals/add-edit-login/add-edit-login-modal.component';
 import { Login, UpdateLoginDto } from '../../entities/login';
 import { CommonModule, KeyValue } from '@angular/common';
 import { CardStackComponent } from './card-stack/card-stack.component';
@@ -18,6 +18,7 @@ import { SelectedLoginComponent } from "./selected-login/selected-login.componen
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SettingsModalComponent } from './modals/settings/settings-modal.component';
 import { ChangeMasterPasswordModalComponent } from './modals/change-master-password-modal/change-master-password-modal.component';
+import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-vault',
@@ -60,6 +61,7 @@ export class VaultComponent implements OnInit {
       if (login) {
         console.log('VaultComponent : Deleted login received:', login);
         this.allLogins = this.allLogins.filter(l => l.id !== login.id);
+        this.setDisplayedLogins();
         this.computeStacks();
         ToastWrapper.success('Login deleted successfully');
       }
@@ -71,6 +73,7 @@ export class VaultComponent implements OnInit {
         const index = this.allLogins.findIndex(l => l.id === login.id);
         if (index !== -1) {
           this.allLogins[index] = login;
+          this.setDisplayedLogins();
           this.computeStacks();
           ToastWrapper.success('Login updated successfully');
         } else {
@@ -86,8 +89,8 @@ export class VaultComponent implements OnInit {
     this.loading = true;
     try {
       this.allLogins = await this.loginService.getLoginsAsync();
-      this.allLogins = await this.vaultService.decryptAllLogins(this.allLogins);
-      this.displayedLogins = this.allLogins.filter(login => !login.deleted);
+      this.allLogins = await this.vaultService.decryptAllLoginsAsync(this.allLogins);
+      this.setDisplayedLogins();
       this.computeStacks();
       console.log('vault selectedLogin:', this.selectedLogin);
     } catch (error: any) {
@@ -97,6 +100,10 @@ export class VaultComponent implements OnInit {
       this.spinner.hide();
       this.loading = false;
     }
+  }
+
+  setDisplayedLogins() {
+    this.displayedLogins = this.allLogins.filter(login => !login.deleted);
   }
 
   computeStacks() {
@@ -114,7 +121,21 @@ export class VaultComponent implements OnInit {
   }
 
   async signout() {
-    if (confirm('Are you sure you want to signout?')) {
+    this.dialog.open(ConfirmModalComponent, {
+      panelClass: 'custom-modal',
+      data: {
+        title: 'Sign Out',
+        message: 'Are you sure you want to signout?',
+        confirmText: 'Sign Out',
+        cancelText: 'Cancel',
+        width: '400px',
+        height: 'auto',
+        closeOnNavigation: false,
+        disableClose: true,
+        autoFocus: true
+      }
+    }).afterClosed().subscribe(async (confirmed: boolean) => {
+      if (confirmed) {
       this.spinner.show();
       console.log('Signing out...');
       try {
@@ -129,18 +150,23 @@ export class VaultComponent implements OnInit {
         console.error('Error during signout:', error);
         this.spinner.hide();
       }
-    }
+      }
+    });
   }
 
   openAddLoginModal() {
-    const dialogRef = this.dialog.open(AddLoginModalComponent,
+    const dialogRef = this.dialog.open(AddEditLoginModalComponent,
       {
         panelClass: 'custom-modal',
         width: '600px',
         height: 'auto',
         closeOnNavigation: false,
         disableClose: true,
-        autoFocus: true
+        autoFocus: true,
+        data: {
+          mode: AddEditLoginModalComponent.MODAL_MOD.ADD,
+          login: null
+        }
       }
     );
 
@@ -149,13 +175,8 @@ export class VaultComponent implements OnInit {
         this.allLogins.push(result);
         this.displayedLogins.push(result);
         this.computeStacks();
-        console.log(`Add login :`, result);
       }
     });
-  }
-
-  select(login: Login) {
-    console.log('Card stack clicked');
   }
 
   openSettingsModal() {
@@ -189,21 +210,12 @@ export class VaultComponent implements OnInit {
         try {
           this.spinner.show();
           this.loading = true;
-          console.log('Master password changed, re-encrypting all logins... old key', this.vaultService.exportKey());
           this.vaultService.clearKey();
           await this.vaultService.setKeyAsync(newMasterPassword);
-          console.log('Master password changed, re-encrypting all logins... new key', this.vaultService.exportKey());
-          
           this.dataService.setSelectedLogin(null);
-          console.log('Changing master password...', this.allLogins);
-          
-          this.allLogins = await this.vaultService.encryptAllLogins(this.allLogins);
+          this.allLogins = await this.vaultService.encryptAllLoginsAsync(this.allLogins);
           let updatedLogins = await this.loginService.updateLoginBulkAsync(this.allLogins.map(l => UpdateLoginDto.fromLogin(l)));
-          updatedLogins = await this.vaultService.decryptAllLogins(updatedLogins);
-          console.log('Logins before changing master password:', this.allLogins);
-          
-          console.log('Updated logins after changing master password:', updatedLogins);
-          
+          updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
         } catch (error: any) {
           ToastWrapper.error('Failed to change master password: ', error.message ?? error);
           console.error('Error changing master password:', error);

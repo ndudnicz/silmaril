@@ -20,13 +20,14 @@ export class DataService {
 
   private _deletedLogin: BehaviorSubject<Login | null> = new BehaviorSubject<Login | null>(null);
   public readonly deletedLogin: Observable<Login | null> = this._deletedLogin.asObservable();
-  setDeleteLogin(login: Login | null): void {
+  setDeletedLogin(login: Login | null): void {
     this._deletedLogin.next(login);
   }
 
   private _updatedLogin: BehaviorSubject<Login | null> = new BehaviorSubject<Login | null>(null);
   public readonly updatedLogin: Observable<Login | null> = this._updatedLogin.asObservable();
-  setUpdateLogin(login: Login | null): void {
-    this._deletedLogin.next(login);
+  setUpdatedLogin(login: Login): void {
+    console.log(`DataService: Setting updated login:`, login);
+    this._updatedLogin.next(login);
   }
 }
