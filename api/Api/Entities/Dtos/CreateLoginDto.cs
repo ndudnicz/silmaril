@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Api.Entities.Dtos;
 
 public record CreateLoginDto

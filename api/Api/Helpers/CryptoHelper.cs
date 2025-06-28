@@ -1,4 +1,3 @@
-using System.Diagnostics.Contracts;
 using System.Security.Cryptography;
 using System.Text;
 using Isopoh.Cryptography.Argon2;
@@ -24,7 +23,7 @@ public static class CryptoHelper
             Lanes = 4,
             Threads = Environment.ProcessorCount,
             Password = System.Text.Encoding.UTF8.GetBytes(password),
-            Salt = GenerateRandomByte(16), // 128 bits
+            Salt = GenerateRandomByte(16),
             HashLength = 32
         };
 

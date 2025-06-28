@@ -104,8 +104,8 @@ export class AddEditLoginModalComponent {
     const encryptionResult = await CryptoUtilsV1.encryptDataAsync(this.vaultService.getKey(), decryptedData.toString());
     try {
       if (this.mode === AddEditLoginModalComponent.MODAL_MOD.ADD) {
-    this.loading = true;
-    this.spinner.show();
+        this.loading = true;
+        this.spinner.show();
         const login: Login = await this.createLogin(encryptionResult);
         ToastWrapper.success('Login created successfully')
         this.dialogRef.close(login);
@@ -127,12 +127,12 @@ export class AddEditLoginModalComponent {
           if (!confirmed) {
             return;
           }
-    this.loading = true;
-    this.spinner.show();
+          this.loading = true;
+          this.spinner.show();
           const updatedLogin: Login = await this.editLogin(encryptionResult);
           ToastWrapper.success('Login updated successfully');
-    this.loading = false;
-    this.spinner.hide();
+          this.loading = false;
+          this.spinner.hide();
           this.dialogRef.close(updatedLogin);
         });
       }

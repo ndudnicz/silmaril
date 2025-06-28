@@ -12,32 +12,14 @@ public class TagService(
     {
         return await tagRepository.GetTagsAsync();
     }
-    public async Task<Tag> GetTagAsync(Guid id)
-    {
-        var tag = await tagRepository.GetTagAsync(id);
-        if (tag == null)
-        {
-            throw new TagNotFound(id);
-        }
-        return tag;
-    }
     
-    public async Task<Tag> GetTagByNameAsync(string name)
+    public async Task<List<Tag>> GetTagsByNamesAsync(string[] names)
     {
-        return await tagRepository.GetTagByNameAsync(name);
-    }
-    
-    public async Task<List<Tag>> GetTagByNameBulkAsync(string[] names)
-    {
-        var tags = await tagRepository.GetTagByNameBulkAsync(names);
-        if (tags == null || tags.Count == 0)
-        {
-            throw new TagNameNotFound(names[0]);
-        }
+        var tags = await tagRepository.GetTagsByNamesAsync(names);
         if (tags.Count != names.Length)
         {
             var missingNames = names.Except(tags.Select(t => t.Name)).ToArray();
-            throw new TagNamesNotFound(string.Join(", ", missingNames));
+            throw new TagsNotFound("Name", string.Join(", ", missingNames));
         }
         return tags;
     }

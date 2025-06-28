@@ -1,5 +1,3 @@
-using Api.Helpers;
-
 namespace Api.Entities.Dtos;
 
 public class UserDto: MyEntity

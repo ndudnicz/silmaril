@@ -5,9 +5,6 @@ namespace Api.Repositories;
 public interface ITagRepository
 {
     public Task<List<Tag>> GetTagsAsync();
-    public Task<Tag> GetTagAsync(Guid id);
-    public Task<List<Tag>> GetTagByIdBulkAsync(Guid[] ids);
-
-    public Task<Tag> GetTagByNameAsync(string name);
-    public Task<List<Tag>> GetTagByNameBulkAsync(string[] names);
+    
+    public Task<List<Tag>> GetTagsByNamesAsync(string[] names);
 }

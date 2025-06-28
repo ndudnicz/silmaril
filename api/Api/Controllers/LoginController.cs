@@ -58,7 +58,7 @@ public class LoginController(
     {
         try
         {
-            return Ok(await loginService.UpdateLoginBulkAsync(updateLoginDtos, GetUserId()));
+            return Ok(await loginService.UpdateLoginsAsync(updateLoginDtos, GetUserId()));
         }
         catch (Exception ex)
         {

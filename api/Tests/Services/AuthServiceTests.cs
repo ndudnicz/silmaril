@@ -1,4 +1,3 @@
-using System.Diagnostics.Contracts;
 using Api.Configuration;
 using Api.Entities;
 using Api.Entities.Dtos.Authentication;
@@ -32,7 +31,7 @@ public class AuthServiceTests
                 JwtValidAudience = "TestAudience",
                 JwtSecretKey = CryptoHelper.GenerateRandomByte(32),
                 AccessTokenExpirationMinutes = 15,
-                RefreshTokenExpirationHours = 1
+                RefreshTokenExpirationMinutes = 1
             }
         );
     }

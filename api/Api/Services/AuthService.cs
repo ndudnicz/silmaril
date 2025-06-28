@@ -1,7 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.InteropServices.JavaScript;
 using System.Security.Claims;
-using System.Text;
 using Api.Configuration;
 using Api.Entities;
 using Api.Entities.Dtos.Authentication;
@@ -19,7 +17,7 @@ public class AuthService(
     ): IAuthService
 {
     private readonly int _jwtTokenExpirationTimeInMinutes = jwtConfiguration.AccessTokenExpirationMinutes;
-    private readonly int _jwtRefreshTokenExpirationTimeInHours = jwtConfiguration.RefreshTokenExpirationHours; 
+    private readonly int _jwtRefreshTokenExpirationTimeInHours = jwtConfiguration.RefreshTokenExpirationMinutes; 
     
     public static bool ValidatePasswordFormat(string password)
     {
@@ -80,11 +78,6 @@ public class AuthService(
     public async Task<int> RevokeRefreshTokenByUserIdAsync(Guid userId)
     {
         return await authRepository.DeleteRefreshTokenByUserIdAsync(userId);
-    }
-
-    public async Task<int> RevokeAllRefreshTokensAsync()
-    {
-        return await authRepository.DeleteAllRefreshTokensAsync();
     }
 
     private string GenerateJwtToken(Guid userId)
