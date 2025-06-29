@@ -22,15 +22,22 @@
 
 ---
 
-## 📦 Installation & Run
+## 📦 Installation & Run for local env only
 
-Dockerization **coming soon**
+### Docker
+
+```bash
+docker-compose up --build
+```
+
+### Manual (db in docker)
 
 ```bash
 # setup local database (⚠️ for test and dev purpose, do not use it as production database ⚠️)
 # requirement : docker
 ./api/Api/Database/create.sh
 ./api/Api/Database/run.sh
+# mysql -h 127.0.0.1 -P 3307 -uroot -proot
 
 # front
 cd front

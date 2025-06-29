@@ -1,21 +1,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS migrator
-
 WORKDIR /src
-
-# Copie le projet
 COPY ./Api/*.csproj ./Api/
 RUN dotnet restore ./Api/Api.csproj
-
 COPY . ./
-
-# Installe dotnet-ef
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="${PATH}:/root/.dotnet/tools"
 RUN chmod +x ./Api/entrypoint.migrator.sh
-
-# Positionne le dossier de travail dans le projet EF
 WORKDIR /src/Api
-
-# Point d'entrée : exécute la migration
 CMD ["./entrypoint.migrator.sh"]
 
