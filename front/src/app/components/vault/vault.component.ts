@@ -31,7 +31,7 @@ import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.com
     CardStackComponent,
     CommonModule,
     SelectedLoginComponent,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'

@@ -9,7 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgxSpinnerService } from "ngx-spinner";
 import { ReactiveFormsModule } from '@angular/forms';
 import { VaultService } from '../../services/vault.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 
 @Component({
@@ -23,6 +23,7 @@ import { ToastWrapper } from '../../utils/toast.wrapper';
     MatButtonModule,
     MatTooltipModule,
     MatDividerModule,
+    RouterLink
   ],
   templateUrl: './unlock.component.html',
   styleUrl: './unlock.component.css'
