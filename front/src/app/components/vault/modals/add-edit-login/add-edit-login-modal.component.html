@@ -29,9 +29,9 @@
                 <div id="password-input">
                     <mat-form-field class="full-width modal-field" appearance="fill" floatLabel="always">
                         <mat-label>Password</mat-label>
-                        <input matInput type="text" id="password" formControlName="passwordFormControl"
+                        <input matInput type="text" id="add-edit-password" formControlName="passwordFormControl"
                             [type]="showPassword ? 'text' : 'password'">
-                        <button mat-icon-button matSuffix (click)="togglePasswordVisibility()">
+                        <button mat-icon-button matSuffix (click)="addEditTogglePasswordVisibility()">
                             <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
                         </button>
                         @if (passwordFormControl.hasError('maxlength')) {

@@ -177,9 +177,9 @@ export class AddEditLoginModalComponent {
     this.dialogRef.close();
   }
 
-  togglePasswordVisibility() {
+  addEditTogglePasswordVisibility() {
     this.showPassword = !this.showPassword;
-    const passwordField = document.querySelector<HTMLInputElement>('#password');
+    const passwordField = document.querySelector<HTMLInputElement>('#add-edit-password');
     if (passwordField) {
       passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
     }

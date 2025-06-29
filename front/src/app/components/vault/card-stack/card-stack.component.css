@@ -7,15 +7,15 @@
 .stack-header {
     width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-content: center;
     align-items: center;
-    font-size: 10px;
+    font-size: 11px;
 }
 
 .title-container {
     display: inline-block;
-    width: 10%;
+    margin-left: 40px;
 }
 
 .stack-content {
@@ -29,7 +29,9 @@
 .divider-container {
     display: flex;
     align-items: center;
-    width: 80%;
+    min-width: 200px;
+    width: 100%;
+    padding: 0 40px;
 }
 
 mat-divider {

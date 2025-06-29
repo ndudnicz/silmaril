@@ -27,6 +27,7 @@ interface PasswordOptions {
 enum PasswordStrength {
   WEAK = 'weak',
   MEDIUM = 'medium',
+  GOOD = 'good',
   STRONG = 'strong'
 }
 
@@ -82,9 +83,10 @@ export class GeneratePasswordModalComponent implements OnInit {
   });
 
   progressBarColors = {
-    [PasswordStrength.WEAK]: 'red',
-    [PasswordStrength.MEDIUM]: 'orange',
-    [PasswordStrength.STRONG]: 'green'
+    [PasswordStrength.WEAK]: '#ed6161',
+    [PasswordStrength.MEDIUM]: '#e8b53c',
+    [PasswordStrength.GOOD]: '#60b582',
+    [PasswordStrength.STRONG]: '#00966f'
   }
   progressBarValue = 0;
   progressBarColor = this.progressBarColors[PasswordStrength.WEAK];
@@ -285,6 +287,8 @@ export class GeneratePasswordModalComponent implements OnInit {
 
     if (score >= 100) {
       return { str: PasswordStrength.STRONG, color: this.progressBarColors[PasswordStrength.STRONG], score: score };
+    } else if (score >= 80) {
+      return { str: PasswordStrength.GOOD, color: this.progressBarColors[PasswordStrength.GOOD], score: score };
     } else if (score >= 50) {
       return { str: PasswordStrength.MEDIUM, color: this.progressBarColors[PasswordStrength.MEDIUM], score: score };
     } else {

@@ -19,6 +19,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SettingsModalComponent } from './modals/settings/settings-modal.component';
 import { ChangeMasterPasswordModalComponent } from './modals/change-master-password-modal/change-master-password-modal.component';
 import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.component';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-vault',
@@ -32,6 +36,10 @@ import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.com
     CommonModule,
     SelectedLoginComponent,
     MatTooltipModule,
+    MatInputModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule
   ],
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'
@@ -44,6 +52,7 @@ export class VaultComponent implements OnInit {
   displayedLoginStackEntries: KeyValue<string, Login[]>[] = [];
   selectedLogin: Login | null = null;
   loading = false;
+  searchValue = '';
 
   constructor(
     private vaultService: VaultService,
@@ -233,5 +242,24 @@ export class VaultComponent implements OnInit {
   async openDeletedLoginsModal() {
     // Implement logic to open deleted logins modal
     console.log('Open deleted logins modal');
+  }
+
+  search(value: string) {
+    this.searchValue = value;
+    if (this.searchValue.trim() === '') {
+      this.setDisplayedLogins();
+    } else {
+      this.displayedLogins = this.allLogins.filter(login => {
+        const title = login.decryptedData?.title || '';
+        return title.toLowerCase().includes(this.searchValue.toLowerCase());
+      });
+    }
+    this.computeStacks();
+  }
+
+  clearSearch() {
+    this.searchValue = '';
+    this.setDisplayedLogins();
+    this.computeStacks();
   }
 }

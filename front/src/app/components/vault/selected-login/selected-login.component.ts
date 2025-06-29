@@ -59,7 +59,7 @@ export class SelectedLoginComponent {
 
   setValues() {
     console.log('Sets values for selected login:', this.login);
-    
+    this.showPassword = false;
     if (this.login) {
       this.title = this.login.decryptedData?.title || '';
       this.identifier = this.login.decryptedData?.identifier || '';
@@ -76,7 +76,7 @@ export class SelectedLoginComponent {
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
-    const passwordField = document.querySelector<HTMLInputElement>('#password');
+    const passwordField = document.querySelector<HTMLInputElement>('#selected-login-password');
     if (passwordField) {
       passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
     }

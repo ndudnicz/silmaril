@@ -1,5 +1,8 @@
 .toolbar {
   background-color: #faf9fd;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
 }
 
 .toolbar-button {
@@ -61,4 +64,30 @@
 
 #no-data-button {
   transform: scale(2);
+}
+
+#searchbar-container {
+  width: 600px;
+  /* margin-left: 20px; */
+  /* align-self: flex-start; */
+  display: flex;
+  align-items: center;
+
+}
+
+#search-field {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  height: 20px;
+  transform: scale(0.86);
+}
+
+
+/* Hide the subscript wrapper in the search field as we don't need any hint or error message for the search bar */
+:host ::ng-deep #search-field .mat-mdc-form-field-subscript-wrapper.mat-mdc-form-field-bottom-align {
+  display: none !important;
 }

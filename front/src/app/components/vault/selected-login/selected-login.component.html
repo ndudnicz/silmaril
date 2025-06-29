@@ -23,7 +23,7 @@
             <br>
             <mat-form-field class="full-width" appearance="fill" floatLabel="always">
                 <mat-label>Password</mat-label>
-                <input matInput class="selected-login-field" type="text" id="password" [(ngModel)]="password"
+                <input matInput class="selected-login-field" type="text" id="selected-login-password" [(ngModel)]="password"
                     name="password" [type]="showPassword ? 'text' : 'password'" readonly="true"
                     (click)="selectText($event)" [cdkCopyToClipboard]="password">
                 <button mat-icon-button matSuffix (click)="togglePasswordVisibility()">

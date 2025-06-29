@@ -4,6 +4,29 @@
             <mat-icon>diamond</mat-icon>
         </button>
         <span>Silmaril</span>
+        <!-- <form class="search-form"> -->
+        <!-- <mat-form-field class="full-width search-field" appearance="outline">
+                <input matInput type="text" id="searchbar" [(ngModel)]="searchValue" (ngModelChange)="search($event)"
+                    [ngModelOptions]="{standalone: true}" placeholder="Search logins...">
+                <button mat-icon-button matSuffix (click)="clearSearch()">
+                    <mat-icon>clear</mat-icon>
+                </button>
+            </mat-form-field> -->
+        <!-- </form> -->
+         <div id="searchbar-container">
+            <mat-form-field id="search-field" appearance="outline" floatLabel="always">
+                <input matInput type="text" [(ngModel)]="searchValue" placeholder="Search" 
+                    (ngModelChange)="search($event)" [ngModelOptions]="{standalone: true}">
+                @if (searchValue) {
+                <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
+                    <mat-icon>close</mat-icon>
+                </button>
+                }
+            </mat-form-field>
+
+         </div>
+
+
         <span class="spacer"></span>
         <div class="toolbar-button">
             <button mat-icon-button (click)="openAddLoginModal()" matTooltip="Add Login">
@@ -51,10 +74,10 @@
                 </div>
                 }
                 @for (entry of displayedLoginStackEntries; track $index) {
-                    @if (entry.value.length > 0) {
-                    <app-card-stack class="card-stack" [logins]="entry.value" [title]="entry.key">
-                    </app-card-stack>
-                    }
+                @if (entry.value.length > 0) {
+                <app-card-stack class="card-stack" [logins]="entry.value" [title]="entry.key">
+                </app-card-stack>
+                }
                 }
             </div>
         </div>
