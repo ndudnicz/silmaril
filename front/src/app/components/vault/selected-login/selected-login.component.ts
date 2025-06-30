@@ -109,7 +109,7 @@ export class SelectedLoginComponent extends BaseComponent {
       panelClass: 'custom-modal',
       data: {
         title: `Delete Login ${this.login?.decryptedData?.title}`,
-        message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? The data will be sent to the trash bin and can be restored later.`,
+        message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? The data will be sent to the recycle bin and can be restored later.`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
         width: '400px',
@@ -126,7 +126,6 @@ export class SelectedLoginComponent extends BaseComponent {
           this.login!.deleted = true;
           const updatedLogin = await this.loginService.updateLoginAsync(UpdateLoginDto.fromLogin(this.login!));
           console.log('Login deleted successfully:', updatedLogin);
-
           this.dataService.setUpdatedLogin(updatedLogin);
           this.dataService.setSelectedLogin(null);
           ToastWrapper.success('Login deleted successfully');

@@ -15,4 +15,9 @@ export class BaseComponent {
     this.loading = false;
     this.spinner.hide();
   }
+
+  protected openInNewTab(path: string): void {
+    const baseUrl = window.location.origin;
+    window.open(`${baseUrl}${path}`, '_blank');
+  }
 }

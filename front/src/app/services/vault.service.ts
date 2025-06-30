@@ -11,6 +11,7 @@ export class VaultService {
   private key: CryptoKey | null = null;
 
   constructor() {
+    this.key = null;
   }
 
   public setSalt(salt: string): void {

@@ -180,10 +180,6 @@ export class VaultComponent extends BaseComponent implements OnInit {
     });
   }
 
-  async openDeletedLoginsModal() {
-    console.log('Open deleted logins modal');
-  }
-
   search(value: string) {
     this.searchValue = value;
     if (this.searchValue.trim() === '') {

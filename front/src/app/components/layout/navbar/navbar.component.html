@@ -1,17 +1,49 @@
 <nav id="navbar-container">
-    <div class="navbar-element" matTooltip="Vault" matTooltipPosition="right">
-        <a mat-icon-button routerLink="/vault">
+    <div class="navbar-element" matTooltip="The Vault is locked" matTooltipPosition="right">
+        @if (!vaultService.isUnlocked()) {
+        <button mat-button class="full-width navbar-button" routerLink="/unlock">
+            Unlock
+            <mat-icon class="navbar-icon">lock</mat-icon>
+        </button>
+
+        }
+        @else {
+        <button mat-button class="full-width navbar-button" routerLink="/vault">
+            Vault
             <mat-icon class="navbar-icon">diamond</mat-icon>
-        </a>
+        </button>
+        }
+
     </div>
-    <div class="navbar-element" matTooltip="Settings" matTooltipPosition="right">
-        <a mat-icon-button routerLink="/settings">
+    <div class="navbar-element">
+        <button mat-button class="full-width navbar-button" routerLink="/settings">
+            Settings
             <mat-icon class="navbar-icon">settings</mat-icon>
-        </a>
+        </button>
     </div>
-    <div class="navbar-element" matTooltip="Sign Out" matTooltipPosition="right">
-        <button mat-icon-button (click)="signout()">
+    <div class="navbar-element">
+        <button mat-button class="full-width navbar-button" routerLink="/recycle-bin">
+            Recycle Bin
+            <mat-icon class="navbar-icon">delete</mat-icon>
+        </button>
+    </div>
+    <div class="navbar-element">
+        <button mat-button class="full-width navbar-button" (click)="openInNewTab('/faq')">
+            FAQ
+            <mat-icon class="navbar-icon">info</mat-icon>
+        </button>
+    </div>
+    <span class="spacer"></span>
+    <div class="navbar-element" >
+        <button mat-button class="full-width navbar-button" (click)="signout()">
+            Signout
             <mat-icon class="navbar-icon">logout</mat-icon>
         </button>
+    </div>
+    <div class="navbar-element navbar-text-element" matTooltip="https://github.com/ndudnicz/silmaril" matTooltipPosition="right">
+        <a href="https://github.com/ndudnicz/silmaril" class="link" target="_blank">
+            <img src="assets/images/github.svg" width="17" height="17">
+            Silmaril
+        </a>
     </div>
 </nav>
