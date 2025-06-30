@@ -1,0 +1,25 @@
+<div id="settings-container">
+    <mat-toolbar id="toolbar">
+        <span class="toolbar-title">Settings</span>
+    </mat-toolbar>
+    <div id="settings-body">
+        <div id="settings-menu-container">
+            <div class="settings-button-container">
+                <button mat-raised-button class="settings-button" (click)="openChangeUserNameModal()">
+                    Change Username
+                    <mat-icon class="settings-icon">account_circle</mat-icon>
+                </button>
+
+            </div>
+            <div class="settings-button-container">
+                <button mat-raised-button class="settings-button" (click)="openChangePasswordModal()">
+                    Change Password
+                    <mat-icon class="settings-icon">password</mat-icon>
+                </button>
+
+            </div>
+
+
+        </div>
+    </div>
+</div>

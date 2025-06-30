@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { UserService } from '../../services/user.service';
 import { VaultService } from '../../services/vault.service';
+import { BaseComponent } from '../base-component/base-component.component';
 
 @Component({
   standalone: true,
@@ -28,28 +29,26 @@ import { VaultService } from '../../services/vault.service';
   templateUrl: './signin.component.html',
   styleUrl: './signin.component.css'
 })
-export class SigninComponent {
+export class SigninComponent extends BaseComponent {
   usernameFormControl = new FormControl('');
   passwordFormControl = new FormControl('');
   form: FormGroup = new FormGroup({
     username: this.usernameFormControl,
     password: this.passwordFormControl
   });
-  loading = false;
 
   constructor(
-    private spinner: NgxSpinnerService,
     private router: Router,
     private authService: AuthService,
     private userService: UserService,
     private vaultService: VaultService
-  ) { 
+  ) {
+    super(inject(NgxSpinnerService));
   }
 
   async onSubmit() {
     try {
-      this.spinner.show();
-      this.loading = true;
+      this.startLoading();
       const result = await this.authService.authAsync(this.form.value.username, this.form.value.password)
       ToastWrapper.success('Authentication successful');
       const user = await this.userService.getUserAsync();
@@ -58,12 +57,11 @@ export class SigninComponent {
       this.router.navigate(['/home']);
     } catch (error: any) {
       console.log(error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       ToastWrapper.error(errorMessage, null);
     } finally {
-      this.loading = false;
-      this.spinner.hide();
+      this.stopLoading();
     }
   }
 
@@ -73,8 +71,5 @@ export class SigninComponent {
       event.preventDefault();
       this.onSubmit();
     }
-  }
-
-  signin() {
   }
 }

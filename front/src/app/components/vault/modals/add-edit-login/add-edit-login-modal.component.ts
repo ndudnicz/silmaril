@@ -14,6 +14,7 @@ import { VaultService } from '../../../../services/vault.service';
 import { LoginService } from '../../../../services/login.service';
 import { ToastWrapper } from '../../../../utils/toast.wrapper';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
+import { BaseComponent } from '../../../base-component/base-component.component';
 
 @Component({
 
@@ -29,7 +30,7 @@ import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-mod
   templateUrl: './add-edit-login-modal.component.html',
   styleUrl: './add-edit-login-modal.component.css'
 })
-export class AddEditLoginModalComponent {
+export class AddEditLoginModalComponent extends BaseComponent {
   data = inject(MAT_DIALOG_DATA);
   public static MODAL_MOD = {
     ADD: 'add',
@@ -55,16 +56,15 @@ export class AddEditLoginModalComponent {
     notesFormControl: this.notesFormControl
   });
 
-  loading = false;
-  showPassword = false;
+  showPassword = true;
 
   constructor(
-    private spinner: NgxSpinnerService,
     private vaultService: VaultService,
     private loginService: LoginService,
     private dialogRef: MatDialogRef<AddEditLoginModalComponent>,
     private dialog: MatDialog
   ) {
+    super(inject(NgxSpinnerService));
     if (this.mode === AddEditLoginModalComponent.MODAL_MOD.EDIT && !this.login) {
       const msg = 'Edit mode requires a login object';
       console.error(msg);
@@ -104,8 +104,7 @@ export class AddEditLoginModalComponent {
     const encryptionResult = await CryptoUtilsV1.encryptDataAsync(this.vaultService.getKey(), decryptedData.toString());
     try {
       if (this.mode === AddEditLoginModalComponent.MODAL_MOD.ADD) {
-        this.loading = true;
-        this.spinner.show();
+        this.startLoading();
         const login: Login = await this.createLogin(encryptionResult);
         ToastWrapper.success('Login created successfully')
         this.dialogRef.close(login);
@@ -127,12 +126,10 @@ export class AddEditLoginModalComponent {
           if (!confirmed) {
             return;
           }
-          this.loading = true;
-          this.spinner.show();
+          this.startLoading();
           const updatedLogin: Login = await this.editLogin(encryptionResult);
           ToastWrapper.success('Login updated successfully');
-          this.loading = false;
-          this.spinner.hide();
+          this.stopLoading();
           this.dialogRef.close(updatedLogin);
         });
       }
@@ -140,8 +137,7 @@ export class AddEditLoginModalComponent {
       console.error('Error during form submission:', error);
       ToastWrapper.error('Failed to process login: ', error instanceof Error ? error.message : 'Unknown error');
     } finally {
-      this.spinner.hide();
-      this.loading = false;
+      this.stopLoading();
     }
   }
 

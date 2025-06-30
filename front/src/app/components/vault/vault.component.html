@@ -1,21 +1,9 @@
-<div class="vault-container">
-    <mat-toolbar class="toolbar">
-        <button mat-icon-button class="example-icon">
-            <mat-icon>diamond</mat-icon>
-        </button>
-        <span>Silmaril</span>
-        <!-- <form class="search-form"> -->
-        <!-- <mat-form-field class="full-width search-field" appearance="outline">
-                <input matInput type="text" id="searchbar" [(ngModel)]="searchValue" (ngModelChange)="search($event)"
-                    [ngModelOptions]="{standalone: true}" placeholder="Search logins...">
-                <button mat-icon-button matSuffix (click)="clearSearch()">
-                    <mat-icon>clear</mat-icon>
-                </button>
-            </mat-form-field> -->
-        <!-- </form> -->
-         <div id="searchbar-container">
+<div id="vault-container">
+    <mat-toolbar id="toolbar">
+        <span class="toolbar-title">Vault</span>
+        <div id="searchbar-container">
             <mat-form-field id="search-field" appearance="outline" floatLabel="always">
-                <input matInput type="text" [(ngModel)]="searchValue" placeholder="Search" 
+                <input matInput type="text" [(ngModel)]="searchValue" placeholder="Search"
                     (ngModelChange)="search($event)" [ngModelOptions]="{standalone: true}">
                 @if (searchValue) {
                 <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
@@ -23,10 +11,7 @@
                 </button>
                 }
             </mat-form-field>
-
-         </div>
-
-
+        </div>
         <span class="spacer"></span>
         <div class="toolbar-button">
             <button mat-icon-button (click)="openAddLoginModal()" matTooltip="Add Login">
@@ -43,19 +28,9 @@
                 <mat-icon>vpn_key</mat-icon>
             </button>
         </div>
-        <div class="toolbar-button">
-            <button mat-icon-button (click)="openSettingsModal()" matTooltip="Change Password">
-                <mat-icon>settings</mat-icon>
-            </button>
-        </div>
-        <div class="toolbar-button">
-            <button mat-icon-button (click)="signout()" matTooltip="Sign Out">
-                <mat-icon>logout</mat-icon>
-            </button>
-        </div>
     </mat-toolbar>
 
-    <div class="grid-container">
+    <div id="vault-grid-container">
         <div [ngClass]="{
             'left-container': true,
             'left-container-fullscreen': selectedLogin == null

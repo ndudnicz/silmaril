@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Login, UpdateLoginDto } from '../../../entities/login';
 import { DataService } from '../../../services/data.service';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -8,13 +8,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import {ClipboardModule} from '@angular/cdk/clipboard';
+import { ClipboardModule } from '@angular/cdk/clipboard';
 import { ToastWrapper } from '../../../utils/toast.wrapper';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmModalComponent } from '../../modals/confirm-modal/confirm-modal.component';
 import { LoginService } from '../../../services/login.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { AddEditLoginModalComponent } from '../modals/add-edit-login/add-edit-login-modal.component';
+import { BaseComponent } from '../../base-component/base-component.component';
 
 @Component({
   standalone: true,
@@ -33,7 +34,7 @@ import { AddEditLoginModalComponent } from '../modals/add-edit-login/add-edit-lo
   templateUrl: './selected-login.component.html',
   styleUrl: './selected-login.component.css'
 })
-export class SelectedLoginComponent {
+export class SelectedLoginComponent extends BaseComponent {
   login!: Login | null;
   showPassword = false;
   title = '';
@@ -41,15 +42,13 @@ export class SelectedLoginComponent {
   password = '';
   url = '';
   notes = '';
-  loading = false;
 
   constructor(
     private dataService: DataService,
     private dialog: MatDialog,
     private loginService: LoginService,
-    private spinner: NgxSpinnerService
   ) {
-    console.log('SelectedLoginComponent initialized');
+    super(inject(NgxSpinnerService));
     this.dataService.selectedLogin.subscribe((login: Login | null) => {
       this.login = login;
       this.setValues();
@@ -73,7 +72,6 @@ export class SelectedLoginComponent {
     this.dataService.setSelectedLogin(null);
   }
 
-
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
     const passwordField = document.querySelector<HTMLInputElement>('#selected-login-password');
@@ -83,7 +81,7 @@ export class SelectedLoginComponent {
   }
 
   openEditModal() {
-   const dialogRef = this.dialog.open(AddEditLoginModalComponent,
+    const dialogRef = this.dialog.open(AddEditLoginModalComponent,
       {
         panelClass: 'custom-modal',
         width: '600px',
@@ -97,7 +95,6 @@ export class SelectedLoginComponent {
         }
       }
     );
-
     dialogRef.afterClosed().subscribe(async (result: Login) => {
       if (result) {
         console.log('Edit login result:', result);
@@ -124,13 +121,12 @@ export class SelectedLoginComponent {
     }).afterClosed().subscribe(async (confirmed: boolean) => {
       console.log('Delete modal closed with confirmation:', confirmed);
       if (confirmed) {
-        this.spinner.show();
-        this.loading = true;
+        this.startLoading();
         try {
           this.login!.deleted = true;
           const updatedLogin = await this.loginService.updateLoginAsync(UpdateLoginDto.fromLogin(this.login!));
           console.log('Login deleted successfully:', updatedLogin);
-          
+
           this.dataService.setUpdatedLogin(updatedLogin);
           this.dataService.setSelectedLogin(null);
           ToastWrapper.success('Login deleted successfully');
@@ -138,8 +134,7 @@ export class SelectedLoginComponent {
           ToastWrapper.error('Failed to delete login: ', error.message || 'Unknown error');
           console.error('Error during login deletion:', error);
         } finally {
-          this.loading = false;
-          this.spinner.hide();
+          this.stopLoading();
         }
       }
     })

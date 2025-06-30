@@ -1,0 +1,17 @@
+<nav id="navbar-container">
+    <div class="navbar-element" matTooltip="Vault" matTooltipPosition="right">
+        <a mat-icon-button routerLink="/vault">
+            <mat-icon class="navbar-icon">diamond</mat-icon>
+        </a>
+    </div>
+    <div class="navbar-element" matTooltip="Settings" matTooltipPosition="right">
+        <a mat-icon-button routerLink="/settings">
+            <mat-icon class="navbar-icon">settings</mat-icon>
+        </a>
+    </div>
+    <div class="navbar-element" matTooltip="Sign Out" matTooltipPosition="right">
+        <button mat-icon-button (click)="signout()">
+            <mat-icon class="navbar-icon">logout</mat-icon>
+        </button>
+    </div>
+</nav>

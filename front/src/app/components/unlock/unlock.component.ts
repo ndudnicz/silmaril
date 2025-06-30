@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +11,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { VaultService } from '../../services/vault.service';
 import { Router, RouterLink } from '@angular/router';
 import { ToastWrapper } from '../../utils/toast.wrapper';
+import { BaseComponent } from '../base-component/base-component.component';
 
 @Component({
   standalone: true,
@@ -28,18 +29,18 @@ import { ToastWrapper } from '../../utils/toast.wrapper';
   templateUrl: './unlock.component.html',
   styleUrl: './unlock.component.css'
 })
-export class UnlockComponent implements OnInit {
+export class UnlockComponent extends BaseComponent implements OnInit {
   masterPasswordFormControl = new FormControl('', [Validators.required, Validators.minLength(8)]);
   form: FormGroup = new FormGroup({
     password: this.masterPasswordFormControl
   });
-  loading = false;
 
   constructor(
     private vaultService: VaultService,
     private router: Router,
-    private spinner: NgxSpinnerService
-  ) { }
+  ) {
+    super(inject(NgxSpinnerService));
+  }
 
   ngOnInit() {
     if (this.vaultService.isUnlocked()) {
@@ -49,8 +50,7 @@ export class UnlockComponent implements OnInit {
 
   async onSubmit() {
     try {
-      this.loading = true;
-      this.spinner.show();
+      this.startLoading();
       console.log('Form submitted:', this.form.value);
       await this.vaultService.setKeyAsync(this.masterPasswordFormControl.value!);
       ToastWrapper.success('Vault unlocked successfully');
@@ -58,8 +58,7 @@ export class UnlockComponent implements OnInit {
     } catch (error: any) {
       ToastWrapper.error('Failed to unlock vault: ', error.message ?? error);
     } finally {
-      this.loading = false;
-      this.spinner.hide();
+      this.stopLoading();
     }
   }
 

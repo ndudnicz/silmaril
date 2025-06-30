@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { UserService } from '../../../../services/user.service';
@@ -13,9 +13,10 @@ import { ToastWrapper } from '../../../../utils/toast.wrapper';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../../services/auth.service';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
+import { BaseComponent } from '../../../base-component/base-component.component';
 
 @Component({
-  selector: 'app-settings-modal',
+  selector: 'app-change-password-modal',
   imports: [
     MatDialogModule,
     ReactiveFormsModule,
@@ -26,12 +27,10 @@ import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-mod
     MatCardModule,
     MatDividerModule
   ],
-  templateUrl: './settings-modal.component.html',
-  styleUrl: './settings-modal.component.css'
+  templateUrl: './change-password-modal.component.html',
+  styleUrl: './change-password-modal.component.css'
 })
-export class SettingsModalComponent {
-
-  loading = false;
+export class ChangePasswordModalComponent extends BaseComponent {
   displayPasswordRequirements = false;
   oldPasswordFormControl = new FormControl('', [Validators.required]);
   newPasswordFormControl = new FormControl('', this.passwordValidator());
@@ -44,12 +43,11 @@ export class SettingsModalComponent {
 
   constructor(
     private userService: UserService,
-    private dialogRef: MatDialogRef<SettingsModalComponent>,
-    private spinner: NgxSpinnerService,
+    private dialogRef: MatDialogRef<ChangePasswordModalComponent>,
     private authService: AuthService,
     private dialog: MatDialog
   ) {
-    // Initialization logic can go here
+    super(inject(NgxSpinnerService));
   }
 
   passwordValidator(): ValidatorFn {
@@ -69,7 +67,7 @@ export class SettingsModalComponent {
     };
   }
 
-  // Add methods to handle settings actions
+  // Add methods to handle change-password actions
   async onSubmit() {
     this.dialog.open(ConfirmModalComponent, {
       panelClass: 'custom-modal',
@@ -91,13 +89,11 @@ export class SettingsModalComponent {
   }
 
   async saveSettings() {
-    this.spinner.show();
     if (this.form.invalid) {
       console.error('Form is invalid:', this.form.errors);
-      this.spinner.hide();
       return;
     }
-    this.loading = true;
+    this.startLoading();
     try {
       await this.userService.changePasswordAsync(
         this.oldPasswordFormControl.value!,
@@ -107,24 +103,19 @@ export class SettingsModalComponent {
       this.form.reset();
       await this.authService.signoutAsync();
       setTimeout(() => {
-        this.spinner.hide();
         window.location.reload();
       }, 1500)
     } catch (error: any) {
       console.error('Error changing password:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       ToastWrapper.error('Failed to change password', errorMessage);
-      this.spinner.hide();
-      this.loading = false;
+      this.stopLoading();
     }
   }
 
   closeDialog() {
-    console.log('Settings cancelled');
     this.dialogRef.close();
-    // Implement cancel logic here
   }
-
 
   inputFocusOut() {
     this.displayPasswordRequirements = this.newPasswordFormControl.invalid;

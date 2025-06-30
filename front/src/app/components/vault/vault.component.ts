@@ -6,7 +6,6 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { AuthService } from '../../services/auth.service';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AddEditLoginModalComponent } from './modals/add-edit-login/add-edit-login-modal.component';
@@ -16,13 +15,11 @@ import { CardStackComponent } from './card-stack/card-stack.component';
 import { DataService } from '../../services/data.service';
 import { SelectedLoginComponent } from "./selected-login/selected-login.component";
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { SettingsModalComponent } from './modals/settings/settings-modal.component';
 import { ChangeMasterPasswordModalComponent } from './modals/change-master-password-modal/change-master-password-modal.component';
-import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.component';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { BaseComponent } from '../base-component/base-component.component';
 
 @Component({
   selector: 'app-vault',
@@ -44,23 +41,21 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'
 })
-export class VaultComponent implements OnInit {
+export class VaultComponent extends BaseComponent implements OnInit {
 
   readonly dialog = inject(MatDialog);
   allLogins: Login[] = [];
   displayedLogins: Login[] = [];
   displayedLoginStackEntries: KeyValue<string, Login[]>[] = [];
   selectedLogin: Login | null = null;
-  loading = false;
   searchValue = '';
 
   constructor(
     private vaultService: VaultService,
-    private authService: AuthService,
     private loginService: LoginService,
-    private spinner: NgxSpinnerService,
     private dataService: DataService
   ) {
+    super(inject(NgxSpinnerService));
     this.dataService.selectedLogin.subscribe((login: Login | null) => {
       this.selectedLogin = login;
       console.log('VaultComponent : Selected login updated:', this.selectedLogin);
@@ -94,9 +89,8 @@ export class VaultComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    this.spinner.show();
-    this.loading = true;
     try {
+      this.startLoading();
       this.allLogins = await this.loginService.getLoginsAsync();
       this.allLogins = await this.vaultService.decryptAllLoginsAsync(this.allLogins);
       this.setDisplayedLogins();
@@ -106,8 +100,7 @@ export class VaultComponent implements OnInit {
       ToastWrapper.error('Failed to fetch data: ', error.message ?? error);
       console.error('Error fetching data:', error);
     } finally {
-      this.spinner.hide();
-      this.loading = false;
+      this.stopLoading();
     }
   }
 
@@ -127,40 +120,6 @@ export class VaultComponent implements OnInit {
     this.displayedLoginStackEntries = Object.entries(loginStacks as Record<string, Login[]>)
       .map(([key, value]) => ({ key, value }));
     this.displayedLoginStackEntries.sort((a, b) => a.key.localeCompare(b.key));
-  }
-
-  async signout() {
-    this.dialog.open(ConfirmModalComponent, {
-      panelClass: 'custom-modal',
-      data: {
-        title: 'Sign Out',
-        message: 'Are you sure you want to signout?',
-        confirmText: 'Sign Out',
-        cancelText: 'Cancel',
-        width: '400px',
-        height: 'auto',
-        closeOnNavigation: false,
-        disableClose: true,
-        autoFocus: true
-      }
-    }).afterClosed().subscribe(async (confirmed: boolean) => {
-      if (confirmed) {
-      this.spinner.show();
-      console.log('Signing out...');
-      try {
-        await this.authService.signoutAsync();
-        ToastWrapper.success('Signed out successfully');
-        setTimeout(() => {
-          this.spinner.hide();
-          window.location.reload();
-        }, 1500)
-      } catch (error: any) {
-        ToastWrapper.error('Signout failed: ', error.message ?? error);
-        console.error('Error during signout:', error);
-        this.spinner.hide();
-      }
-      }
-    });
   }
 
   openAddLoginModal() {
@@ -188,21 +147,6 @@ export class VaultComponent implements OnInit {
     });
   }
 
-  openSettingsModal() {
-    console.log('Settings clicked');
-    const dialogRef = this.dialog.open(SettingsModalComponent,
-      {
-        panelClass: 'custom-modal',
-        width: '400px',
-        height: 'auto',
-        closeOnNavigation: false,
-        disableClose: true,
-        autoFocus: true
-      }
-    );
-    dialogRef.afterClosed().subscribe(_ => { });
-  }
-
   openChangeMasterPasswordModal() {
     const dialogRef = this.dialog.open(ChangeMasterPasswordModalComponent,
       {
@@ -217,8 +161,7 @@ export class VaultComponent implements OnInit {
     dialogRef.afterClosed().subscribe(async newMasterPassword => {
       if (newMasterPassword != null) {
         try {
-          this.spinner.show();
-          this.loading = true;
+          this.startLoading();
           this.vaultService.clearKey();
           await this.vaultService.setKeyAsync(newMasterPassword);
           this.dataService.setSelectedLogin(null);
@@ -228,11 +171,9 @@ export class VaultComponent implements OnInit {
         } catch (error: any) {
           ToastWrapper.error('Failed to change master password: ', error.message ?? error);
           console.error('Error changing master password:', error);
-          this.loading = false;
-          this.spinner.hide();
+          this.stopLoading();
         } finally {
-          this.loading = false;
-          this.spinner.hide();
+          this.stopLoading();
           ToastWrapper.success('Master password changed successfully');
         }
       }
@@ -240,7 +181,6 @@ export class VaultComponent implements OnInit {
   }
 
   async openDeletedLoginsModal() {
-    // Implement logic to open deleted logins modal
     console.log('Open deleted logins modal');
   }
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -12,7 +12,7 @@ import { UserService } from '../../services/user.service';
 import { toast } from 'ngx-sonner';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../utils/toast.wrapper';
-import { VaultService } from '../../services/vault.service';
+import { BaseComponent } from '../base-component/base-component.component';
 
 @Component({
   standalone: true,
@@ -30,7 +30,7 @@ import { VaultService } from '../../services/vault.service';
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css'
 })
-export class SignupComponent {
+export class SignupComponent extends BaseComponent {
   usernameFormControl = new FormControl('');
   passwordFormControl = new FormControl('', this.passwordValidator());
   confirmPasswordFormControl = new FormControl('', this.confirmPasswordValidator());
@@ -41,18 +41,17 @@ export class SignupComponent {
   });
 
   displayPasswordRequirements = false;
-  loading = false;
 
   constructor(
     private userService: UserService,
-    private spinner: NgxSpinnerService,
     private router: Router
-  ) { }
+  ) {
+    super(inject(NgxSpinnerService));
+  }
 
   async onSubmit() {
     try {
-      this.loading = true;
-      this.spinner.show();
+      this.startLoading();
       const created = await this.userService.createUserAsync(
         this.form.value.username,
         this.form.value.password,
@@ -65,8 +64,7 @@ export class SignupComponent {
       console.error('Error during user creation:', error);
       ToastWrapper.error('Error during user creation', error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
-      this.loading = false;
-      this.spinner.hide();
+      this.stopLoading();
     }
   }
 
@@ -76,7 +74,6 @@ export class SignupComponent {
       return isValid ? null : { 'invalidPassword': { value: control.value } };
     };
   }
-
 
   confirmPasswordValidator(): ValidatorFn {
     return (control: AbstractControl<string>): { [key: string]: any } | null => {

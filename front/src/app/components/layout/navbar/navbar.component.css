@@ -1,0 +1,23 @@
+#navbar-container
+{
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+    padding-top: 3px;
+}
+
+.navbar-element
+{
+    margin: 10px auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-icon {
+    transform: scale(1.3);
+}

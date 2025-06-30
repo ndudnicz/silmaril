@@ -1,18 +1,23 @@
 <div id="layout-body">
-    <router-outlet />
-</div>
-<div id="layout-footer">
-    <div class="footer-element">
-        <span>💎 Silmaril</span>
+    <app-navbar id="navbar"></app-navbar>
+
+    <div id="layout-content">
+        <router-outlet></router-outlet>
     </div>
-    <div class="footer-element">
-        <a routerLink="/faq" target="_blank" class="link">
-            <span>FAQ</span>
-        </a>
-    </div>
-    <div class="footer-element">
-        <a href="https://github.com/ndudnicz/silmaril" target="_blank">
-            <img src="assets/images/github.svg" width="20" height="20">
-        </a>
+
+    <div id="layout-footer">
+        <div class="footer-element">
+            <span>💎 Silmaril</span>
+        </div>
+        <div class="footer-element">
+            <a routerLink="/faq" target="_blank" class="link">
+                <span>FAQ</span>
+            </a>
+        </div>
+        <div class="footer-element">
+            <a href="https://github.com/ndudnicz/silmaril" target="_blank">
+                <img src="assets/images/github.svg" width="20" height="20">
+            </a>
+        </div>
     </div>
 </div>
