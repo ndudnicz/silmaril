@@ -25,6 +25,20 @@ public class LoginController(
         }
     }
     
+    [HttpGet("deleted")]
+    public async Task<IActionResult> GetDeletedLoginsAsync()
+    {
+        try
+        {
+            return Ok(await loginService.GetDeletedLoginsByUserIdAsync(GetUserId()));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error fetching logins for user with ID {UserId}", GetUserId());
+            return BadRequest(ex.InnerException?.Message ?? ex.Message);
+        }
+    }
+    
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] CreateLoginDto createLoginDto)
     {
@@ -35,6 +49,20 @@ public class LoginController(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error creating login");
+            return BadRequest(ex.InnerException?.Message ?? ex.Message);
+        }
+    }
+    
+    [HttpPost("bulk")]
+    public async Task<IActionResult> CreateBulkAsync([FromBody] IEnumerable<CreateLoginDto> createLoginDtos)
+    {
+        try
+        {
+            return Ok(await loginService.CreateLoginsAsync(createLoginDtos, GetUserId()));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error creating bulk logins");
             return BadRequest(ex.InnerException?.Message ?? ex.Message);
         }
     }

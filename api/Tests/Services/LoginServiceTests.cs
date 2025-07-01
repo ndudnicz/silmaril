@@ -11,19 +11,41 @@ namespace Tests.Services
     public class LoginServiceTests
     {
         private readonly Mock<ILoginRepository> _loginRepository = new();
-        private readonly Mock<ITagRepository> _tagRepository = new();
+        private readonly Mock<ITagService> _tagService = new();
+        
         private readonly Mock<IUserRepository> _userRepository = new();
 
         private LoginService CreateService() =>
-            new(_loginRepository.Object, new TagService(_tagRepository.Object), _userRepository.Object);
+            new(_loginRepository.Object, _tagService.Object, _userRepository.Object);
+
+        private static Login CreateTestLogin(
+            Guid userId = new(),
+            List<Tag>? tags = null,
+            bool deleted = false,
+            int encryptionVersion = 1
+            )
+        {
+            return new Login
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Tags = tags ?? [],
+                Deleted = deleted,
+                EncryptedData = new byte[3],
+                EncryptionVersion = encryptionVersion,
+                InitializationVector = new byte[16],
+                Created = DateTime.UtcNow
+            };
+        }
 
         [Fact]
         public async Task CreateLoginAsync_WithTags_ShouldReturnLoginDto()
         {
-            var createDto = new CreateLoginDto { TagNames = new[] { "tag1" } };
+            var tags = new List<Tag> { new() { Name = "tag1" } };
+            var createDto = new CreateLoginDto { TagNames = new[] { tags[0].Name } };
             var login = new Login { Id = Guid.NewGuid(), Tags = new List<Tag>() };
-            _tagRepository.Setup(t => t.GetTagsByNamesAsync(It.IsAny<string[]>()))
-                .ReturnsAsync(new List<Tag> { new() { Name = "tag1" } });
+            _tagService.Setup(t => t.GetTagsByNamesAsync(It.IsAny<string[]>()))
+                .ReturnsAsync(tags);
             _loginRepository.Setup(r => r.CreateLoginAsync(It.IsAny<Login>()))
                 .ReturnsAsync(login);
 
@@ -62,9 +84,8 @@ namespace Tests.Services
         public async Task CreateLoginAsync_WhenTagsNotFound_ShouldThrow()
         {
             var createDto = new CreateLoginDto { TagNames = new[] { "inexistant" } };
-            _tagRepository.Setup(t => t.GetTagsByNamesAsync(It.IsAny<string[]>()))
-                .ReturnsAsync(new List<Tag>());
-
+            _tagService.Setup(t => t.GetTagsByNamesAsync(It.IsAny<string[]>()))
+                .ThrowsAsync(new TagsNotFound("Name", "inexistant"));
             var service = CreateService();
             Func<Task> act = async () => await service.CreateLoginAsync(createDto, Guid.NewGuid());
 
@@ -81,6 +102,108 @@ namespace Tests.Services
             var result = await service.DeleteLoginByUserIdAsync(Guid.NewGuid(), Guid.NewGuid());
 
             result.Should().Be(0);
+        }
+        
+        [Fact]
+        public async Task CreateLoginsAsync_ShouldReturnLoginDtos()
+        {
+            var userId = Guid.NewGuid();
+            var createDtos = new List<CreateLoginDto>
+            {
+                new() { TagNames = new[] { "tag1" } },
+                new() { TagNames = new[] { "tag2" } }
+            };
+
+            var tags = new List<Tag>
+            {
+                new() { Name = "tag1" },
+                new() { Name = "tag2" }
+            };
+
+            var logins = new List<Login>
+            {
+                CreateTestLogin(userId, tags: new List<Tag> { tags[0] }),
+                CreateTestLogin(userId, tags: new List<Tag> { tags[1] })
+            };
+            
+            _tagService.Setup(t => t.GetTagsAsync()).ReturnsAsync(tags);
+
+            _loginRepository.Setup(r => r.CreateLoginsAsync(It.IsAny<List<Login>>()))
+                .ReturnsAsync(logins);
+
+            var service = CreateService();
+            var result = await service.CreateLoginsAsync(createDtos, userId);
+
+            result.Should().NotBeNull();
+            result.Should().HaveCount(2);
+            result.Select(l => l.Id).Should().BeEquivalentTo(logins.Select(l => l.Id));
+        }
+        
+        
+        [Fact]
+        public async Task CreateLoginsAsync_WhenTagsNotFound_ShouldThrow()
+        {
+            var createDtos = new List<CreateLoginDto>
+            {
+                new() { TagNames = new[] { "inexistant" } },
+                new() { TagNames = new[] { "inexistant2" } }
+            };
+            _tagService.Setup(t => t.GetTagsAsync())
+                .ThrowsAsync(new TagsNotFound("Name", "inexistant, inexistant2"));
+
+            var service = CreateService();
+            Func<Task> act = async () => await service.CreateLoginsAsync(createDtos, Guid.NewGuid());
+
+            await act.Should().ThrowAsync<TagsNotFound>();
+        }
+
+        [Fact]
+        public async Task GetDeletedLoginsByUserIdAsync_ShouldReturnOnlyDeletedLogins()
+        {
+            var userId = Guid.NewGuid();
+            var tags = new List<Tag>();
+            var logins = new List<Login>
+            {
+                CreateTestLogin(userId, tags),
+                CreateTestLogin(userId, tags, true),
+                CreateTestLogin(userId, tags, true)
+            };
+            var deletedLogins = logins.Where(l => l.Deleted).ToList();
+
+            _loginRepository
+                .Setup(r => r.GetLoginsWithTagsByUserIdAsync(userId, true))
+                .ReturnsAsync(deletedLogins);
+
+            var service = CreateService();
+            var result = await service.GetDeletedLoginsByUserIdAsync(userId);
+
+            result.Should().NotBeNull();
+            result.Should().OnlyContain(l => l.Deleted == true);
+            result.Should().HaveCount(deletedLogins.Count);
+        }
+        
+        [Fact]
+        public async Task GetNotDeletedLoginsByUserIdAsync_ShouldReturnOnlyNotDeletedLogins()
+        {
+            var userId = Guid.NewGuid();
+            var tags = new List<Tag>();
+            var logins = new List<Login>
+            {
+                CreateTestLogin(userId, tags),
+                CreateTestLogin(userId, tags),
+                CreateTestLogin(userId, tags, true)
+            };
+            var notDeletedLogins = logins.Where(l => l.Deleted == false).ToList();
+            _loginRepository
+                .Setup(r => r.GetLoginsWithTagsByUserIdAsync(userId, false))
+                .ReturnsAsync(notDeletedLogins);
+
+            var service = CreateService();
+            var result = await service.GetLoginsByUserIdAsync(userId);
+
+            result.Should().NotBeNull();
+            result.Should().OnlyContain(l => l.Deleted == false);
+            result.Should().HaveCount(notDeletedLogins.Count);
         }
     }
 }

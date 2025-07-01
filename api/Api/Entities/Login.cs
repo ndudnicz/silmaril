@@ -17,6 +17,8 @@ public class Login: MyEntity
     public List<Tag> Tags { get; set; } = new();
     [Column("deleted")]
     public bool Deleted { get; set; } = false;
+    [NotMapped]
+    public string[] TagNames => Tags.Select(t => t.Name).ToArray();
     
     public static Login FromCreateLoginDto(CreateLoginDto dto)
     {
@@ -27,5 +29,10 @@ public class Login: MyEntity
             EncryptionVersion = dto.EncryptionVersion,
             InitializationVector = Convert.FromBase64String(dto.InitializationVectorBase64 ?? string.Empty)
         };
+    }
+    
+    public static List<Login> FromCreateLoginDtos(IEnumerable<CreateLoginDto> dtos)
+    {
+        return dtos.Select(FromCreateLoginDto).ToList();
     }
 }

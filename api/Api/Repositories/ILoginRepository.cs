@@ -4,10 +4,11 @@ namespace Api.Repositories;
 
 public interface ILoginRepository
 {
-    public Task<Login> GetLoginWithTagsByUserIdAsync(Guid id, Guid userId);
-    public Task<List<Login>> GetLoginsWithTagsByUserIdAsync(Guid userId);
-    public Task<List<Login>> GetLoginsWithTagsByUserIdBulkAsync(IEnumerable<Guid> ids, Guid userId);
+    public Task<Login?> GetLoginWithTagsByUserIdAsync(Guid id, Guid userId);
+    public Task<List<Login>> GetLoginsWithTagsByUserIdAsync(Guid userId, bool deleted = false);
+    public Task<List<Login>> GetLoginsByIdsAndUserIdWithTagsAsync(IEnumerable<Guid> ids, Guid userId);
     public Task<Login> CreateLoginAsync(Login login);
+    public Task<List<Login>> CreateLoginsAsync(List<Login> logins);
     public Task<Login> UpdateLoginAsync(Login login);
     public Task<List<Login>> UpdateLoginsAsync(List<Login> logins);
     public Task<int> DeleteLoginByUserIdAsync(Guid id, Guid userId);

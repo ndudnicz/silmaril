@@ -166,7 +166,7 @@ export class VaultComponent extends BaseComponent implements OnInit {
           await this.vaultService.setKeyAsync(newMasterPassword);
           this.dataService.setSelectedLogin(null);
           this.allLogins = await this.vaultService.encryptAllLoginsAsync(this.allLogins);
-          let updatedLogins = await this.loginService.updateLoginBulkAsync(this.allLogins.map(l => UpdateLoginDto.fromLogin(l)));
+          let updatedLogins = await this.loginService.updateLoginsBulkAsync(this.allLogins.map(l => UpdateLoginDto.fromLogin(l)));
           updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
         } catch (error: any) {
           ToastWrapper.error('Failed to change master password: ', error.message ?? error);

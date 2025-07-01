@@ -27,6 +27,20 @@ export class LoginService {
     }
   }
 
+  async getDeletedLoginsAsync(): Promise<Login[]> {
+    try {
+      const response = await this.fetchService.getAsync(`${this.apiEndpointV1}/login/deleted`, {});
+      if (!response.ok) {
+        throw new Error(`Failed to fetch deleted logins: ${response.body ? await response.text() : 'Unknown error'}`);
+      }
+      const logins = await response.json() as Login[];
+      return logins.map(login =>  Login.fromObject(login));
+    } catch (error) {
+      console.error('Error fetching deleted logins:', error);
+      throw error;
+    }
+  }
+
   async createLoginAsync(createLoginDto: CreateLoginDto): Promise<Login> {
     try {
       const response = await this.fetchService.postAsync(`${this.apiEndpointV1}/login`, {
@@ -36,6 +50,22 @@ export class LoginService {
         throw new Error(`Failed to create login: ${response.body ? await response.text() : 'Unknown error'}`);
       }
       return Login.fromObject(await response.json());
+    } catch (error) {
+      console.error('Error creating login:', error);
+      throw error;
+    }
+  }
+
+    async createLoginsBulkAsync(createLoginDtos: CreateLoginDto[]): Promise<Login[]> {
+    try {
+      const response = await this.fetchService.postAsync(`${this.apiEndpointV1}/login/bulk`, {
+        body: JSON.stringify(createLoginDtos)
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to create logins bulk: ${response.body ? await response.text() : 'Unknown error'}`);
+      }
+      const logins = await response.json() as Login[];
+      return logins.map(login =>  Login.fromObject(login));
     } catch (error) {
       console.error('Error creating login:', error);
       throw error;
@@ -59,13 +89,13 @@ export class LoginService {
     }
   }
 
-  async updateLoginBulkAsync(updateLoginDtos: UpdateLoginDto[]): Promise<Login[]> {
+  async updateLoginsBulkAsync(updateLoginDtos: UpdateLoginDto[]): Promise<Login[]> {
     try {
       const response = await this.fetchService.putAsync(`${this.apiEndpointV1}/login/bulk`, {
         body: JSON.stringify(updateLoginDtos)
       });
       if (!response.ok) {
-        throw new Error(`Failed to update logins: ${response.body ? await response.text() : 'Unknown error'}`);
+        throw new Error(`Failed to update logins bulk: ${response.body ? await response.text() : 'Unknown error'}`);
       }
       const updatedLogins = await response.json() as Login[];
       return updatedLogins.map(login => Login.fromObject(login));

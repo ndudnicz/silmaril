@@ -16,6 +16,11 @@ public class LoginService(
         return LoginDto.FromLogin(await loginRepository.GetLoginsWithTagsByUserIdAsync(userId));
     }
 
+    public async Task<List<LoginDto>> GetDeletedLoginsByUserIdAsync(Guid userId)
+    {
+        return LoginDto.FromLogin(await loginRepository.GetLoginsWithTagsByUserIdAsync(userId, true));
+    }
+    
     public async Task<LoginDto> CreateLoginAsync(CreateLoginDto createLoginDto, Guid userId)
     {
         var login = Login.FromCreateLoginDto(createLoginDto);
@@ -27,57 +32,99 @@ public class LoginService(
         return LoginDto.FromLogin(await loginRepository.CreateLoginAsync(login));
     }
 
-    public async Task<LoginDto> UpdateLoginAsync(UpdateLoginDto updateLoginDto, Guid userId)
+    public async Task<List<LoginDto>> CreateLoginsAsync(IEnumerable<CreateLoginDto> createLoginDtos, Guid userId)
     {
-        if (await userRepository.UserExistsAsync(userId) == false)
-        {
-            throw new UserNotFound("id", userId.ToString());
-        }
-        var existingLogin = await loginRepository.GetLoginWithTagsByUserIdAsync(updateLoginDto.Id, userId);
-        if (updateLoginDto.TagNames.Length > 0)
-        {
-            existingLogin.Tags = await tagService.GetTagsByNamesAsync(updateLoginDto.TagNames.ToArray());
-        }
-        existingLogin.EncryptedData = Convert.FromBase64String(updateLoginDto.EncryptedDataBase64 ?? string.Empty);
-        existingLogin.EncryptionVersion = updateLoginDto.EncryptionVersion;
-        existingLogin.Deleted = updateLoginDto.Deleted;
-        existingLogin.InitializationVector = Convert.FromBase64String(updateLoginDto.InitializationVectorBase64 ?? string.Empty);
-        return LoginDto.FromLogin(await loginRepository.UpdateLoginAsync(existingLogin));
+        var logins = Login.FromCreateLoginDtos(createLoginDtos);
+        var tags = await tagService.GetTagsAsync();
+        logins.ForEach(login => AssignUserAndTagsToLogin(login, userId, tags));
+        return LoginDto.FromLogin(await loginRepository.CreateLoginsAsync(logins));
     }
-
+    
+    private void AssignUserAndTagsToLogin(Login login, Guid userId, List<Tag> availableTags)
+    {
+        tagService.EnsureAllTagNamesExist(login.TagNames, availableTags);
+        login.UserId = userId;
+        login.Tags = availableTags
+            .Where(tag => login.TagNames.Contains(tag.Name, StringComparer.OrdinalIgnoreCase))
+            .ToList();
+    }
+    public async Task<LoginDto> UpdateLoginAsync(UpdateLoginDto dto, Guid userId)
+    {
+        await EnsureUserExistsAsync(userId);
+        var login = await loginRepository.GetLoginWithTagsByUserIdAsync(dto.Id, userId);
+        if (login == null)
+        {
+            throw new LoginNotFound(dto.Id);
+        }
+        await ApplyDtoToLoginAsync(dto, login);
+        var updatedLogin = await loginRepository.UpdateLoginAsync(login);
+        return LoginDto.FromLogin(updatedLogin);
+    }
+    
+    private async Task ApplyDtoToLoginAsync(UpdateLoginDto dto, Login login)
+    {
+        if (dto.TagNames.Length > 0)
+        {
+            login.Tags = await tagService.GetTagsByNamesAsync(dto.TagNames);
+        }
+        login.EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty);
+        login.InitializationVector = Convert.FromBase64String(dto.InitializationVectorBase64 ?? string.Empty);
+        login.EncryptionVersion = dto.EncryptionVersion;
+        login.Deleted = dto.Deleted;
+    }
+    
     public async Task<List<LoginDto>> UpdateLoginsAsync(List<UpdateLoginDto> updateLoginDtos, Guid userId)
     {
-        if (await userRepository.UserExistsAsync(userId) == false)
+        await EnsureUserExistsAsync(userId);
+        var existingLogins = await loginRepository.GetLoginsByIdsAndUserIdWithTagsAsync(updateLoginDtos.Select(l => l.Id), userId);
+        var existingLoginsDictionary = existingLogins.ToDictionary(l => l.Id, l => l);
+        EnsureLoginsExists(existingLoginsDictionary, updateLoginDtos.Select(u => u.Id).ToList());
+        await ApplyDtosToLoginsAsync(updateLoginDtos, existingLoginsDictionary);
+        return LoginDto.FromLogin(await loginRepository.UpdateLoginsAsync(existingLoginsDictionary.Values.ToList()));
+    }
+    
+    private void EnsureLoginsExists(Dictionary<Guid, Login> existingLoginsDictionary, List<Guid> ids)
+    {
+        if (existingLoginsDictionary.Count == ids.Count) return;
+        var missingIds = ids
+            .Where(id => !existingLoginsDictionary.ContainsKey(id))
+            .Select(id => id);
+        throw new LoginsNotFoundBulk(missingIds);
+    }
+    
+    private async Task EnsureUserExistsAsync(Guid userId)
+    {
+        if (!await userRepository.UserExistsAsync(userId))
         {
             throw new UserNotFound("id", userId.ToString());
         }
-        var existingLogins = await loginRepository.GetLoginsWithTagsByUserIdBulkAsync(updateLoginDtos.Select(l => l.Id), userId);
-        var existingLoginsDictionary = existingLogins.ToDictionary(x => x.Id);
-        if (existingLogins.Count != updateLoginDtos.Count)
+    }
+    
+    private async Task ApplyDtosToLoginsAsync(List<UpdateLoginDto> updateLoginDtos, Dictionary<Guid, Login> existingLoginsDictionary)
+    {
+        var allTags = await tagService.GetTagsAsync();
+        var allTagNames = updateLoginDtos
+            .SelectMany(dto => dto.TagNames)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        tagService.EnsureAllTagNamesExist(allTagNames, allTags);
+        foreach (var dto in updateLoginDtos)
         {
-            var missingIds = updateLoginDtos
-                .Where(l => !existingLoginsDictionary.ContainsKey(l.Id))
-                .Select(l => l.Id).ToList();
-            throw new LoginsNotFoundBulk(missingIds);
+            var login = existingLoginsDictionary[dto.Id];
+            UpdateLoginFromDto(login, dto, allTags);
         }
+    }
+    
+    private void UpdateLoginFromDto(Login login, UpdateLoginDto dto, List<Tag> allTags)
+    {
+        login.Tags = allTags
+            .Where(tag => dto.TagNames.Contains(tag.Name, StringComparer.OrdinalIgnoreCase))
+            .ToList();
 
-        var existingTags = await tagService.GetTagsAsync();
-        foreach (var updateLoginDto in updateLoginDtos)
-        {
-            if (!existingLoginsDictionary.TryGetValue(updateLoginDto.Id, out var existingLogin))
-            {
-                throw new LoginNotFound(updateLoginDto.Id);
-            }
-            if (updateLoginDto.TagNames.Length > 0)
-            {
-                existingLogin.Tags = existingTags.Where(t => updateLoginDto.TagNames.Contains(t.Name, StringComparer.OrdinalIgnoreCase)).ToList();
-            }
-            existingLogin.EncryptedData = Convert.FromBase64String(updateLoginDto.EncryptedDataBase64 ?? string.Empty);
-            existingLogin.InitializationVector = Convert.FromBase64String(updateLoginDto.InitializationVectorBase64 ?? string.Empty);
-            existingLogin.EncryptionVersion = updateLoginDto.EncryptionVersion;
-            existingLogin.Deleted = updateLoginDto.Deleted;
-        }
-        return LoginDto.FromLogin(await loginRepository.UpdateLoginsAsync(existingLoginsDictionary.Values.ToList()));
+        login.EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty);
+        login.InitializationVector = Convert.FromBase64String(dto.InitializationVectorBase64 ?? string.Empty);
+        login.EncryptionVersion = dto.EncryptionVersion;
+        login.Deleted = dto.Deleted;
     }
 
     public async Task<int> DeleteLoginByUserIdAsync(Guid id, Guid userId)
