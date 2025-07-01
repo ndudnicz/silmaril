@@ -110,7 +110,7 @@ export class SelectedLoginComponent extends BaseComponent {
       data: {
         title: `Delete Login ${this.login?.decryptedData?.title}`,
         message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? The data will be sent to the recycle bin and can be restored later.`,
-        confirmText: 'Delete',
+        confirmText: 'Confirm',
         cancelText: 'Cancel',
         width: '400px',
         height: 'auto',

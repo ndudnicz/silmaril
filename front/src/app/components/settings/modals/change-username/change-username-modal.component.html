@@ -1,0 +1,17 @@
+<div id="change-password-modal">
+    <h1 mat-dialog-title>Change Your Username</h1>
+    <mat-icon class="close-button close-dialog-button" (click)="closeDialog()">close</mat-icon>
+    <mat-dialog-content>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-label>New Username</mat-label>
+                <input matInput placeholder="" type="text" formControlName="username" required>
+                <mat-icon matSuffix>account_box</mat-icon>
+            </mat-form-field>
+            <br>
+            <div class="buttons">
+                <button mat-raised-button type="submit" matButton [disabled]="form.invalid || loading">Change Username</button>
+            </div>
+        </form>
+    </mat-dialog-content>
+</div>

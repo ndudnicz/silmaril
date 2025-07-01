@@ -67,14 +67,13 @@ export class ChangePasswordModalComponent extends BaseComponent {
     };
   }
 
-  // Add methods to handle change-password actions
   async onSubmit() {
     this.dialog.open(ConfirmModalComponent, {
       panelClass: 'custom-modal',
       data: {
         title: 'Confirm Password Change',
         message: 'Are you sure you want to change your password? This is not your master password.',
-        confirmText: 'Change Password',
+        confirmText: 'Confirm',
         cancelText: 'Cancel'
       }
     }).afterClosed().subscribe(async (confirmed: boolean) => {

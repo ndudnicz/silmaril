@@ -72,7 +72,7 @@ export class AuthService {
         credentials: 'include'
       });
       if (!response.ok) {
-        throw new Error(`Authentication failed: ${response.body ? await response.text() : 'Unknown error'}`);
+        throw new Error(`${response.body ? await response.text() : 'Unknown error'}`);
       }
       const data = await response.json() as AuthResponse;
       this.setLocalStorage(data);

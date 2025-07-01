@@ -114,7 +114,7 @@ export class AddEditLoginModalComponent extends BaseComponent {
           data: {
             title: `Edit Login ${this.login?.decryptedData?.title}`,
             message: `Are you sure you want to edit the login "${this.login?.decryptedData?.title}"?`,
-            confirmText: 'Edit',
+            confirmText: 'Confirm',
             cancelText: 'Cancel',
             width: '400px',
             height: 'auto',

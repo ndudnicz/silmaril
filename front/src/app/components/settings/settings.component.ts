@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { ChangeUsernameModalComponent } from './modals/change-username/change-username-modal.component';
 
 @Component({
   selector: 'app-settings',
@@ -26,7 +27,6 @@ export class SettingsComponent extends BaseComponent {
   }
 
   openChangePasswordModal() {
-    console.log('Settings clicked');
     const dialogRef = this.dialog.open(ChangePasswordModalComponent,
       {
         panelClass: 'custom-modal',
@@ -40,5 +40,17 @@ export class SettingsComponent extends BaseComponent {
     dialogRef.afterClosed().subscribe(_ => { });
   }
 
-  openChangeUserNameModal() {}
+  openChangeUserNameModal() {
+    const dialogRef = this.dialog.open(ChangeUsernameModalComponent,
+      {
+        panelClass: 'custom-modal',
+        width: '400px',
+        height: 'auto',
+        closeOnNavigation: false,
+        disableClose: true,
+        autoFocus: true
+      }
+    );
+    dialogRef.afterClosed().subscribe(_ => { });
+  }
 }

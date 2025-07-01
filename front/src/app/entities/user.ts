@@ -5,3 +5,7 @@ export interface User {
     updated: Date;
     saltBase64: string;
 }
+
+export interface UpdateUserDto {
+    username: string;
+}

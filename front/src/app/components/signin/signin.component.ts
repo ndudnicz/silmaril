@@ -57,7 +57,6 @@ export class SigninComponent extends BaseComponent {
       this.router.navigate(['/home']);
     } catch (error: any) {
       console.log(error);
-
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       ToastWrapper.error(errorMessage, null);
     } finally {

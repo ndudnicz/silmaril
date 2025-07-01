@@ -56,7 +56,7 @@ export class ChangeMasterPasswordModalComponent {
       data: {
         title: 'Change Master Password',
         message: 'Are you sure you want to change your master password? This will reencrypt your vault with the new master password.',
-        confirmText: 'Change Master Password',
+        confirmText: 'Confirm',
         cancelText: 'Cancel'
       },
       panelClass: 'custom-modal'
