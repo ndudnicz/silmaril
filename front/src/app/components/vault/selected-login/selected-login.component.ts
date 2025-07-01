@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { Login, UpdateLoginDto } from '../../../entities/login';
 import { DataService } from '../../../services/data.service';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -16,6 +16,7 @@ import { LoginService } from '../../../services/login.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { AddEditLoginModalComponent } from '../modals/add-edit-login/add-edit-login-modal.component';
 import { BaseComponent } from '../../base-component/base-component.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -34,7 +35,7 @@ import { BaseComponent } from '../../base-component/base-component.component';
   templateUrl: './selected-login.component.html',
   styleUrl: './selected-login.component.css'
 })
-export class SelectedLoginComponent extends BaseComponent {
+export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
   login!: Login | null;
   showPassword = false;
   title = '';
@@ -42,6 +43,7 @@ export class SelectedLoginComponent extends BaseComponent {
   password = '';
   url = '';
   notes = '';
+  selectedLoginSubscription: Subscription | null = null;
 
   constructor(
     private dataService: DataService,
@@ -49,15 +51,26 @@ export class SelectedLoginComponent extends BaseComponent {
     private loginService: LoginService,
   ) {
     super(inject(NgxSpinnerService));
+    this.setupLoginSubscriptions();
+  }
+
+  ngOnDestroy() {
+    this.unsubscribeAllSubscriptions();
+  }
+
+  setupLoginSubscriptions() {
     this.dataService.selectedLogin.subscribe((login: Login | null) => {
       this.login = login;
       this.setValues();
-      console.log('SelectedLoginComponent : Selected login updated:', this.login);
     });
   }
 
+  unsubscribeAllSubscriptions() {
+    this.selectedLoginSubscription?.unsubscribe();
+    this.selectedLoginSubscription = null;
+  }
+
   setValues() {
-    console.log('Sets values for selected login:', this.login);
     this.showPassword = false;
     if (this.login) {
       this.title = this.login.decryptedData?.title || '';
@@ -97,7 +110,6 @@ export class SelectedLoginComponent extends BaseComponent {
     );
     dialogRef.afterClosed().subscribe(async (result: Login) => {
       if (result) {
-        console.log('Edit login result:', result);
         this.dataService.setUpdatedLogin(result);
         this.dataService.setSelectedLogin(result); // Clear selected login after edit
       }
@@ -119,13 +131,11 @@ export class SelectedLoginComponent extends BaseComponent {
         autoFocus: true
       }
     }).afterClosed().subscribe(async (confirmed: boolean) => {
-      console.log('Delete modal closed with confirmation:', confirmed);
       if (confirmed) {
         this.startLoading();
         try {
           this.login!.deleted = true;
           const updatedLogin = await this.loginService.updateLoginAsync(UpdateLoginDto.fromLogin(this.login!));
-          console.log('Login deleted successfully:', updatedLogin);
           this.dataService.setUpdatedLogin(updatedLogin);
           this.dataService.setSelectedLogin(null);
           ToastWrapper.success('Login deleted successfully');
@@ -139,12 +149,12 @@ export class SelectedLoginComponent extends BaseComponent {
     })
   }
 
-  selectText(event: Event) {
+  selectInputText(event: Event) {
     const inputElement = event.target as HTMLInputElement;
-    inputElement.readOnly = false; // Allow selection by temporarily removing readonly
-    inputElement.select(); // Select the text
+    inputElement.readOnly = false;
+    inputElement.select();
     setTimeout(() => {
-      inputElement.readOnly = true; // Re-enable readonly after selection
+      inputElement.readOnly = true;
     }, 0);
     ToastWrapper.info('Value copied to clipboard');
   }

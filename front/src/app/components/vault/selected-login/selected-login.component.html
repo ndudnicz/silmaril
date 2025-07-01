@@ -13,19 +13,19 @@
             <mat-form-field class="full-width" appearance="fill" floatLabel="always">
                 <mat-label>Title</mat-label>
                 <input matInput class="selected-login-field" type="text" [(ngModel)]="title" name="title"
-                    readonly="true" (click)="selectText($event)" [cdkCopyToClipboard]="title">
+                    readonly="true" (click)="selectInputText($event)" [cdkCopyToClipboard]="title">
             </mat-form-field>
             <mat-form-field class="full-width" appearance="fill" floatLabel="always">
                 <mat-label>Identifier</mat-label>
                 <input matInput class="selected-login-field" type="text" [(ngModel)]="identifier" name="identifier"
-                    readonly="true" (click)="selectText($event)" [cdkCopyToClipboard]="identifier">
+                    readonly="true" (click)="selectInputText($event)" [cdkCopyToClipboard]="identifier">
             </mat-form-field>
             <br>
             <mat-form-field class="full-width" appearance="fill" floatLabel="always">
                 <mat-label>Password</mat-label>
                 <input matInput class="selected-login-field" type="text" id="selected-login-password" [(ngModel)]="password"
                     name="password" [type]="showPassword ? 'text' : 'password'" readonly="true"
-                    (click)="selectText($event)" [cdkCopyToClipboard]="password">
+                    (click)="selectInputText($event)" [cdkCopyToClipboard]="password">
                 <button mat-icon-button matSuffix (click)="togglePasswordVisibility()">
                     <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
                 </button>
@@ -34,7 +34,7 @@
             <mat-form-field class="full-width" appearance="fill" floatLabel="always">
                 <mat-label>Url</mat-label>
                 <input matInput class="selected-login-field" type="text" [(ngModel)]="url" name="url" readonly="true"
-                    (click)="selectText($event)" [cdkCopyToClipboard]="url">
+                    (click)="selectInputText($event)" [cdkCopyToClipboard]="url">
             </mat-form-field>
             <br>
             <mat-form-field class="full-width" appearance="fill" floatLabel="always">

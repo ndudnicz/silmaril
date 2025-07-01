@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { VaultService } from '../../services/vault.service';
 import { LoginService } from '../../services/login.service';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -20,6 +20,7 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { BaseComponent } from '../base-component/base-component.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-vault',
@@ -41,7 +42,7 @@ import { BaseComponent } from '../base-component/base-component.component';
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'
 })
-export class VaultComponent extends BaseComponent implements OnInit {
+export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
 
   readonly dialog = inject(MatDialog);
   allLogins: Login[] = [];
@@ -49,6 +50,9 @@ export class VaultComponent extends BaseComponent implements OnInit {
   displayedLoginStackEntries: KeyValue<string, Login[]>[] = [];
   selectedLogin: Login | null = null;
   searchValue = '';
+  private selectedLoginSubscription: Subscription | null = null;
+  private updatedLoginSubscription: Subscription | null = null;
+  private deletedLoginSubscription: Subscription | null = null;
 
   constructor(
     private vaultService: VaultService,
@@ -56,35 +60,7 @@ export class VaultComponent extends BaseComponent implements OnInit {
     private dataService: DataService
   ) {
     super(inject(NgxSpinnerService));
-    this.dataService.selectedLogin.subscribe((login: Login | null) => {
-      this.selectedLogin = login;
-      console.log('VaultComponent : Selected login updated:', this.selectedLogin);
-    });
-
-    this.dataService.deletedLogin.subscribe((login: Login | null) => {
-      if (login) {
-        console.log('VaultComponent : Deleted login received:', login);
-        this.allLogins = this.allLogins.filter(l => l.id !== login.id);
-        this.setDisplayedLogins();
-        this.computeStacks();
-        ToastWrapper.success('Login deleted successfully');
-      }
-    });
-
-    this.dataService.updatedLogin.subscribe((login: Login | null) => {
-      if (login) {
-        console.log('VaultComponent : Updated login received:', login);
-        const index = this.allLogins.findIndex(l => l.id === login.id);
-        if (index !== -1) {
-          this.allLogins[index] = login;
-          this.setDisplayedLogins();
-          this.computeStacks();
-          ToastWrapper.success('Login updated successfully');
-        } else {
-          console.warn('Updated login not found in current logins:', login);
-        }
-      }
-    });
+    this.setupLoginSubscriptions();
     console.log('VaultComponent initialized');
   }
 
@@ -102,6 +78,48 @@ export class VaultComponent extends BaseComponent implements OnInit {
     } finally {
       this.stopLoading();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribeAllSubscriptions();
+  }
+
+  setupLoginSubscriptions() {
+    this.selectedLoginSubscription = this.dataService.selectedLogin.subscribe((login: Login | null) => {
+      this.selectedLogin = login;
+    });
+
+    this.deletedLoginSubscription = this.dataService.deletedLogin.subscribe((login: Login | null) => {
+      if (login) {
+        this.allLogins = this.allLogins.filter(l => l.id !== login.id);
+        this.setDisplayedLogins();
+        this.computeStacks();
+        ToastWrapper.success('Login deleted successfully');
+      }
+    });
+
+    this.updatedLoginSubscription = this.dataService.updatedLogin.subscribe((login: Login | null) => {
+      if (login) {
+        const index = this.allLogins.findIndex(l => l.id === login.id);
+        if (index !== -1) {
+          this.allLogins[index] = login;
+          this.setDisplayedLogins();
+          this.computeStacks();
+          ToastWrapper.success('Login updated successfully');
+        } else {
+          console.warn('Updated login not found in current logins:', login);
+        }
+      }
+    });
+  }
+
+  unsubscribeAllSubscriptions() {
+    this.selectedLoginSubscription?.unsubscribe();
+    this.updatedLoginSubscription?.unsubscribe();
+    this.deletedLoginSubscription?.unsubscribe();
+    this.selectedLoginSubscription = null;
+    this.updatedLoginSubscription = null;
+    this.deletedLoginSubscription = null;
   }
 
   setDisplayedLogins() {

@@ -23,7 +23,6 @@ export class CardStackComponent {
   }
 
   setSelectedLogin(login: Login) {
-    console.log('Card stack clicked');
     this.dataService.setSelectedLogin(login);
   }
 }
