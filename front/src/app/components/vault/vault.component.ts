@@ -170,7 +170,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         disableClose: true,
         autoFocus: true
       }
-    ).afterClosed().pipe(take(1)).subscribe(async newMasterPassword => {
+    ).afterClosed().pipe(take(1)).subscribe(async (newMasterPassword: string) => {
       if (newMasterPassword != null) {
         await this.changeMasterPassword(newMasterPassword);
       }
@@ -185,19 +185,25 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     this.allLogins = await this.vaultService.encryptAllLoginsAsync(this.allLogins);
     this.loginService.updateLoginsBulk$(this.allLogins.map(l => UpdateLoginDto.fromLogin(l))).pipe(take(1)).subscribe({
       next: async (updatedLogins: Login[]) => {
-        console.log('All logins updated successfully');
-        updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
-        this.allLogins = updatedLogins;
-        this.setDisplayedLogins();
-        this.computeStacks();
-        this.stopLoading();
-        ToastWrapper.success('Master password changed successfully');
+        this.onUpdateLoginsSuccess(updatedLogins);
       },
+
       error: (error: any) => {
         ToastWrapper.error('Failed to update logins: ', error.message ?? error);
         console.error('Error updating logins:', error);
       }
     });
+  }
+
+  async onUpdateLoginsSuccess(updatedLogins: Login[]) {
+    console.log('All logins updated successfully');
+    updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
+    this.allLogins = updatedLogins;
+    this.setDisplayedLogins();
+    this.computeStacks();
+    this.stopLoading();
+    ToastWrapper.success('Master password changed successfully');
+
   }
 
   search(value: string) {

@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { FetchService } from './fetch.service';
 import { HttpClient } from '@angular/common/http';
 import { UpdateUserDto, User } from '../entities/user';
-import { AuthService } from './auth.service';
 import { Observable } from 'rxjs/internal/Observable';
 import { catchError, map, throwError } from 'rxjs';
 
@@ -14,7 +12,6 @@ export class UserService {
   private apiEndpointV1 = environment.apiEndpoint + '/v1';
 
   constructor(
-    private fetchService: FetchService,
     private http: HttpClient
   ) { }
 

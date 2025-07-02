@@ -17,11 +17,6 @@ public class TagService(
     {
         var tags = await tagRepository.GetTagsByNamesAsync(names);
         EnsureAllTagNamesExist(names, tags);
-        if (tags.Count != names.Length)
-        {
-            var missingNames = names.Except(tags.Select(t => t.Name)).ToArray();
-            throw new TagsNotFound("Name", string.Join(", ", missingNames));
-        }
         return tags;
     }
 

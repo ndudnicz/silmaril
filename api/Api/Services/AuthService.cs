@@ -6,20 +6,33 @@ using Api.Entities.Dtos.Authentication;
 using Api.Exceptions;
 using Api.Helpers;
 using Api.Repositories;
+using Api.Services.Validation;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Services;
 
 public class AuthService(
-    IUserService userService,
+    IUserRepository userRepository,
     IAuthRepository authRepository,
+    IUserValidator userValidator,
     JwtConfiguration jwtConfiguration
     ): IAuthService
 {
     private readonly int _jwtTokenExpirationTimeInMinutes = jwtConfiguration.AccessTokenExpirationMinutes;
     private readonly int _jwtRefreshTokenExpirationTimeInHours = jwtConfiguration.RefreshTokenExpirationMinutes; 
     
-    public static bool ValidatePasswordFormat(string password)
+    public static void ValidatePasswordFormat(string password)
+    {
+        // The password must be at least 8 characters long, contain at least one letter, one digit,
+        // one uppercase letter, one lowercase letter and contains at least one special character.
+        const string specialCharacters = "!@#$%^&*()-_=+[]{}|;:',.<>?/";
+        if (!PasswordFormatIsValid(password))
+        {
+            throw new InvalidPasswordFormat();
+        }
+    }
+    
+    private static bool PasswordFormatIsValid(string password)
     {
         // The password must be at least 8 characters long, contain at least one letter, one digit,
         // one uppercase letter, one lowercase letter and contains at least one special character.
@@ -33,13 +46,20 @@ public class AuthService(
                && password.Any(c => specialCharacters.Contains(c));
     }
     
-    public async Task<AuthResponseDto> AuthAsync(AuthDto authDto)
+    public static void VerifyPasswordHash(string password, string passwordHash)
     {
-        var user = await userService.GetUserByUserNameAsync(CryptoHelper.Sha512(authDto.Username));
-        if (!CryptoHelper.Argon2idVerify(authDto.Password, user!.PasswordHash))
+        if (!CryptoHelper.Argon2idVerify(password, passwordHash))
         {
             throw new InvalidPassword();
         }
+    }
+    
+    public async Task<AuthResponseDto> AuthAsync(AuthDto authDto)
+    {
+        var usernameHash = CryptoHelper.Sha512(authDto.Username);
+        await userValidator.EnsureExistsByUsernameHashAsync(usernameHash);
+        var user = await userRepository.GetUserByUserNameAsync(CryptoHelper.Sha512(authDto.Username));
+        VerifyPasswordHash(authDto.Password, user!.PasswordHash);
         var jwt = GenerateJwtToken(user.Id);
         var (refreshTokenStr, refreshToken, refreshTokenExpiration) = GenerateRefreshToken(user.Id);
         await authRepository.UpsertAsync(refreshToken);
@@ -55,16 +75,9 @@ public class AuthService(
     {
         var refreshTokenHash = CryptoHelper.Sha512(refreshToken);
         var existingRefreshToken = await authRepository.GetAsync(refreshTokenHash);
-        if (existingRefreshToken == null)
-        {
-            throw new UnknownRefreshToken();
-        }
-        if (existingRefreshToken.Expires < DateTime.UtcNow)
-        {
-            throw new ExpiredRefreshToken();
-        }
-        var user = await userService.GetUserAsync(existingRefreshToken.UserId);
-        var jwt = GenerateJwtToken(user.Id);
+        await EnsureRefreshTokenExistsNotExpiredAndUserExistsAsync(existingRefreshToken);
+        var user = await userRepository.GetUserAsync(existingRefreshToken!.UserId);
+        var jwt = GenerateJwtToken(user!.Id);
         var (newRefreshTokenStr, newRefreshToken, refreshTokenExpiration) = GenerateRefreshToken(user.Id);
         await authRepository.UpsertAsync(newRefreshToken);
         return new AuthResponseDto
@@ -73,6 +86,19 @@ public class AuthService(
             RefreshToken = newRefreshTokenStr,
             RefreshTokenExpiration = refreshTokenExpiration
         };
+    }
+    
+    private async Task EnsureRefreshTokenExistsNotExpiredAndUserExistsAsync(RefreshToken? refreshToken)
+    {
+        if (refreshToken == null)
+        {
+            throw new UnknownRefreshToken();
+        }
+        if (refreshToken.Expires < DateTime.UtcNow)
+        {
+            throw new ExpiredRefreshToken();
+        }
+        await userValidator.EnsureExistsAsync(refreshToken!.UserId);
     }
     
     public async Task<int> RevokeRefreshTokenByUserIdAsync(Guid userId)

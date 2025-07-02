@@ -6,6 +6,21 @@ namespace Api.Repositories;
 
 public class LoginRepository(AppDbContext db): ILoginRepository
 {
+    public async Task<bool> LoginExistsByUserIdAsync(Guid id, Guid userId)
+    {
+        return await db.Logins
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == id && x.UserId == userId);
+    }
+    
+    public async Task<bool> LoginsExistByUserIdAsync(IEnumerable<Guid> ids, Guid userId)
+    {
+        return await db.Logins
+            .AsNoTracking()
+            .Where(x => ids.Contains(x.Id) && x.UserId == userId)
+            .AnyAsync();
+    }
+    
     public async Task<Login?> GetLoginWithTagsByUserIdAsync(Guid id, Guid userId)
     {
         return await db.Logins

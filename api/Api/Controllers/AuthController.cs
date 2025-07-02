@@ -16,22 +16,14 @@ public class AuthController(
     [HttpPost]
     public async Task<IActionResult> Auth([FromBody] AuthDto authDto)
     {
-        try
-        {
-            var authResponse = await authService.AuthAsync(authDto);
-            Response.Cookies.Append("refreshToken", authResponse.RefreshToken, new CookieOptions{
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax,
-                Expires = authResponse.RefreshTokenExpiration
-            });
-            return Ok(authResponse);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Authentication failed for user {Username}", authDto.Username);
-            return BadRequest("Authentication failed");
-        }
+        var authResponse = await authService.AuthAsync(authDto);
+        Response.Cookies.Append("refreshToken", authResponse.RefreshToken, new CookieOptions{
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Expires = authResponse.RefreshTokenExpiration
+        });
+        return Ok(authResponse);
     }
     
     [HttpPost("refresh-token")]
@@ -58,32 +50,15 @@ public class AuthController(
         {
             return StatusCode(StatusCodes.Status403Forbidden, "Invalid CSRF token.");
         }
-        catch (InvalidRefreshToken ex)
-        {
-            return Unauthorized(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to refresh token for user");
-            return BadRequest(ex.Message);
-        }
     }
 
     [HttpPost("signout")]
     public async Task<IActionResult> Signout()
     {
-        try
-        {
-            var result = await authService.RevokeRefreshTokenByUserIdAsync(GetUserId());
-            Response.Cookies.Delete(jwtConfiguration.RefreshTokenCookieName);
-            Response.Cookies.Delete(csrfConfiguration.CookieName);
-            Response.Cookies.Delete(csrfConfiguration.SessionCookieName);
-            return Ok("Logged out successfully");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error during signout");
-            return BadRequest("An error occurred while signing out");
-        }
+        var result = await authService.RevokeRefreshTokenByUserIdAsync(GetUserId());
+        Response.Cookies.Delete(jwtConfiguration.RefreshTokenCookieName);
+        Response.Cookies.Delete(csrfConfiguration.CookieName);
+        Response.Cookies.Delete(csrfConfiguration.SessionCookieName);
+        return Ok("Logged out successfully");
     }
 }

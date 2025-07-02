@@ -45,7 +45,7 @@ public class UserController(
     {
         try
         {
-            return Ok(UserDto.FromUser(await userService.UpdateUserAsync(GetUserId(),updateUserDto)));
+            return Ok(UserDto.FromUser(await userService.UpdateUserAsync(GetUserId(), updateUserDto)));
         }
         catch (Exception ex)
         {

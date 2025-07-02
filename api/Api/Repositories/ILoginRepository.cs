@@ -4,6 +4,8 @@ namespace Api.Repositories;
 
 public interface ILoginRepository
 {
+    public Task<bool> LoginExistsByUserIdAsync(Guid id, Guid userId);
+    public Task<bool> LoginsExistByUserIdAsync(IEnumerable<Guid> ids, Guid userId);
     public Task<Login?> GetLoginWithTagsByUserIdAsync(Guid id, Guid userId);
     public Task<List<Login>> GetLoginsWithTagsByUserIdAsync(Guid userId, bool deleted = false);
     public Task<List<Login>> GetLoginsByIdsAndUserIdWithTagsAsync(IEnumerable<Guid> ids, Guid userId);

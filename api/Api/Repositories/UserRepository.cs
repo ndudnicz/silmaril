@@ -6,14 +6,14 @@ namespace Api.Repositories;
 
 public class UserRepository(AppDbContext db): IUserRepository
 {
-    public async Task<User> GetUserAsync(Guid id)
+    public async Task<User?> GetUserAsync(Guid id)
     {
-        return await db.Users.FirstAsync(u => u.Id == id);
+        return await db.Users.FirstOrDefaultAsync(u => u.Id == id);
     }
     
-    public async Task<User> GetUserByUserNameAsync(string usernameHash)
+    public async Task<User?> GetUserByUserNameAsync(string usernameHash)
     {
-        return await db.Users.FirstAsync(x => x.UsernameHash == usernameHash);
+        return await db.Users.FirstOrDefaultAsync(x => x.UsernameHash == usernameHash);
     }
     
     public async Task<bool> UserExistsAsync(Guid id)
@@ -23,7 +23,7 @@ public class UserRepository(AppDbContext db): IUserRepository
             .AnyAsync(x => x.Id == id);
     }
     
-    public async Task<bool> UserExistsAsync(string usernameHash)
+    public async Task<bool> UserExistsByUsernameHashAsync(string usernameHash)
     {
         return await db.Users
             .AsNoTracking()

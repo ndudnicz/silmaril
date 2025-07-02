@@ -2,9 +2,11 @@ using Api.Configuration;
 using Api.Repositories;
 using Api.Repositories.EFContext;
 using Api.Services;
+using Api.Services.Validation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Extensions;
 
@@ -69,6 +71,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITagService, TagService>();
+        
+        services.AddScoped<IUserValidator, UserValidator>();
+        services.AddScoped<ILoginValidator, LoginValidator>();
     }
 
     public static void AddCsrf(this IServiceCollection services, CsrfConfiguration csrfConfiguration)
@@ -77,6 +82,43 @@ public static class ServiceCollectionExtensions
         {
             options.HeaderName = csrfConfiguration.HeaderName;
             options.Cookie.Name = csrfConfiguration.SessionCookieName;
+        });
+    }
+
+    public static void AddSwagger(this IServiceCollection services)
+    {
+        services.AddSwaggerGen(c =>
+        {
+
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "Silmaril API",
+                Version = "v1"
+            });
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Example : `Bearer eyJhbGciOiJIUzI1NiIs...`"
+            });
+    
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
         });
     }
 }

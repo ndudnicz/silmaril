@@ -1,5 +1,6 @@
 using Api.Configuration;
 using Api.Extensions;
+using Api.Middlewares;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.OpenApi.Models;
 
@@ -20,40 +21,10 @@ builder.Services.AddRouting(opt => opt.LowercaseUrls = true);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAuthorization();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Silmaril API",
-        Version = "v1"
-    });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Example : `Bearer eyJhbGciOiJIUzI1NiIs...`"
-    });
-    
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
+builder.Services.AddSwagger();
 
 var app = builder.Build();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 var allowedOrigins = configuration["AllowedOrigins"]!.Split(",");
 app.UseCors(b =>
         b.WithOrigins(allowedOrigins)
