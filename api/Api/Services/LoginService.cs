@@ -1,6 +1,7 @@
 using Api.Entities;
 using Api.Entities.Dtos;
 using Api.Exceptions;
+using Api.Helpers;
 using Api.Repositories;
 using Api.Services.Validation;
 
@@ -72,10 +73,9 @@ public class LoginService(
     
     private async Task ApplyDtoToLoginAsync(UpdateLoginDto dto, Login login)
     {
-
         login.Tags = dto.TagNames.Length > 0 ? await tagService.GetTagsByNamesAsync(dto.TagNames) : [];
-        login.EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty);
-        login.InitializationVector = Convert.FromBase64String(dto.InitializationVectorBase64 ?? string.Empty);
+        login.EncryptedData = CryptoHelper.DecodeBase64(dto.EncryptedDataBase64 ?? string.Empty);
+        login.InitializationVector = CryptoHelper.DecodeBase64(dto.InitializationVectorBase64 ?? string.Empty);
         login.EncryptionVersion = dto.EncryptionVersion;
         login.Deleted = dto.Deleted;
     }
@@ -114,8 +114,8 @@ public class LoginService(
         login.Tags = allTags
             .Where(tag => dto.TagNames.Contains(tag.Name, StringComparer.OrdinalIgnoreCase))
             .ToList();
-        login.EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty);
-        login.InitializationVector = Convert.FromBase64String(dto.InitializationVectorBase64 ?? string.Empty);
+        login.EncryptedData = CryptoHelper.DecodeBase64(dto.EncryptedDataBase64 ?? string.Empty);
+        login.InitializationVector = CryptoHelper.DecodeBase64(dto.InitializationVectorBase64 ?? string.Empty);
         login.EncryptionVersion = dto.EncryptionVersion;
         login.Deleted = dto.Deleted;
     }

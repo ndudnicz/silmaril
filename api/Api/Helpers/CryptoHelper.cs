@@ -31,10 +31,8 @@ public static class CryptoHelper
         return hash;
     }
     
-    public static bool Argon2idVerify(string password, string hash)
-    {
-        return Argon2.Verify(hash, password);
-    }
+    public static bool Argon2idVerify(string password, string hash) =>
+        Argon2.Verify(hash, password);
 
     public static byte[] GenerateRandomByte(int length)
     {
@@ -44,8 +42,10 @@ public static class CryptoHelper
         return randomBytes;
     }
 
-    public static string GenerateRandomBase64Str(int length)
-    {
-        return Convert.ToBase64String(GenerateRandomByte(length));
-    }
+    public static string GenerateRandomBase64Str(int length) =>
+        Convert.ToBase64String(GenerateRandomByte(length));
+    
+    public static byte[] DecodeBase64(string? base64) =>
+        string.IsNullOrWhiteSpace(base64) ? [] : Convert.FromBase64String(base64);
+
 }

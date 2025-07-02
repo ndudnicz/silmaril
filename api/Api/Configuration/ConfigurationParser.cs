@@ -1,3 +1,5 @@
+using Api.Helpers;
+
 namespace Api.Configuration;
 
 public static class ConfigurationParser
@@ -32,7 +34,7 @@ public static class ConfigurationParser
             ConnectionString = configuration["ConnectionStrings:MySql"] ??
                                throw new InvalidOperationException("MySql:ConnectionString is not defined in the configuration.")
         };
-        var jwtSecretKey = Convert.FromBase64String(jwtSecretKeyBae64!);
+        var jwtSecretKey = CryptoHelper.DecodeBase64(jwtSecretKeyBae64!);
         var accessTokenExpirationMinutes = int.Parse(configuration["Jwt:AccessTokenExpirationMinutes"]);
         var refreshTokenExpirationMinutes = int.Parse(configuration["Jwt:RefreshTokenExpirationMinutes"]);
         var jwtConfiguration = new JwtConfiguration

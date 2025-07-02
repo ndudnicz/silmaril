@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Api.Entities.Dtos;
+using Api.Helpers;
 
 namespace Api.Entities;
 
@@ -24,10 +25,10 @@ public class Login: MyEntity
     {
         return new Login
         {
-            EncryptedData = Convert.FromBase64String(dto.EncryptedDataBase64 ?? string.Empty),
+            EncryptedData = CryptoHelper.DecodeBase64(dto.EncryptedDataBase64 ?? string.Empty),
             Tags = dto.TagNames.Select(name => new Tag { Name = name }).ToList(),
             EncryptionVersion = dto.EncryptionVersion,
-            InitializationVector = Convert.FromBase64String(dto.InitializationVectorBase64 ?? string.Empty)
+            InitializationVector = CryptoHelper.DecodeBase64(dto.InitializationVectorBase64 ?? string.Empty)
         };
     }
     
