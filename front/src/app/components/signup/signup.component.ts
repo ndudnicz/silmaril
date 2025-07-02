@@ -13,6 +13,7 @@ import { toast } from 'ngx-sonner';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { BaseComponent } from '../base-component/base-component.component';
+import { take } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -50,22 +51,26 @@ export class SignupComponent extends BaseComponent {
   }
 
   async onSubmit() {
-    try {
-      this.startLoading();
-      const created = await this.userService.createUserAsync(
-        this.form.value.username,
-        this.form.value.password,
-        this.form.value.confirmPassword
-      );
-      toast.success('User created successfully, please sign in.');
-      this.form.reset();
-      this.router.navigate(['/signin']);
-    } catch (error) {
-      console.error('Error during user creation:', error);
-      ToastWrapper.error('Error during user creation', error instanceof Error ? error.message : 'An unknown error occurred');
-    } finally {
-      this.stopLoading();
-    }
+    this.startLoading();
+    this.userService.createUser$(
+      this.form.value.username,
+      this.form.value.password,
+      this.form.value.confirmPassword
+    ).pipe(take(1)).subscribe({
+      next: () => this.onUserCreationSuccess(),
+      error: (error: any) => {
+        console.error('Error during user creation:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        ToastWrapper.error('Error during user creation', errorMessage);
+      }
+    });
+  }
+
+  onUserCreationSuccess() {
+    ToastWrapper.success('User created successfully, please sign in.');
+    this.form.reset();
+    this.stopLoading();
+    this.router.navigate(['/signin']);
   }
 
   passwordValidator(): ValidatorFn {

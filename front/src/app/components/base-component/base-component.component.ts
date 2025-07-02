@@ -1,8 +1,9 @@
 import { NgxSpinnerService } from "ngx-spinner";
+import { Subject, Subscription } from "rxjs";
 
-// base-form.component.ts
 export class BaseComponent {
   protected loading = false;
+  protected destroy$ = new Subject<void>();
 
   protected constructor(private spinner: NgxSpinnerService) { }
 

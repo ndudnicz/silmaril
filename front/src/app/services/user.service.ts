@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { FetchService } from './fetch.service';
+import { HttpClient } from '@angular/common/http';
 import { UpdateUserDto, User } from '../entities/user';
 import { AuthService } from './auth.service';
+import { Observable } from 'rxjs/internal/Observable';
+import { catchError, map, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,68 +15,46 @@ export class UserService {
 
   constructor(
     private fetchService: FetchService,
-    private authService: AuthService
+    private http: HttpClient
   ) { }
 
-  async getUserAsync(): Promise<User> {
-    try {
-      const response = await this.fetchService.getAsync(`${this.apiEndpointV1}/user`, {});
-      if (!response.ok) {
-        throw new Error(`${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      return await response.json() as User;
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      throw error;
-    }
+  getUser$(): Observable<User> {
+    return this.http.get<User>(`${this.apiEndpointV1}/user`).pipe(
+      catchError(error => {
+        console.error('Error fetching user data:', error);
+        return throwError(() => new Error('Failed to fetch user data'));
+      })
+    );
   }
 
-  async createUserAsync(username: string, password: string, confirmPassword: string): Promise<boolean> {
-    try {
-      const response = await this.fetchService.postAsync(
-        `${this.apiEndpointV1}/user`,
-        { body: JSON.stringify({ username, password, confirmPassword }) });
-      if (!response.ok) {
-        throw new Error(`${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      return response.ok;
-    }
-    catch (error) {
-      console.error('Error during user creation:', error);
-      throw error;
-    }
+  createUser$(username: string, password: string, confirmPassword: string): Observable<boolean> {
+    const body = { username, password, confirmPassword };
+    return this.http.post(`${this.apiEndpointV1}/user`, body, { observe: 'response' }).pipe(
+      map(response => response.ok),
+      catchError(error => {
+        console.error('Error during user creation:', error);
+        return throwError(() => new Error('Failed to create user'));
+      })
+    );
   }
 
-  async changePasswordAsync(oldPassword: string, newPassword: string): Promise<boolean> {
-    try {
-      const response = await this.fetchService.putAsync(
-        `${this.apiEndpointV1}/user/password`,
-        { body: JSON.stringify({ oldPassword, newPassword }) }
-      );
-      if (!response.ok) {
-        throw new Error(`${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      return response.ok;
-    } catch (error) {
-      console.error('Error during password change:', error);
-      throw error;
-    }
+  changePassword$(oldPassword: string, newPassword: string): Observable<boolean> {
+    const body = { oldPassword, newPassword };
+    return this.http.put(`${this.apiEndpointV1}/user/password`, body, { observe: 'response' }).pipe(
+      map(response => response.ok),
+      catchError(error => {
+        console.error('Error during password change:', error);
+        return throwError(() => new Error('Failed to change password'));
+      })
+    );
   }
 
-  async upadateUserAsync(updateUserDto: UpdateUserDto): Promise<User> {
-    try {
-      const response = await this.fetchService.putAsync(
-        `${this.apiEndpointV1}/user`,
-        { body: JSON.stringify(updateUserDto) }
-      );
-      if (!response.ok) {
-        throw new Error(`${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      const updatedUser = await response.json() as User;
-      return updatedUser;
-    } catch (error) {
-      console.error('Error updating user:', error);
-      throw error;
-    }
+  updateUser$(updateUserDto: UpdateUserDto): Observable<User> {
+    return this.http.put<User>(`${this.apiEndpointV1}/user`, updateUserDto).pipe(
+      catchError(error => {
+        console.error('Error updating user:', error);
+        return throwError(() => new Error('Failed to update user'));
+      })
+    );
   }
 }

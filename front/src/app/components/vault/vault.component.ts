@@ -20,7 +20,7 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { BaseComponent } from '../base-component/base-component.component';
-import { Subscription } from 'rxjs';
+import { take, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-vault',
@@ -50,9 +50,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   displayedLoginStackEntries: KeyValue<string, Login[]>[] = [];
   selectedLogin: Login | null = null;
   searchValue = '';
-  private selectedLoginSubscription: Subscription | null = null;
-  private updatedLoginSubscription: Subscription | null = null;
-  private deletedLoginSubscription: Subscription | null = null;
 
   constructor(
     private vaultService: VaultService,
@@ -64,32 +61,41 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     console.log('VaultComponent initialized');
   }
 
-  async ngOnInit(): Promise<void> {
-    try {
-      this.startLoading();
-      this.allLogins = await this.loginService.getLoginsAsync();
-      this.allLogins = await this.vaultService.decryptAllLoginsAsync(this.allLogins);
-      this.setDisplayedLogins();
-      this.computeStacks();
-      console.log('vault selectedLogin:', this.selectedLogin);
-    } catch (error: any) {
-      ToastWrapper.error('Failed to fetch data: ', error.message ?? error);
-      console.error('Error fetching data:', error);
-    } finally {
-      this.stopLoading();
-    }
+  ngOnInit() {
+    this.startLoading();
+    this.loginService.getLogins$().pipe(take(1)).subscribe({
+      next: async (logins: Login[]) => {
+        this.allLogins = await this.vaultService.decryptAllLoginsAsync(logins);
+        console.log('Fetched logins:', this.allLogins);
+        if (this.allLogins.length === 0) {
+          ToastWrapper.info('No logins found. Please add a login.');
+        }
+        this.setDisplayedLogins();
+        this.computeStacks();
+      },
+      error: (error: any) => {
+        ToastWrapper.error('Failed to fetch logins: ', error.message ?? error);
+        console.error('Error fetching logins:', error);
+        this.stopLoading();
+      },
+      complete: async () => {
+        console.log('All logins fetched successfully');
+        this.stopLoading();
+      }
+    });
   }
 
   ngOnDestroy(): void {
-    this.unsubscribeAllSubscriptions();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   setupLoginSubscriptions() {
-    this.selectedLoginSubscription = this.dataService.selectedLogin.subscribe((login: Login | null) => {
+    this.dataService.selectedLogin.pipe(takeUntil(this.destroy$)).subscribe((login: Login | null) => {
       this.selectedLogin = login;
     });
 
-    this.deletedLoginSubscription = this.dataService.deletedLogin.subscribe((login: Login | null) => {
+    this.dataService.deletedLogin.pipe(takeUntil(this.destroy$)).subscribe((login: Login | null) => {
       if (login) {
         this.allLogins = this.allLogins.filter(l => l.id !== login.id);
         this.setDisplayedLogins();
@@ -98,7 +104,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.updatedLoginSubscription = this.dataService.updatedLogin.subscribe((login: Login | null) => {
+    this.dataService.updatedLogin.pipe(takeUntil(this.destroy$)).subscribe((login: Login | null) => {
       if (login) {
         const index = this.allLogins.findIndex(l => l.id === login.id);
         if (index !== -1) {
@@ -111,15 +117,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         }
       }
     });
-  }
-
-  unsubscribeAllSubscriptions() {
-    this.selectedLoginSubscription?.unsubscribe();
-    this.updatedLoginSubscription?.unsubscribe();
-    this.deletedLoginSubscription?.unsubscribe();
-    this.selectedLoginSubscription = null;
-    this.updatedLoginSubscription = null;
-    this.deletedLoginSubscription = null;
   }
 
   setDisplayedLogins() {
@@ -141,7 +138,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   }
 
   openAddLoginModal() {
-    const dialogRef = this.dialog.open(AddEditLoginModalComponent,
+    this.dialog.open(AddEditLoginModalComponent,
       {
         panelClass: 'custom-modal',
         width: '600px',
@@ -154,9 +151,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
           login: null
         }
       }
-    );
-
-    dialogRef.afterClosed().subscribe(async (result: Login) => {
+    ).afterClosed().pipe(take(1)).subscribe(async (result: Login) => {
       if (result) {
         this.allLogins.push(result);
         this.displayedLogins.push(result);
@@ -166,7 +161,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   }
 
   openChangeMasterPasswordModal() {
-    const dialogRef = this.dialog.open(ChangeMasterPasswordModalComponent,
+    this.dialog.open(ChangeMasterPasswordModalComponent,
       {
         panelClass: 'custom-modal',
         width: '400px',
@@ -175,25 +170,32 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         disableClose: true,
         autoFocus: true
       }
-    );
-    dialogRef.afterClosed().subscribe(async newMasterPassword => {
+    ).afterClosed().pipe(take(1)).subscribe(async newMasterPassword => {
       if (newMasterPassword != null) {
-        try {
-          this.startLoading();
-          this.vaultService.clearKey();
-          await this.vaultService.setKeyAsync(newMasterPassword);
-          this.dataService.setSelectedLogin(null);
-          this.allLogins = await this.vaultService.encryptAllLoginsAsync(this.allLogins);
-          let updatedLogins = await this.loginService.updateLoginsBulkAsync(this.allLogins.map(l => UpdateLoginDto.fromLogin(l)));
-          updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
-        } catch (error: any) {
-          ToastWrapper.error('Failed to change master password: ', error.message ?? error);
-          console.error('Error changing master password:', error);
-          this.stopLoading();
-        } finally {
-          this.stopLoading();
-          ToastWrapper.success('Master password changed successfully');
-        }
+        await this.changeMasterPassword(newMasterPassword);
+      }
+    });
+  }
+
+  private async changeMasterPassword(newMasterPassword: string) {
+    this.startLoading();
+    this.vaultService.clearKey();
+    await this.vaultService.setKeyAsync(newMasterPassword);
+    this.dataService.setSelectedLogin(null);
+    this.allLogins = await this.vaultService.encryptAllLoginsAsync(this.allLogins);
+    this.loginService.updateLoginsBulk$(this.allLogins.map(l => UpdateLoginDto.fromLogin(l))).pipe(take(1)).subscribe({
+      next: async (updatedLogins: Login[]) => {
+        console.log('All logins updated successfully');
+        updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
+        this.allLogins = updatedLogins;
+        this.setDisplayedLogins();
+        this.computeStacks();
+        this.stopLoading();
+        ToastWrapper.success('Master password changed successfully');
+      },
+      error: (error: any) => {
+        ToastWrapper.error('Failed to update logins: ', error.message ?? error);
+        console.error('Error updating logins:', error);
       }
     });
   }

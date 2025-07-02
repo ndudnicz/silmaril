@@ -13,6 +13,7 @@ import { ToastWrapper } from '../../utils/toast.wrapper';
 import { UserService } from '../../services/user.service';
 import { VaultService } from '../../services/vault.service';
 import { BaseComponent } from '../base-component/base-component.component';
+import { take } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -46,22 +47,37 @@ export class SigninComponent extends BaseComponent {
     super(inject(NgxSpinnerService));
   }
 
-  async onSubmit() {
-    try {
-      this.startLoading();
-      const result = await this.authService.authAsync(this.form.value.username, this.form.value.password)
-      ToastWrapper.success('Authentication successful');
-      const user = await this.userService.getUserAsync();
-      console.log('user:', user);
-      this.vaultService.setSalt(user.saltBase64);
-      this.router.navigate(['/home']);
-    } catch (error: any) {
-      console.log(error);
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      ToastWrapper.error(errorMessage, null);
-    } finally {
-      this.stopLoading();
-    }
+  onSubmit() {
+    this.startLoading();
+    this.authService.auth$(this.form.value.username, this.form.value.password)
+      .pipe(take(1))
+      .subscribe({
+        next: () => this.onAuthSuccess(),
+        error: (error: any) => {
+          console.error('Authentication error:', error);
+          const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+          ToastWrapper.error(errorMessage, null);
+          this.stopLoading();
+        }
+      });
+  }
+
+  onAuthSuccess() {
+    ToastWrapper.success('Authentication successful');
+    this.userService.getUser$().pipe(take(1)).subscribe({
+      next: (user) => {
+        console.log('user:', user);
+        this.vaultService.setSalt(user.saltBase64);
+        this.stopLoading();
+        this.router.navigate(['/home']);
+      },
+      error: (error: any) => {
+        console.error('Error fetching user:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        ToastWrapper.error(errorMessage, null);
+        this.stopLoading();
+      }
+    });
   }
 
   keypress(event: KeyboardEvent) {

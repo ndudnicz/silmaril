@@ -7,7 +7,6 @@ import { DecryptedData, Login } from '../entities/login';
 @Injectable({ providedIn: 'root' })
 export class VaultService {
   private SALT_KEY_NAME = 'vault-salt';
-  // private salt!: Uint8Array | null;
   private key: CryptoKey | null = null;
 
   constructor() {

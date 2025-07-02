@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-change-username-modal',
@@ -47,7 +48,7 @@ export class ChangeUsernameModalComponent extends BaseComponent {
         confirmText: 'Confirm',
         cancelText: 'Cancel'
       }
-    }).afterClosed().subscribe(async (confirmed: boolean) => {
+    }).afterClosed().pipe(take(1)).subscribe(async (confirmed: boolean) => {
       console.log('Confirm modal closed with confirmation:', confirmed);
       if (confirmed) {
         await this.saveSettings();
@@ -55,29 +56,36 @@ export class ChangeUsernameModalComponent extends BaseComponent {
         this.closeDialog();
       }
     });
- 
+
   }
 
-  async saveSettings() {
+  saveSettings() {
     if (this.form.invalid) {
       console.error('Form is invalid:', this.form.errors);
       return;
     }
     this.startLoading();
-    try {
-      await this.userService.upadateUserAsync({
-        username: this.userNameFormControl.value!
-      });
-      ToastWrapper.success('Username changed successfully');
-      this.form.reset();
-      this.stopLoading();
-      this.dialogRef.close();
-    } catch (error: any) {
-      console.error('Error changing username:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      ToastWrapper.error('Failed to change username', errorMessage);
-      this.stopLoading();
-    }
+    this.userService.updateUser$({
+      username: this.userNameFormControl.value!
+    }).pipe(take(1)).subscribe({
+      next: async (updatedUser) => {
+        console.log('Username updated successfully:', updatedUser);
+        this.onUsernameChangeSuccess();
+      },
+      error: (error: any) => {
+        console.error('Error updating username:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        ToastWrapper.error('Failed to change username', errorMessage);
+        this.stopLoading();
+      }
+    });
+  }
+
+  onUsernameChangeSuccess() {
+    ToastWrapper.success('Username changed successfully');
+    this.form.reset();
+    this.stopLoading();
+    this.closeDialog();
   }
 
   closeDialog() {

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { FetchService } from './fetch.service';
 import { CreateLoginDto, Login, UpdateLoginDto } from '../entities/login';
 import { environment } from '../../environments/environment';
+import { catchError, map, Observable, tap, throwError } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -9,112 +10,76 @@ import { environment } from '../../environments/environment';
 export class LoginService {
   private apiEndpointV1 = environment.apiEndpoint + '/v1';
 
-  constructor(private fetchService: FetchService) { }
+  constructor(private http: HttpClient) { }
 
-  async getLoginsAsync(): Promise<Login[]> {
-    try {
-      const response = await this.fetchService.getAsync(`${this.apiEndpointV1}/login`, {});
-      if (!response.ok) {
-        throw new Error(`Failed to fetch logins: ${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      const logins = await response.json() as Login[];
-      return logins.map(login => {
-        return Login.fromObject(login);
+  getLogins$(): Observable<Login[]> {
+    return this.http.get<Login[]>(`${this.apiEndpointV1}/login`).pipe(
+      map((logins: Login[]) =>
+        logins.map(login => Login.fromObject(login))
+      ),
+      catchError(error => {
+        console.error('Error fetching logins:', error);
+        return throwError(() => new Error('Failed to fetch logins'));
       })
-    } catch (error) {
-      console.error('Error fetching logins:', error);
-      throw error;
-    }
+    );
   }
 
-  async getDeletedLoginsAsync(): Promise<Login[]> {
-    try {
-      const response = await this.fetchService.getAsync(`${this.apiEndpointV1}/login/deleted`, {});
-      if (!response.ok) {
-        throw new Error(`Failed to fetch deleted logins: ${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      const logins = await response.json() as Login[];
-      return logins.map(login =>  Login.fromObject(login));
-    } catch (error) {
-      console.error('Error fetching deleted logins:', error);
-      throw error;
-    }
+  getDeletedLogins$(): Observable<Login[]> {
+    return this.http.get<Login[]>(`${this.apiEndpointV1}/login/deleted`).pipe(
+      map(logins => logins.map(login => Login.fromObject(login))),
+      catchError(error => {
+        console.error('Error fetching deleted logins:', error);
+        return throwError(() => new Error('Failed to fetch deleted logins'));
+      })
+    );
+  }
+  createLogin$(createLoginDto: CreateLoginDto): Observable<Login> {
+    return this.http.post<Login>(`${this.apiEndpointV1}/login`, createLoginDto).pipe(
+      map(login => Login.fromObject(login)),
+      catchError(error => {
+        console.error('Error creating login:', error);
+        return throwError(() => new Error('Failed to create login'));
+      })
+    );
   }
 
-  async createLoginAsync(createLoginDto: CreateLoginDto): Promise<Login> {
-    try {
-      const response = await this.fetchService.postAsync(`${this.apiEndpointV1}/login`, {
-        body: JSON.stringify(createLoginDto)
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to create login: ${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      return Login.fromObject(await response.json());
-    } catch (error) {
-      console.error('Error creating login:', error);
-      throw error;
-    }
+  createLoginsBulk$(createLoginDtos: CreateLoginDto[]): Observable<Login[]> {
+    return this.http.post<Login[]>(`${this.apiEndpointV1}/login/bulk`, createLoginDtos).pipe(
+      map(logins => logins.map(login => Login.fromObject(login))),
+      catchError(error => {
+        console.error('Error creating logins bulk:', error);
+        return throwError(() => new Error('Failed to create logins bulk'));
+      })
+    );
   }
 
-    async createLoginsBulkAsync(createLoginDtos: CreateLoginDto[]): Promise<Login[]> {
-    try {
-      const response = await this.fetchService.postAsync(`${this.apiEndpointV1}/login/bulk`, {
-        body: JSON.stringify(createLoginDtos)
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to create logins bulk: ${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      const logins = await response.json() as Login[];
-      return logins.map(login =>  Login.fromObject(login));
-    } catch (error) {
-      console.error('Error creating login:', error);
-      throw error;
-    }
+  updateLogin$(updateLoginDto: UpdateLoginDto): Observable<Login> {
+    return this.http.put<Login>(`${this.apiEndpointV1}/login`, updateLoginDto).pipe(
+      tap(() => console.log('Updating login with data:', updateLoginDto)),
+      map(login => Login.fromObject(login)),
+      catchError(error => {
+        console.error('Error updating login:', error);
+        return throwError(() => new Error('Failed to update login'));
+      })
+    );
   }
 
-  async updateLoginAsync(updateLoginDto: UpdateLoginDto): Promise<Login> {
-    try {
-      console.log('Updating login with data:', updateLoginDto);
-      
-      const response = await this.fetchService.putAsync(`${this.apiEndpointV1}/login`, {
-        body: JSON.stringify(updateLoginDto)
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to update login: ${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      return Login.fromObject(await response.json());
-    } catch (error) {
-      console.error('Error updating login:', error);
-      throw error;
-    }
+  updateLoginsBulk$(updateLoginDtos: UpdateLoginDto[]): Observable<Login[]> {
+    return this.http.put<Login[]>(`${this.apiEndpointV1}/login/bulk`, updateLoginDtos).pipe(
+      map(logins => logins.map(login => Login.fromObject(login))),
+      catchError(error => {
+        console.error('Error updating logins:', error);
+        return throwError(() => new Error('Failed to update logins bulk'));
+      })
+    );
   }
 
-  async updateLoginsBulkAsync(updateLoginDtos: UpdateLoginDto[]): Promise<Login[]> {
-    try {
-      const response = await this.fetchService.putAsync(`${this.apiEndpointV1}/login/bulk`, {
-        body: JSON.stringify(updateLoginDtos)
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to update logins bulk: ${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      const updatedLogins = await response.json() as Login[];
-      return updatedLogins.map(login => Login.fromObject(login));
-    } catch (error) {
-      console.error('Error updating logins:', error);
-      throw error;
-    }
-  }
-
-  async deleteLoginAsync(id: string): Promise<number> {
-    try {
-      const response = await this.fetchService.deleteAsync(`${this.apiEndpointV1}/login/${id}`, {});
-      if (!response.ok) {
-        throw new Error(`Failed to delete login: ${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      return response.body ? await response.json() as number : 0;
-    } catch (error) {
-      console.error('Error deleting login:', error);
-      throw error;
-    }
+  deleteLogin$(id: string): Observable<number> {
+    return this.http.delete<number>(`${this.apiEndpointV1}/login/${id}`).pipe(
+      catchError(error => {
+        console.error('Error deleting login:', error);
+        return throwError(() => new Error('Failed to delete login'));
+      })
+    );
   }
 }

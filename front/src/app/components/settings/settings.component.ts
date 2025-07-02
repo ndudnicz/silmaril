@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ChangeUsernameModalComponent } from './modals/change-username/change-username-modal.component';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-settings',
@@ -27,7 +28,7 @@ export class SettingsComponent extends BaseComponent {
   }
 
   openChangePasswordModal() {
-    const dialogRef = this.dialog.open(ChangePasswordModalComponent,
+    this.dialog.open(ChangePasswordModalComponent,
       {
         panelClass: 'custom-modal',
         width: '400px',
@@ -36,12 +37,11 @@ export class SettingsComponent extends BaseComponent {
         disableClose: true,
         autoFocus: true
       }
-    );
-    dialogRef.afterClosed().subscribe(_ => { });
+    ).afterClosed().pipe(take(1)).subscribe(_ => { });
   }
 
   openChangeUserNameModal() {
-    const dialogRef = this.dialog.open(ChangeUsernameModalComponent,
+    this.dialog.open(ChangeUsernameModalComponent,
       {
         panelClass: 'custom-modal',
         width: '400px',
@@ -50,7 +50,6 @@ export class SettingsComponent extends BaseComponent {
         disableClose: true,
         autoFocus: true
       }
-    );
-    dialogRef.afterClosed().subscribe(_ => { });
+    ).afterClosed().pipe(take(1)).subscribe(_ => { });
   }
 }

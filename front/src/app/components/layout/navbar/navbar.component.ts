@@ -10,6 +10,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../../utils/toast.wrapper';
 import { VaultService } from '../../../services/vault.service';
 import { BaseComponent } from '../../base-component/base-component.component';
+import { pipe, take } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -29,11 +30,11 @@ export class NavbarComponent extends BaseComponent {
     private authService: AuthService,
     protected vaultService: VaultService
   ) {
-    super(inject(NgxSpinnerService)); 
+    super(inject(NgxSpinnerService));
     console.log('NavbarComponent initialized', this.vaultService.isUnlocked());
   }
 
-  async signout() {
+  signout() {
     this.dialog.open(ConfirmModalComponent, {
       panelClass: 'custom-modal',
       data: {
@@ -47,21 +48,25 @@ export class NavbarComponent extends BaseComponent {
         disableClose: true,
         autoFocus: true
       }
-    }).afterClosed().subscribe(async (confirmed: boolean) => {
+    }).afterClosed().pipe(take(1)).subscribe(async (confirmed: boolean) => {
       if (confirmed) {
         this.startLoading();
         console.log('Signing out...');
-        try {
-          await this.authService.signoutAsync();
-          ToastWrapper.success('Signed out successfully');
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500)
-        } catch (error: any) {
-          ToastWrapper.error('Signout failed: ', error.message ?? error);
-          console.error('Error during signout:', error);
-          this.stopLoading();
-        }
+        this.authService.signout$().pipe(take(1)).subscribe({
+          next: (result) => {
+            console.log('Signout result:', result);
+            
+            ToastWrapper.success('Signed out successfully');
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500)
+          },
+          error: (error: any) => {
+            console.error('Signout error:', error);
+            this.stopLoading();
+            throw error;
+          },
+        });
       }
     });
   }

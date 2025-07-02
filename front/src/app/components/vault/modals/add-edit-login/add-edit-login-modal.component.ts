@@ -15,6 +15,7 @@ import { LoginService } from '../../../../services/login.service';
 import { ToastWrapper } from '../../../../utils/toast.wrapper';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
 import { BaseComponent } from '../../../base-component/base-component.component';
+import { from, Observable, switchMap, take } from 'rxjs';
 
 @Component({
 
@@ -102,71 +103,86 @@ export class AddEditLoginModalComponent extends BaseComponent {
       notes: this.notesFormControl.value || ''
     });
     const encryptionResult = await CryptoUtilsV1.encryptDataAsync(this.vaultService.getKey(), decryptedData.toString());
-    try {
-      if (this.mode === AddEditLoginModalComponent.MODAL_MOD.ADD) {
-        this.startLoading();
-        const login: Login = await this.createLogin(encryptionResult);
-        ToastWrapper.success('Login created successfully')
-        this.dialogRef.close(login);
-      } else {
-        this.dialog.open(ConfirmModalComponent, {
-          panelClass: 'custom-modal',
-          data: {
-            title: `Edit Login ${this.login?.decryptedData?.title}`,
-            message: `Are you sure you want to edit the login "${this.login?.decryptedData?.title}"?`,
-            confirmText: 'Confirm',
-            cancelText: 'Cancel',
-            width: '400px',
-            height: 'auto',
-            closeOnNavigation: false,
-            disableClose: true,
-            autoFocus: true
-          }
-        }).afterClosed().subscribe(async (confirmed: boolean) => {
-          if (!confirmed) {
-            return;
-          }
-          this.startLoading();
-          const updatedLogin: Login = await this.editLogin(encryptionResult);
-          ToastWrapper.success('Login updated successfully');
+    if (this.mode === AddEditLoginModalComponent.MODAL_MOD.ADD) {
+      this.startLoading();
+      this.createLogin(encryptionResult).pipe(take(1)).subscribe({
+        next: (login: Login) => {
+          console.log('Login created successfully:', login);
           this.stopLoading();
-          this.dialogRef.close(updatedLogin);
+          this.dialogRef.close(login);
+        },
+        error: (error: any) => {
+          console.error('Error creating login:', error);
+          ToastWrapper.error('Failed to create login: ', error instanceof Error ? error.message : 'Unknown error');
+          this.stopLoading();
+          throw error;
+        }
+      });
+    } else {
+      this.dialog.open(ConfirmModalComponent, {
+        panelClass: 'custom-modal',
+        data: {
+          title: `Edit Login ${this.login?.decryptedData?.title}`,
+          message: `Are you sure you want to edit the login "${this.login?.decryptedData?.title}"?`,
+          confirmText: 'Confirm',
+          cancelText: 'Cancel',
+          width: '400px',
+          height: 'auto',
+          closeOnNavigation: false,
+          disableClose: true,
+          autoFocus: true
+        }
+      }).afterClosed().pipe(take(1)).subscribe(async (confirmed: boolean) => {
+        if (!confirmed) {
+          return;
+        }
+        this.startLoading();
+        this.editLogin(encryptionResult).pipe(take(1)).subscribe({
+          next: (updatedLogin: Login) => {
+            console.log('Login updated successfully:', updatedLogin);
+            ToastWrapper.success('Login updated successfully');
+            this.stopLoading();
+            this.dialogRef.close(updatedLogin);
+          },
+          error: (error: any) => {
+            console.error('Error updating login:', error);
+            ToastWrapper.error('Failed to update login: ', error instanceof Error ? error.message : 'Unknown error');
+            this.stopLoading();
+            throw error;
+          }
         });
-      }
-    } catch (error: any) {
-      console.error('Error during form submission:', error);
-      ToastWrapper.error('Failed to process login: ', error instanceof Error ? error.message : 'Unknown error');
-    } finally {
-      this.stopLoading();
+      });
     }
   }
 
-  async createLogin(encryptionResult: EncryptionResult): Promise<Login> {
+  createLogin(encryptionResult: EncryptionResult): Observable<Login> {
     const createLoginDto: CreateLoginDto = {
       encryptedDataBase64: uint8ArrayToBase64(encryptionResult.ciphertext),
       initializationVectorBase64: uint8ArrayToBase64(encryptionResult.initializationVector),
       encryptionVersion: encryptionResult.encryptionVersion,
       tagNames: []
     };
-    try {
-      let login: Login = await this.loginService.createLoginAsync(createLoginDto);
-      return await this.vaultService.decryptLoginDataAsync(login);
-    } catch (error: any) {
-      throw new Error('Failed to create login: ' + (error instanceof Error ? error.message : 'Unknown error'));
-    }
+
+    return this.loginService.createLogin$(createLoginDto).pipe(
+      take(1),
+      switchMap((createdLogin: Login) =>
+        from(this.vaultService.decryptLoginDataAsync(createdLogin))
+      )
+    );
   }
 
-  async editLogin(encryptionResult: EncryptionResult): Promise<Login> {
+  editLogin(encryptionResult: EncryptionResult): Observable<Login> {
     this.login!.encryptedData = encryptionResult.ciphertext;
     this.login!.initializationVector = encryptionResult.initializationVector;
     this.login!.encryptionVersion = encryptionResult.encryptionVersion;
     const updateLoginDto: UpdateLoginDto = UpdateLoginDto.fromLogin(this.login!);
-    try {
-      let updatedLogin: Login = await this.loginService.updateLoginAsync(updateLoginDto);
-      return await this.vaultService.decryptLoginDataAsync(updatedLogin);
-    } catch (error: any) {
-      throw new Error('Failed to update login: ' + (error instanceof Error ? error.message : 'Unknown error'));
-    }
+
+    return this.loginService.updateLogin$(updateLoginDto).pipe(
+      take(1),
+      switchMap((updatedLogin: Login) =>
+        from(this.vaultService.decryptLoginDataAsync(updatedLogin))
+      )
+    );
   }
 
   closeDialog() {
@@ -188,7 +204,7 @@ export class AddEditLoginModalComponent extends BaseComponent {
       height: 'auto',
       closeOnNavigation: false,
       disableClose: true,
-    }).afterClosed().subscribe((generatedPassword: string | null) => {
+    }).afterClosed().pipe(take(1)).subscribe((generatedPassword: string | null) => {
       console.log('Generated password:', generatedPassword);
       if (generatedPassword) {
         this.passwordFormControl.setValue(generatedPassword);

@@ -16,7 +16,7 @@ import { LoginService } from '../../../services/login.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { AddEditLoginModalComponent } from '../modals/add-edit-login/add-edit-login-modal.component';
 import { BaseComponent } from '../../base-component/base-component.component';
-import { Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -85,7 +85,7 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
     this.dataService.setSelectedLogin(null);
   }
 
-  togglePasswordVisibility() {
+  togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
     const passwordField = document.querySelector<HTMLInputElement>('#selected-login-password');
     if (passwordField) {
@@ -93,8 +93,8 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
     }
   }
 
-  openEditModal() {
-    const dialogRef = this.dialog.open(AddEditLoginModalComponent,
+  openEditModal(): void {
+    this.dialog.open(AddEditLoginModalComponent,
       {
         panelClass: 'custom-modal',
         width: '600px',
@@ -107,16 +107,15 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
           login: this.login
         }
       }
-    );
-    dialogRef.afterClosed().subscribe(async (result: Login) => {
+    ).afterClosed().pipe(take(1)).subscribe((result: Login) => {
       if (result) {
         this.dataService.setUpdatedLogin(result);
-        this.dataService.setSelectedLogin(result); // Clear selected login after edit
+        this.dataService.setSelectedLogin(result);
       }
     });
   }
 
-  openDeleteModal() {
+  openDeleteModal(): void {
     this.dialog.open(ConfirmModalComponent, {
       panelClass: 'custom-modal',
       data: {
@@ -130,26 +129,34 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
         disableClose: true,
         autoFocus: true
       }
-    }).afterClosed().subscribe(async (confirmed: boolean) => {
+    }).afterClosed().pipe(take(1)).subscribe((confirmed: boolean): void => {
       if (confirmed) {
         this.startLoading();
-        try {
-          this.login!.deleted = true;
-          const updatedLogin = await this.loginService.updateLoginAsync(UpdateLoginDto.fromLogin(this.login!));
-          this.dataService.setUpdatedLogin(updatedLogin);
-          this.dataService.setSelectedLogin(null);
-          ToastWrapper.success('Login deleted successfully');
-        } catch (error: any) {
-          ToastWrapper.error('Failed to delete login: ', error.message || 'Unknown error');
-          console.error('Error during login deletion:', error);
-        } finally {
-          this.stopLoading();
-        }
+        this.login!.deleted = true;
+        this.loginService.updateLogin$(UpdateLoginDto.fromLogin(this.login!))
+          .pipe(take(1))
+          .subscribe({
+            next: (updatedLogin: Login) => this.onUpdateLoginSuccess(updatedLogin),
+            error: (error: any) => {
+              console.error('Error deleting login:', error);
+              ToastWrapper.error('Failed to delete login: ', error.message || 'Unknown error');
+              this.stopLoading();
+              throw error;
+            }
+          });
       }
     })
   }
 
-  selectInputText(event: Event) {
+  onUpdateLoginSuccess(updatedLogin: Login): void {
+    console.log('Login updated successfully:', updatedLogin);
+    this.dataService.setUpdatedLogin(updatedLogin);
+    this.dataService.setSelectedLogin(updatedLogin);
+    ToastWrapper.success('Login updated successfully');
+    this.stopLoading();
+  }
+
+  selectInputText(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     inputElement.readOnly = false;
     inputElement.select();

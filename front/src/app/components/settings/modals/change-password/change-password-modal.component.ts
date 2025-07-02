@@ -14,6 +14,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../../services/auth.service';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
 import { BaseComponent } from '../../../base-component/base-component.component';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-change-password-modal',
@@ -76,40 +77,56 @@ export class ChangePasswordModalComponent extends BaseComponent {
         confirmText: 'Confirm',
         cancelText: 'Cancel'
       }
-    }).afterClosed().subscribe(async (confirmed: boolean) => {
+    }).afterClosed().pipe(take(1)).subscribe(async (confirmed: boolean) => {
       console.log('Confirm modal closed with confirmation:', confirmed);
       if (confirmed) {
-        await this.saveSettings();
+        this.saveSettings();
       } else {
         this.closeDialog();
       }
     });
- 
+
   }
 
-  async saveSettings() {
+  saveSettings() {
     if (this.form.invalid) {
       console.error('Form is invalid:', this.form.errors);
       return;
     }
     this.startLoading();
-    try {
-      await this.userService.changePasswordAsync(
-        this.oldPasswordFormControl.value!,
-        this.newPasswordFormControl.value!,
-      );
-      ToastWrapper.success('Password changed successfully');
-      this.form.reset();
-      await this.authService.signoutAsync();
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500)
-    } catch (error: any) {
-      console.error('Error changing password:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      ToastWrapper.error('Failed to change password', errorMessage);
-      this.stopLoading();
-    }
+    this.userService.changePassword$(
+      this.oldPasswordFormControl.value!,
+      this.newPasswordFormControl.value!,
+    ).pipe(take(1)).subscribe({
+      next: () => {
+        this.onPasswordChangeSuccess();
+      },
+      error: (error: any) => {
+        console.error('Error changing password:', error);
+        ToastWrapper.error('Error changing password', error.message ?? error);
+        this.stopLoading();
+        throw error;
+      }
+    });
+  }
+
+  onPasswordChangeSuccess() {
+    ToastWrapper.success('Password changed successfully');
+    this.form.reset();
+    this.authService.signout$().pipe(take(1)).subscribe({
+      next: () => {
+        ToastWrapper.success('Signed out successfully')
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500)
+      },
+      error: (error: any) => {
+        console.error('Signout error:', error);
+        ToastWrapper.error('Signout error', error.message ?? error);
+        this.stopLoading();
+        throw error;
+      }
+    });
   }
 
   closeDialog() {

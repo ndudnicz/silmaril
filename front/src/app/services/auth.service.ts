@@ -3,6 +3,8 @@ import { environment } from '../../environments/environment';
 import { jwtDecode } from "jwt-decode";
 import { AuthResponse } from '../entities/authentication/authResponse';
 import { VaultService } from './vault.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, firstValueFrom, map, Observable, Subscription, tap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +20,11 @@ export class AuthService {
   private readonly CSRF_HEADER_NAME = 'X-CSRF-TOKEN';
   private timeoutRefreshToken: any = null;
   private refreshTokenDelay = 60; // seconds
+  private refreshTokenSubscription: Subscription | null = null;
 
   constructor(
-    private vaultService: VaultService
+    private vaultService: VaultService,
+    private http: HttpClient
   ) { }
 
   private setLocalStorage(authResponse: AuthResponse): void {
@@ -50,87 +54,84 @@ export class AuthService {
       clearTimeout(this.timeoutRefreshToken);
       this.timeoutRefreshToken = null;
     }
+    this.refreshTokenSubscription?.unsubscribe();
+    this.refreshTokenSubscription = null;
     var jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES))
     if (jwtExpires) {
       const now = Math.floor(Date.now() / 1000);
       const refreshTime = jwtExpires - now - this.refreshTokenDelay; // Refresh 1 minute before expiration
       console.log(`JWT Expires at: ${jwtExpires}, next refresh in: ${refreshTime} seconds`);
       this.timeoutRefreshToken = setTimeout(() => {
-        this.refreshTokenAsync().catch(error => console.error('Error refreshing token:', error));
+        this.refreshTokenSubscription = this.refreshToken$().subscribe({
+          next: () => console.log('Token refreshed successfully'),
+          error: (error) => console.error('Error refreshing token:', error)
+        });
       }, refreshTime * 1000);
     }
   }
 
-  public async authAsync(username: string, password: string): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.apiEndpointV1}/auth`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, password }),
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        throw new Error(`${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      const data = await response.json() as AuthResponse;
-      this.setLocalStorage(data);
-      this.setRefreshTokenTimeout();
-      this.setCsrfToken(this.getCookie(this.CSRF_COOKIE_NAME) ?? '');
-      return response.ok;
-    } catch (error) {
-      console.error('Error during authentication:', error);
-      throw error;
-    }
+  public auth$(username: string, password: string): Observable<boolean> {
+    const url = `${this.apiEndpointV1}/auth`;
+    const body = { username, password };
+
+    return this.http.post<AuthResponse>(url, body, {
+      withCredentials: true
+    }).pipe(
+      tap(response => {
+        this.setLocalStorage(response);
+        this.setRefreshTokenTimeout();
+        this.setCsrfToken(this.getCookie(this.CSRF_COOKIE_NAME) ?? '');
+      }),
+      map(() => true),
+      catchError(error => {
+        console.error('Error during authentication:', error);
+        return throwError(() => new Error('Authentication failed'));
+      })
+    );
   }
 
-  public async refreshTokenAsync(): Promise<boolean> {
-    try {
-      console.log('Refreshing token...');
-      const response = await fetch(`${this.apiEndpointV1}/auth/refresh-token`, {
-        method: 'POST',
-        headers: new Headers([
-          ['Content-Type', 'application/json'],
-          [this.CSRF_HEADER_NAME, this.getCsrfToken() ?? '']
-        ]),
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        throw new Error(`Token refresh failed: ${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      const data = await response.json() as AuthResponse;
-      this.setLocalStorage(data);
-      console.log('Token refreshed successfully');
-      this.setRefreshTokenTimeout();
-      return response.ok;
-    } catch (error) {
-      console.error('Error during authentication:', error);
-      throw error;
-    }
+  public refreshToken$(): Observable<boolean> {
+    const url = `${this.apiEndpointV1}/auth/refresh-token`;
+    const headers = new HttpHeaders({
+      [this.CSRF_HEADER_NAME]: this.getCsrfToken() ?? ''
+    });
+
+    return this.http.post<AuthResponse>(url, {}, {
+      headers,
+      withCredentials: true
+    }).pipe(
+      tap(response => {
+        this.setLocalStorage(response);
+        console.log('Token refreshed successfully');
+        this.setRefreshTokenTimeout();
+      }),
+      map(() => true),
+      catchError(error => {
+        console.error('Error during token refresh:', error);
+        return throwError(() => new Error('Token refresh failed'));
+      })
+    );
   }
 
-  public async signoutAsync(): Promise<void> {
-    try {
-      const response = await fetch(`${this.apiEndpointV1}/auth/signout`, {
-        method: 'POST',
-        headers: this.addAuthHeader({
-          'Content-Type': 'application/json'
-        }),
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        throw new Error(`Signout failed: ${response.body ? await response.text() : 'Unknown error'}`);
-      }
-      this.vaultService.clearKey();
-      this.vaultService.clearSalt();
-      this.clearLocalStorage();
-    } catch (error) {
-      console.error('Error during signout:', error);
-      throw error;
-    }
-  }
+  public signout$(): Observable<boolean> {
+    const url = `${this.apiEndpointV1}/auth/signout`;
 
+    return this.http.post<string>(url, {}, {
+      withCredentials: true,
+      responseType: 'text' as 'json'
+    }).pipe(
+      tap(() => {
+        this.vaultService.clearKey();
+        this.vaultService.clearSalt();
+        this.clearLocalStorage();
+      }),
+      map(() => true),
+      catchError(error => {
+        console.error('Error during signout:', error);
+        return throwError(() => new Error('Signout failed'));
+      })
+    );
+  }
   public getJwtToken(): string | null {
     return localStorage.getItem(this.JWT_TOKEN_KEY);
   }
