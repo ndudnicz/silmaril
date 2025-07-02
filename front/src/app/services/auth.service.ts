@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { AuthResponse } from '../entities/authentication/authResponse';
 import { VaultService } from './vault.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, firstValueFrom, map, Observable, Subscription, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, Subscription, tap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +19,7 @@ export class AuthService {
   private readonly CSRF_COOKIE_NAME = 'XSRF-TOKEN';
   private readonly CSRF_HEADER_NAME = 'X-CSRF-TOKEN';
   private timeoutRefreshToken: any = null;
-  private refreshTokenDelay = 60; // seconds
+  private refreshTokenDelayInSeconds = 60;
   private refreshTokenSubscription: Subscription | null = null;
 
   constructor(
@@ -59,7 +59,7 @@ export class AuthService {
     var jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES))
     if (jwtExpires) {
       const now = Math.floor(Date.now() / 1000);
-      const refreshTime = jwtExpires - now - this.refreshTokenDelay; // Refresh 1 minute before expiration
+      const refreshTime = jwtExpires - now - this.refreshTokenDelayInSeconds; // Refresh 1 minute before expiration
       console.log(`JWT Expires at: ${jwtExpires}, next refresh in: ${refreshTime} seconds`);
       this.timeoutRefreshToken = setTimeout(() => {
         this.refreshTokenSubscription = this.refreshToken$().subscribe({
@@ -92,12 +92,9 @@ export class AuthService {
 
   public refreshToken$(): Observable<boolean> {
     const url = `${this.apiEndpointV1}/auth/refresh-token`;
-    const headers = new HttpHeaders({
-      [this.CSRF_HEADER_NAME]: this.getCsrfToken() ?? ''
-    });
 
     return this.http.post<AuthResponse>(url, {}, {
-      headers,
+      headers: this.addCsrfHeader(),
       withCredentials: true
     }).pipe(
       tap(response => {
@@ -147,18 +144,8 @@ export class AuthService {
     return Number(localStorage.getItem('jwtExpires')) > Math.floor(Date.now() / 1000);
   }
 
-  public addAuthHeader(headers: HeadersInit = new Headers({})): Headers {
-    const h = new Headers(headers || {});
-    if (this.getJwtToken() && this.isTokenValid()) {
-      h.append('Authorization', `Bearer ${this.getJwtToken()}`);
-    }
-    return h;
-  }
-
-  public addCsrfHeader(headers: HeadersInit = new Headers({})): Headers {
-    const h = new Headers(headers || {});
-    h.append(this.CSRF_HEADER_NAME, this.getCsrfToken() ?? '');
-    return h;
+  public addCsrfHeader(headers: HttpHeaders = new HttpHeaders({})): HttpHeaders {
+    return headers.append(this.CSRF_HEADER_NAME, this.getCsrfToken() ?? '');
   }
 
   public isAuthenticated(): boolean {

@@ -23,9 +23,6 @@ public class AuthService(
     
     public static void ValidatePasswordFormat(string password)
     {
-        // The password must be at least 8 characters long, contain at least one letter, one digit,
-        // one uppercase letter, one lowercase letter and contains at least one special character.
-        const string specialCharacters = "!@#$%^&*()-_=+[]{}|;:',.<>?/";
         if (!PasswordFormatIsValid(password))
         {
             throw new InvalidPasswordFormat();
