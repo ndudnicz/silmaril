@@ -1,5 +1,6 @@
 using Api.Entities.Dtos;
-using Api.Services;
+using Api.Mappers.Interfaces;
+using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,21 +9,14 @@ namespace Api.Controllers;
 [Authorize]
 public class UserController(
     ILogger<UserController> logger,
-    IUserService userService
+    IUserService userService,
+    IUserMapper userMapper
     ) : MyControllerV1
 {
     [HttpGet]
     public async Task<IActionResult> GetAsync()
     {
-        try
-        {
-            return Ok(UserDto.FromUser(await userService.GetUserAsync(GetUserId())));
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error getting user");
-            return BadRequest(ex.Message);
-        }
+            return Ok(userMapper.ToDto(await userService.GetUserAsync(GetUserId())));
     }
     
     [HttpPost]
@@ -31,7 +25,7 @@ public class UserController(
     {
         try
         {
-            return Ok(UserDto.FromUser(await userService.CreateUserAsync(createUserDto)));
+            return Ok(userMapper.ToDto(await userService.CreateUserAsync(createUserDto)));
         }
         catch (Exception ex)
         {
@@ -45,7 +39,7 @@ public class UserController(
     {
         try
         {
-            return Ok(UserDto.FromUser(await userService.UpdateUserAsync(GetUserId(), updateUserDto)));
+            return Ok(userMapper.ToDto(await userService.UpdateUserAsync(GetUserId(), updateUserDto)));
         }
         catch (Exception ex)
         {
@@ -60,7 +54,7 @@ public class UserController(
     {
         try
         {
-            return Ok(UserDto.FromUser(await userService.UpdateUserPasswordAsync(GetUserId(), updateUserPasswordDto)));
+            return Ok(userMapper.ToDto(await userService.UpdateUserPasswordAsync(GetUserId(), updateUserPasswordDto)));
         }
         catch (Exception ex)
         {

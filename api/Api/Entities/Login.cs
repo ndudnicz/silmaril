@@ -1,6 +1,4 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Api.Entities.Dtos;
-using Api.Helpers;
 
 namespace Api.Entities;
 
@@ -15,25 +13,11 @@ public class Login: MyEntity
     public int? EncryptionVersion { get; set; }
     [Column("initialization_vector")]
     public byte[]? InitializationVector { get; set; }
-    public List<Tag> Tags { get; set; } = new();
+    public List<Tag> Tags { get; set; } = [];
     [Column("deleted")]
     public bool Deleted { get; set; } = false;
     [NotMapped]
     public string[] TagNames => Tags.Select(t => t.Name).ToArray();
-    
-    public static Login FromCreateLoginDto(CreateLoginDto dto)
-    {
-        return new Login
-        {
-            EncryptedData = CryptoHelper.DecodeBase64(dto.EncryptedDataBase64 ?? string.Empty),
-            Tags = dto.TagNames.Select(name => new Tag { Name = name }).ToList(),
-            EncryptionVersion = dto.EncryptionVersion,
-            InitializationVector = CryptoHelper.DecodeBase64(dto.InitializationVectorBase64 ?? string.Empty)
-        };
-    }
-    
-    public static List<Login> FromCreateLoginDtos(IEnumerable<CreateLoginDto> dtos)
-    {
-        return dtos.Select(FromCreateLoginDto).ToList();
-    }
+    [Column("vault_id")]
+    public required Guid VaultId { get; set; }
 }

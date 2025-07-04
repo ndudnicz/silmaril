@@ -1,7 +1,7 @@
 using Api.Entities;
 using Api.Entities.Dtos;
 
-namespace Api.Services;
+namespace Api.Services.Interfaces;
 
 public interface IUserService
 {

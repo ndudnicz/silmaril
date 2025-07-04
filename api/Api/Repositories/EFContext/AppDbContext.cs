@@ -12,7 +12,6 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        
         modelBuilder.Entity<User>(entity =>
         {
             entity.Property(e => e.Salt)
@@ -37,6 +36,12 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
             .WithMany();
         modelBuilder.Entity<RefreshToken>()
             .HasOne<User>()
+            .WithOne();
+        modelBuilder.Entity<Vault>()
+            .HasMany(v => v.Logins)
+            .WithOne();
+        modelBuilder.Entity<User>()
+            .HasMany<Vault>()
             .WithOne();
 
         // Rename tables and columns to lower snake_case

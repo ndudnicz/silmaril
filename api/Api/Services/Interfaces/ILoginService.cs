@@ -1,6 +1,6 @@
 using Api.Entities.Dtos;
 
-namespace Api.Services;
+namespace Api.Services.Interfaces;
 
 public interface ILoginService
 {
@@ -11,4 +11,5 @@ public interface ILoginService
     public Task<LoginDto> UpdateLoginAsync(UpdateLoginDto updateLoginDto, Guid userId);
     public Task<List<LoginDto>> UpdateLoginsAsync(List<UpdateLoginDto> updateLoginDtos, Guid userId);
     public Task<int> DeleteLoginByUserIdAsync(Guid id, Guid userId);
+    public Task<int> DeleteLoginsByUserIdAsync(List<Guid> ids, Guid userId);
 }

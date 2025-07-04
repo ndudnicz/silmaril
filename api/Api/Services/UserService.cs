@@ -2,8 +2,9 @@ using Api.Entities;
 using Api.Entities.Dtos;
 using Api.Exceptions;
 using Api.Helpers;
-using Api.Repositories;
-using Api.Services.Validation;
+using Api.Repositories.Interfaces;
+using Api.Services.Interfaces;
+using Api.Services.Validation.Interfaces;
 
 namespace Api.Services;
 
@@ -12,6 +13,9 @@ public class UserService(
     IUserValidator userValidator
     ): IUserService
 {
+    // The NIST recommends a 16-byte salt length for deriving the user's Master Password key using PBKDF2 on the frontend.
+    private const int UserSaltLengthInBytes = 16;
+
     public async Task<User> GetUserAsync(Guid id)
     {
         var user = await userRepository.GetUserAsync(id);
@@ -37,34 +41,31 @@ public class UserService(
     public async Task<User> CreateUserAsync(CreateUserDto createUserDto)
     {
         var usernameHash = CryptoHelper.Sha512(createUserDto.Username);
-        await EnsureUserDoesNotExist(usernameHash);
-        AuthService.ValidatePasswordFormat(createUserDto.Password);
-        return await userRepository.CreateUserAsync(User.FromCreateUserDto(createUserDto));
+        await userValidator.EnsureDoesNotExistByUsernameHashAsync(usernameHash);
+        AuthService.EnsurePasswordFormatIsValid(createUserDto.Password);
+        return await userRepository.CreateUserAsync(new User
+        {
+            UsernameHash = CryptoHelper.Sha512(createUserDto.Username),
+            PasswordHash = CryptoHelper.Argon2idHash(createUserDto.Password),
+            Salt = CryptoHelper.GenerateRandomByte(UserSaltLengthInBytes)
+        });
     }
     
     public async Task<User> UpdateUserAsync(Guid userId, UpdateUserDto updateUserDto)
     {
         var usernameHash = CryptoHelper.Sha512(updateUserDto.Username);
-        await EnsureUserDoesNotExist(usernameHash);
+        await userValidator.EnsureDoesNotExistByUsernameHashAsync(usernameHash);
         var existingUser = await userRepository.GetUserAsync(userId);
         existingUser!.UsernameHash = usernameHash;
         return await userRepository.UpdateUserAsync(existingUser);
-    }
-    
-    private async Task EnsureUserDoesNotExist(string usernameHash)
-    {
-        if (await userRepository.UserExistsByUsernameHashAsync(usernameHash))
-        {
-            throw new UserNameAlreadyExists();
-        }
     }
 
     public async Task<User> UpdateUserPasswordAsync(Guid userId, UpdateUserPasswordDto updateUserPasswordDto)
     {
         await userValidator.EnsureExistsAsync(userId);
         var existingUser = await userRepository.GetUserAsync(userId);
-        AuthService.VerifyPasswordHash(updateUserPasswordDto.OldPassword, existingUser!.UsernameHash);
-        AuthService.ValidatePasswordFormat(updateUserPasswordDto.NewPassword);
+        AuthService.EnsurePasswordFormatIsValid(updateUserPasswordDto.NewPassword);
+        AuthService.EnsurePasswordIsValid(updateUserPasswordDto.OldPassword, existingUser!.UsernameHash);
         existingUser.PasswordHash = CryptoHelper.Argon2idHash(updateUserPasswordDto.NewPassword);
         return await userRepository.UpdateUserAsync(existingUser);
     }

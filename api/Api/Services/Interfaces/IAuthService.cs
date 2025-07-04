@@ -1,6 +1,6 @@
 using Api.Entities.Dtos.Authentication;
 
-namespace Api.Services;
+namespace Api.Services.Interfaces;
 
 public interface IAuthService
 {

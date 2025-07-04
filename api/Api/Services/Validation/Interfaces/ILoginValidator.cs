@@ -1,4 +1,4 @@
-namespace Api.Services.Validation;
+namespace Api.Services.Validation.Interfaces;
 
 public interface ILoginValidator
 {

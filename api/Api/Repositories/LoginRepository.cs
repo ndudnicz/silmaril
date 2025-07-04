@@ -1,5 +1,6 @@
 using Api.Entities;
 using Api.Repositories.EFContext;
+using Api.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories;
@@ -83,6 +84,13 @@ public class LoginRepository(AppDbContext db): ILoginRepository
     {
         return await db.Logins
             .Where(x => x.UserId == id && x.Id == userId)
+            .ExecuteDeleteAsync();
+    }
+
+    public async Task<int> DeleteLoginsByUserIdAsync(IEnumerable<Guid> ids, Guid userId)
+    {
+        return await db.Logins
+            .Where(x => x.UserId == userId && ids.Contains(x.Id))
             .ExecuteDeleteAsync();
     }
 }

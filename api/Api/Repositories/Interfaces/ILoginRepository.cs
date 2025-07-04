@@ -1,6 +1,6 @@
 using Api.Entities;
 
-namespace Api.Repositories;
+namespace Api.Repositories.Interfaces;
 
 public interface ILoginRepository
 {
@@ -14,4 +14,5 @@ public interface ILoginRepository
     public Task<Login> UpdateLoginAsync(Login login);
     public Task<List<Login>> UpdateLoginsAsync(List<Login> logins);
     public Task<int> DeleteLoginByUserIdAsync(Guid id, Guid userId);
+    public Task<int> DeleteLoginsByUserIdAsync(IEnumerable<Guid> ids, Guid userId);
 }

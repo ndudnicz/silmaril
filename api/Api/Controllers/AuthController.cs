@@ -1,7 +1,6 @@
 using Api.Configuration;
 using Api.Entities.Dtos.Authentication;
-using Api.Exceptions;
-using Api.Services;
+using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 

@@ -3,9 +3,9 @@ using Api.Entities;
 using Api.Entities.Dtos.Authentication;
 using Api.Exceptions;
 using Api.Helpers;
-using Api.Repositories;
+using Api.Repositories.Interfaces;
 using Api.Services;
-using Api.Services.Validation;
+using Api.Services.Validation.Interfaces;
 using FluentAssertions;
 using Moq;
 
@@ -55,7 +55,7 @@ public class AuthServiceTests
     {
         var password = "ValidPass1!";
 
-        var act = () => AuthService.ValidatePasswordFormat(password);
+        var act = () => AuthService.EnsurePasswordFormatIsValid(password);
 
         act.Should().NotThrow();
     }
@@ -65,7 +65,7 @@ public class AuthServiceTests
     {
         var password = "invalid";
         
-        var act = () => AuthService.ValidatePasswordFormat(password);
+        var act = () => AuthService.EnsurePasswordFormatIsValid(password);
         
         act.Should().Throw<InvalidPasswordFormat>();
     }

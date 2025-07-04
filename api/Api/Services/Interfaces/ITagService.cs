@@ -1,6 +1,6 @@
 using Api.Entities;
 
-namespace Api.Services;
+namespace Api.Services.Interfaces;
 
 public interface ITagService
 {

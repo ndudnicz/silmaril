@@ -1,42 +1,42 @@
 using Api.Entities;
 using Api.Entities.Dtos;
-using Api.Exceptions;
-using Api.Helpers;
-using Api.Repositories;
-using Api.Services.Validation;
+using Api.Mappers.Interfaces;
+using Api.Repositories.Interfaces;
+using Api.Services.Interfaces;
+using Api.Services.Validation.Interfaces;
 
 namespace Api.Services;
 
 public class LoginService(
     ILoginRepository loginRepository,
     ITagService tagService,
-    IUserRepository userRepository,
     IUserValidator userValidator,
-    ILoginValidator loginValidator
+    ILoginValidator loginValidator,
+    ILoginMapper loginMapper
 ) : ILoginService
 {
     public async Task<List<LoginDto>> GetLoginsByUserIdAsync(Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
-        return LoginDto.FromLogin(await loginRepository.GetLoginsWithTagsByUserIdAsync(userId));
+        return loginMapper.ToDto(await loginRepository.GetLoginsWithTagsByUserIdAsync(userId));
     }
 
     public async Task<List<LoginDto>> GetDeletedLoginsByUserIdAsync(Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
-        return LoginDto.FromLogin(await loginRepository.GetLoginsWithTagsByUserIdAsync(userId, true));
+        return loginMapper.ToDto(await loginRepository.GetLoginsWithTagsByUserIdAsync(userId, true));
     }
     
     public async Task<LoginDto> CreateLoginAsync(CreateLoginDto createLoginDto, Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
-        var login = Login.FromCreateLoginDto(createLoginDto);
+        var login = loginMapper.ToEntity(createLoginDto);
         login.UserId = userId;
         if (createLoginDto.TagNames.Length > 0)
         {
             login.Tags = await tagService.GetTagsByNamesAsync(createLoginDto.TagNames);
         }
-        return LoginDto.FromLogin(await loginRepository.CreateLoginAsync(login));
+        return loginMapper.ToDto(await loginRepository.CreateLoginAsync(login));
     }
 
     public async Task<List<LoginDto>> CreateLoginsAsync(List<CreateLoginDto> createLoginDtos, Guid userId)
@@ -46,10 +46,10 @@ public class LoginService(
             return [];
         }
         await userValidator.EnsureExistsAsync(userId);
-        var logins = Login.FromCreateLoginDtos(createLoginDtos);
+        var logins = loginMapper.ToEntity(createLoginDtos);
         var tags = await tagService.GetTagsAsync();
         logins.ForEach(login => AssignUserAndTagsToLogin(login, userId, tags));
-        return LoginDto.FromLogin(await loginRepository.CreateLoginsAsync(logins));
+        return loginMapper.ToDto(await loginRepository.CreateLoginsAsync(logins));
     }
     
     private void AssignUserAndTagsToLogin(Login login, Guid userId, List<Tag> availableTags)
@@ -66,19 +66,12 @@ public class LoginService(
         await userValidator.EnsureExistsAsync(userId);
         await loginValidator.EnsureExistsByUserIdAsync(dto.Id, userId);
         var login = await loginRepository.GetLoginWithTagsByUserIdAsync(dto.Id, userId);
-        await ApplyDtoToLoginAsync(dto, login!);
+        var tags = await tagService.GetTagsByNamesAsync(dto.TagNames);
+        loginMapper.FillEntityFromUpdateDto(login!, dto, tags);
         var updatedLogin = await loginRepository.UpdateLoginAsync(login!);
-        return LoginDto.FromLogin(updatedLogin);
+        return loginMapper.ToDto(updatedLogin);
     }
     
-    private async Task ApplyDtoToLoginAsync(UpdateLoginDto dto, Login login)
-    {
-        login.Tags = dto.TagNames.Length > 0 ? await tagService.GetTagsByNamesAsync(dto.TagNames) : [];
-        login.EncryptedData = CryptoHelper.DecodeBase64(dto.EncryptedDataBase64 ?? string.Empty);
-        login.InitializationVector = CryptoHelper.DecodeBase64(dto.InitializationVectorBase64 ?? string.Empty);
-        login.EncryptionVersion = dto.EncryptionVersion;
-        login.Deleted = dto.Deleted;
-    }
     
     public async Task<List<LoginDto>> UpdateLoginsAsync(List<UpdateLoginDto> updateLoginDtos, Guid userId)
     {
@@ -91,7 +84,7 @@ public class LoginService(
         var existingLogins = await loginRepository.GetLoginsByIdsAndUserIdWithTagsAsync(updateLoginDtos.Select(l => l.Id), userId);
         var existingLoginsDictionary = existingLogins.ToDictionary(l => l.Id, l => l);
         await ApplyDtosToLoginsAsync(updateLoginDtos, existingLoginsDictionary);
-        return LoginDto.FromLogin(await loginRepository.UpdateLoginsAsync(existingLoginsDictionary.Values.ToList()));
+        return loginMapper.ToDto(await loginRepository.UpdateLoginsAsync(existingLoginsDictionary.Values.ToList()));
     }
     
     private async Task ApplyDtosToLoginsAsync(List<UpdateLoginDto> updateLoginDtos, Dictionary<Guid, Login> existingLoginsDictionary)
@@ -105,24 +98,23 @@ public class LoginService(
         foreach (var dto in updateLoginDtos)
         {
             var login = existingLoginsDictionary[dto.Id];
-            UpdateLoginFromDto(login, dto, allTags);
+            loginMapper.FillEntityFromUpdateDto(login, dto, allTags.Where(x => dto.TagNames.Contains(x.Name)).ToList());
         }
-    }
-    
-    private void UpdateLoginFromDto(Login login, UpdateLoginDto dto, List<Tag> allTags)
-    {
-        login.Tags = allTags
-            .Where(tag => dto.TagNames.Contains(tag.Name, StringComparer.OrdinalIgnoreCase))
-            .ToList();
-        login.EncryptedData = CryptoHelper.DecodeBase64(dto.EncryptedDataBase64 ?? string.Empty);
-        login.InitializationVector = CryptoHelper.DecodeBase64(dto.InitializationVectorBase64 ?? string.Empty);
-        login.EncryptionVersion = dto.EncryptionVersion;
-        login.Deleted = dto.Deleted;
     }
 
     public async Task<int> DeleteLoginByUserIdAsync(Guid id, Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
         return await loginRepository.DeleteLoginByUserIdAsync(id, userId);
+    }
+    
+    public async Task<int> DeleteLoginsByUserIdAsync(List<Guid> ids, Guid userId)
+    {
+        if (ids.Count == 0)
+        {
+            return 0;
+        }
+        await userValidator.EnsureExistsAsync(userId);
+        return await loginRepository.DeleteLoginsByUserIdAsync(ids, userId);
     }
 }

@@ -2,18 +2,22 @@ namespace Api.Entities.Dtos;
 
 public class UserDto: MyEntity
 {
-    public required string UsernameHash { get; set; }
-    public required string SaltBase64 { get; set; }
-
-    public static UserDto FromUser(User user)
+    public string UsernameHash { get; set; }
+    private byte[] Salt { get; set; }
+    public string SaltBase64 => Convert.ToBase64String(Salt);
+    
+    public UserDto(
+        Guid id,
+        DateTime created,
+        DateTime? updated,
+        string usernameHash,
+        byte[] salt
+    )
     {
-        return new UserDto
-        {
-            Id = user.Id,
-            UsernameHash = user.UsernameHash,
-            Created = user.Created,
-            Updated = user.Updated,
-            SaltBase64 = Convert.ToBase64String(user.Salt)
-        };
+        Id = id;
+        Created = created;
+        Updated = updated;
+        UsernameHash = usernameHash;
+        Salt = salt;
     }
 }
