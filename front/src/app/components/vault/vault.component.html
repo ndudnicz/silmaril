@@ -19,6 +19,21 @@
             </button>
         </div>
         <div class="toolbar-button">
+            <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="Import / Export">
+                <mat-icon>import_export</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu" xPosition="before">
+                <button mat-menu-item (click)="openImportModal()">
+                    <mat-icon>upload</mat-icon>
+                    <span>Import</span>
+                </button>
+                <button mat-menu-item (click)="openExportModal()">
+                    <mat-icon>download</mat-icon>
+                    <span>Export</span>
+                </button>
+            </mat-menu>
+        </div>
+        <div class="toolbar-button">
             <button mat-icon-button (click)="openChangeMasterPasswordModal()" matTooltip="Change Master Password">
                 <mat-icon>vpn_key</mat-icon>
             </button>

@@ -21,6 +21,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { BaseComponent } from '../base-component/base-component.component';
 import { take, takeUntil } from 'rxjs';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-vault',
@@ -37,7 +38,8 @@ import { take, takeUntil } from 'rxjs';
     MatInputModule,
     FormsModule,
     ReactiveFormsModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatMenuModule
   ],
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'
@@ -223,5 +225,12 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     this.searchValue = '';
     this.setDisplayedLogins();
     this.computeStacks();
+  }
+
+  openImportModal() {
+  }
+
+  openExportModal() {
+
   }
 }
