@@ -13,8 +13,8 @@ const title = 'Silmaril - Password Manager';
 export const routes: Routes = [
     { path: 'what-is-master-password', title: title + ': What is a master password', component: WhatIsMasterPasswordComponent },
     { path: 'faq', title: title + ': FAQ', component: FaqComponent },
-            { path: 'signin', title: title + ': Sign in', component: SigninComponent, canActivate: [authNoAuthGuard] },
-            { path: 'signup', title: title + ': Sign up', component: SignupComponent, canActivate: [authNoAuthGuard] },
+    { path: 'signin', title: title + ': Sign in', component: SigninComponent, canActivate: [authNoAuthGuard] },
+    { path: 'signup', title: title + ': Sign up', component: SignupComponent, canActivate: [authNoAuthGuard] },
     {
         path: '', title: title, component: LayoutComponent, children: [
             { path: 'unlock', title: title + ': Unlock', component: UnlockComponent, canActivate: [authGuard] },
@@ -24,5 +24,4 @@ export const routes: Routes = [
             { path: '**', redirectTo: 'unlock', pathMatch: 'full' }
         ]
     }
-    // { path: '**', redirectTo: 'unlock', pathMatch: 'full' }
 ];

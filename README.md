@@ -16,7 +16,7 @@
 
 ## ⚙️ Stack
 
-- Front: Angular 19 / Material
+- Front: Angular 19 / RxJS
 - Api: .net 8 / Entity Framework
 - Database: MariaDB
 
@@ -50,6 +50,7 @@ cd api/Api
 export Jwt__SecretKeyBase64='your-jwt-secret-key-base64' # requires a 256 bits key length
 export Jwt__ValidIssuer='valid-issuer'
 export Jwt__ValidAudience='valid-audience'
+dotnet ef database update
 dotnet run
 # running on http://localhost:5000
 ```
