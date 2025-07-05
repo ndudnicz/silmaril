@@ -1,4 +1,5 @@
-using Api.Entities.Dtos;
+using Api.Entities.Dtos.Create;
+using Api.Entities.Dtos.Update;
 using Api.Mappers.Interfaces;
 using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;

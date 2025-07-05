@@ -8,7 +8,14 @@ public class UserMapper : IUserMapper
 {
     public UserDto ToDto(User user)
     {
-        return new UserDto(user.Id, user.Created, user.Updated, user.UsernameHash, user.Salt);
+        return new UserDto
+        {
+            Id = user.Id,
+            Created = user.Created,
+            Updated = user.Updated,
+            UsernameHash = user.UsernameHash!,
+            Salt = user.Salt!
+        };
     }
 
     public List<UserDto> ToDto(List<User> users)

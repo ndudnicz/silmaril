@@ -1,5 +1,7 @@
 using Api.Entities;
 using Api.Entities.Dtos;
+using Api.Entities.Dtos.Create;
+using Api.Entities.Dtos.Update;
 using Api.Helpers;
 using Api.Mappers.Interfaces;
 
@@ -9,18 +11,19 @@ public class LoginMapper : ILoginMapper
 {
     public LoginDto ToDto(Login login)
     {
-        return new LoginDto(
-            login.Id,
-            login.Created,
-            login.Updated,
-            login.VaultId,
-            login.Tags?.Select(x => x.Name).ToArray() ?? [],
-            login.UserId,
-            login.EncryptedData,
-            login.EncryptionVersion,
-            login.InitializationVector,
-            login.Deleted
-            );
+        return new LoginDto
+        {
+            Id = login.Id,
+            Created = login.Created,
+            Updated = login.Updated,
+            UserId = login.UserId,
+            VaultId = login.VaultId,
+            TagNames = login.Tags?.Select(x => x.Name).ToArray() ?? [],
+            EncryptedData = login.EncryptedData,
+            EncryptionVersion = login.EncryptionVersion,
+            InitializationVector = login.InitializationVector,
+            Deleted = login.Deleted
+        };
     }
 
     public List<LoginDto> ToDto(List<Login> logins)

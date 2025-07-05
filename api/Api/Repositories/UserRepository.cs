@@ -46,4 +46,11 @@ public class UserRepository(AppDbContext db): IUserRepository
         await db.SaveChangesAsync();
         return user;
     }
+    
+    public async Task<int> DeleteUserAsync(User user)
+    {
+        return await db.Users
+            .Where(u => u.Id == user.Id)
+            .ExecuteDeleteAsync();
+    }
 }

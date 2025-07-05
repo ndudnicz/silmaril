@@ -1,5 +1,6 @@
 namespace Api.Entities.Dtos;
 
-public class VaultDto: Vault
+public class VaultDto: MyEntity
 {
+    public required string Name { get; set; }
 }

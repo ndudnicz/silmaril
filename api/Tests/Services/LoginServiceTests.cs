@@ -1,5 +1,6 @@
 using Api.Entities;
-using Api.Entities.Dtos;
+using Api.Entities.Dtos.Create;
+using Api.Entities.Dtos.Update;
 using Api.Exceptions;
 using Api.Mappers;
 using Api.Mappers.Interfaces;
@@ -18,6 +19,7 @@ public class LoginServiceTests
     private readonly Mock<ITagService> _tagService = new();
     private readonly Mock<IUserValidator> _userValidator = new();
     private readonly Mock<ILoginValidator> _loginValidator = new();
+    private readonly Mock<IVaultValidator> _vaultValidator = new();
     private readonly ILoginMapper _loginMapper = new LoginMapper();
 
     private LoginService CreateService() =>
@@ -25,6 +27,7 @@ public class LoginServiceTests
             _tagService.Object,
             _userValidator.Object,
             _loginValidator.Object,
+            _vaultValidator.Object,
             _loginMapper);
 
     private static Login CreateTestLogin(
@@ -201,7 +204,7 @@ public class LoginServiceTests
         var deletedLogins = logins.Where(l => l.Deleted).ToList();
 
         _loginRepository
-            .Setup(r => r.GetLoginsWithTagsByUserIdAsync(userId, true))
+            .Setup(r => r.GetLoginsByUserIdWithTagsAsync(userId, true))
             .ReturnsAsync(deletedLogins);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
@@ -228,7 +231,7 @@ public class LoginServiceTests
         };
         var notDeletedLogins = logins.Where(l => l.Deleted == false).ToList();
         _loginRepository
-            .Setup(r => r.GetLoginsWithTagsByUserIdAsync(userId, false))
+            .Setup(r => r.GetLoginsByUserIdWithTagsAsync(userId, false))
             .ReturnsAsync(notDeletedLogins);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);

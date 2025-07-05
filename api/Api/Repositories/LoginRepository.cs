@@ -22,14 +22,29 @@ public class LoginRepository(AppDbContext db): ILoginRepository
             .AnyAsync();
     }
     
-    public async Task<Login?> GetLoginWithTagsByUserIdAsync(Guid id, Guid userId)
+    public async Task<bool> LoginExistsByVaultIdAsync(Guid id, Guid vaultId)
+    {
+        return await db.Logins
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == id && x.VaultId == vaultId);
+    }
+    
+    public async Task<bool> LoginsExistByVaultIdAsync(IEnumerable<Guid> ids, Guid vaultId)
+    {
+        return await db.Logins
+            .AsNoTracking()
+            .Where(x => ids.Contains(x.Id) && x.VaultId == vaultId)
+            .AnyAsync();
+    }
+    
+    public async Task<Login?> GetLoginWithTagsAsync(Guid id)
     {
         return await db.Logins
             .Include(l => l.Tags)
-            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<List<Login>> GetLoginsWithTagsByUserIdAsync(Guid userId, bool deleted = false)
+    public async Task<List<Login>> GetLoginsByUserIdWithTagsAsync(Guid userId, bool deleted = false)
     {
         return await db.Logins
             .AsNoTracking()
@@ -38,11 +53,19 @@ public class LoginRepository(AppDbContext db): ILoginRepository
             .ToListAsync();
     }
 
-    public async Task<List<Login>> GetLoginsByIdsAndUserIdWithTagsAsync(IEnumerable<Guid> ids, Guid userId)
+    public async Task<List<Login>> GetLoginsByVaultIdWithTagsAsync(Guid vaultId)
     {
         return await db.Logins
             .Include(l => l.Tags)
-            .Where(l => l.UserId == userId && ids.Contains(l.Id))
+            .Where(l => l.VaultId == vaultId && l.Deleted == false)
+            .ToListAsync();
+    }
+    
+    public async Task<List<Login>> GetLoginsWithTagsAsync(IEnumerable<Guid> ids)
+    {
+        return await db.Logins
+            .Include(l => l.Tags)
+            .Where(l => ids.Contains(l.Id))
             .ToListAsync();
     }
     
@@ -80,13 +103,27 @@ public class LoginRepository(AppDbContext db): ILoginRepository
         return logins;
     }
     
+    public async Task<int> DeleteLoginAsync(Guid id)
+    {
+        return await db.Logins
+            .Where(x => x.Id == id)
+            .ExecuteDeleteAsync();
+    }
+    
     public async Task<int> DeleteLoginByUserIdAsync(Guid id, Guid userId)
     {
         return await db.Logins
-            .Where(x => x.UserId == id && x.Id == userId)
+            .Where(x => x.Id == id && x.UserId == userId)
             .ExecuteDeleteAsync();
     }
 
+    public async Task<int> DeleteLoginsAsync(IEnumerable<Guid> ids)
+    {
+        return await db.Logins
+            .Where(x => ids.Contains(x.Id))
+            .ExecuteDeleteAsync();
+    }
+    
     public async Task<int> DeleteLoginsByUserIdAsync(IEnumerable<Guid> ids, Guid userId)
     {
         return await db.Logins

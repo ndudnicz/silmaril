@@ -1,6 +1,6 @@
 using Api.Helpers;
 
-namespace Api.Entities.Dtos;
+namespace Api.Entities.Dtos.Update;
 
 public record UpdateUserDto
 {

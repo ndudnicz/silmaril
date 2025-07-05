@@ -1,7 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Api.Entities.Dtos;
-using Api.Helpers;
 
 namespace Api.Entities;
 
@@ -16,14 +14,4 @@ public class User: MyEntity
     public required string PasswordHash { get; set; }
     [Column("salt")]
     public required byte[] Salt { get; set; }
-    
-    public static User FromCreateUserDto(CreateUserDto createUserDto)
-    {
-        return new User
-        {
-            UsernameHash = CryptoHelper.Sha512(createUserDto.Username),
-            PasswordHash = CryptoHelper.Argon2idHash(createUserDto.Password),
-            Salt = CryptoHelper.GenerateRandomByte(16) // 128 bits
-        };
-    }
 }

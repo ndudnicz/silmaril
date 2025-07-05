@@ -6,6 +6,7 @@ namespace Api.Repositories.EFContext;
 public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<Vault> Vaults { get; set; }
     public virtual DbSet<Login> Logins { get; set; }
     public virtual DbSet<Tag> Tags { get; set; }
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -26,9 +27,6 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
                 .HasColumnType("TinyBlob");
         });
         modelBuilder.Entity<User>()
-            .HasMany<Login>()
-            .WithOne();
-        modelBuilder.Entity<User>()
             .HasIndex(u => u.UsernameHash)
             .IsUnique();
         modelBuilder.Entity<Login>()
@@ -36,13 +34,17 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
             .WithMany();
         modelBuilder.Entity<RefreshToken>()
             .HasOne<User>()
-            .WithOne();
-        modelBuilder.Entity<Vault>()
-            .HasMany(v => v.Logins)
-            .WithOne();
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Login>()
+            .HasOne<Vault>()
+            .WithMany()
+            .HasForeignKey(l => l.VaultId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<User>()
             .HasMany<Vault>()
-            .WithOne();
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Rename tables and columns to lower snake_case
         foreach (var entity in modelBuilder.Model.GetEntityTypes())

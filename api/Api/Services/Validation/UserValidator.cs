@@ -14,7 +14,7 @@ public class UserValidator(IUserRepository userRepository) : IUserValidator
         }
     }
     
-    public async Task EnsureUserDoesNotExist(Guid id)
+    public async Task EnsureDoesNotExist(Guid id)
     {
         if (await userRepository.UserExistsAsync(id))
         {
