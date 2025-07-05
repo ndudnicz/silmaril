@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-change-master-password-modal',
@@ -60,7 +61,7 @@ export class ChangeMasterPasswordModalComponent {
         cancelText: 'Cancel'
       },
       panelClass: 'custom-modal'
-    }).afterClosed().subscribe(async confirmed => {
+    }).afterClosed().pipe(take(1)).subscribe(async confirmed => {
       if (confirmed) {
         this.dialogRef.close(confirmed ? this.form.value.newMasterPassword : null);
       }

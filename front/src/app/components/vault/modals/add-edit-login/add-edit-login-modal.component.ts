@@ -112,10 +112,8 @@ export class AddEditLoginModalComponent extends BaseComponent {
           this.dialogRef.close(login);
         },
         error: (error: any) => {
-          console.error('Error creating login:', error);
-          ToastWrapper.error('Failed to create login: ', error instanceof Error ? error.message : 'Unknown error');
+          this.displayError('Error creating login', error);
           this.stopLoading();
-          throw error;
         }
       });
     } else {
@@ -145,10 +143,8 @@ export class AddEditLoginModalComponent extends BaseComponent {
             this.dialogRef.close(updatedLogin);
           },
           error: (error: any) => {
-            console.error('Error updating login:', error);
-            ToastWrapper.error('Failed to update login: ', error instanceof Error ? error.message : 'Unknown error');
+            this.displayError('Error updating login', error);
             this.stopLoading();
-            throw error;
           }
         });
       });
@@ -164,7 +160,6 @@ export class AddEditLoginModalComponent extends BaseComponent {
     };
 
     return this.loginService.createLogin$(createLoginDto).pipe(
-      take(1),
       switchMap((createdLogin: Login) =>
         from(this.vaultService.decryptLoginDataAsync(createdLogin))
       )

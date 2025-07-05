@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -30,7 +30,7 @@ import { take } from 'rxjs';
   templateUrl: './signin.component.html',
   styleUrl: './signin.component.css'
 })
-export class SigninComponent extends BaseComponent {
+export class SigninComponent extends BaseComponent implements OnInit {
   usernameFormControl = new FormControl('');
   passwordFormControl = new FormControl('');
   form: FormGroup = new FormGroup({
@@ -47,6 +47,10 @@ export class SigninComponent extends BaseComponent {
     super(inject(NgxSpinnerService));
   }
 
+  ngOnInit(): void {
+    this.authService.getCsrfCookie();
+  }
+
   onSubmit() {
     this.startLoading();
     this.authService.auth$(this.form.value.username, this.form.value.password)
@@ -54,9 +58,7 @@ export class SigninComponent extends BaseComponent {
       .subscribe({
         next: () => this.onAuthSuccess(),
         error: (error: any) => {
-          console.error('Authentication error:', error);
-          const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-          ToastWrapper.error(errorMessage, null);
+          this.displayError('Authentication failed', error);
           this.stopLoading();
         }
       });
@@ -72,9 +74,7 @@ export class SigninComponent extends BaseComponent {
         this.router.navigate(['/home']);
       },
       error: (error: any) => {
-        console.error('Error fetching user:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        ToastWrapper.error(errorMessage, null);
+        this.displayError('Error fetching user:', error);
         this.stopLoading();
       }
     });

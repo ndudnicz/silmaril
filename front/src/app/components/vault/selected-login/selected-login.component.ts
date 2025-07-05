@@ -138,10 +138,8 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
           .subscribe({
             next: (updatedLogin: Login) => this.onUpdateLoginSuccess(updatedLogin),
             error: (error: any) => {
-              console.error('Error deleting login:', error);
-              ToastWrapper.error('Failed to delete login: ', error.message || 'Unknown error');
+              this.displayError('Error deleting login', error);
               this.stopLoading();
-              throw error;
             }
           });
       }

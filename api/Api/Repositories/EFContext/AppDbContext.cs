@@ -1,4 +1,6 @@
 using Api.Entities;
+using Api.Helpers;
+using Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories.EFContext;
@@ -18,6 +20,18 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
             entity.Property(e => e.Salt)
                 .HasColumnType("binary(16)")
                 .IsRequired();
+            entity.HasData(new List<User>
+            {
+                // {Username: "q", Password "q"}
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Created = DateTime.UtcNow,
+                    UsernameHash = "2E96772232487FB3A058D58F2C310023E07E4017C94D56CC5FAE4B54B44605F42A75B0B1F358991F8C6CBE9B68B64E5B2A09D0AD23FCAC07EE9A9198A745E1D5", // This is the SHA-512 hash of "q"
+                    PasswordHash = "$argon2id$v=19$m=16,t=2,p=1$ZEp5eWdQeDBXeGk2OWh6Qw$/sfpIugCYAcUqDG3xmx/2g",
+                    Salt = CryptoHelper.GenerateRandomByte(UserService.UserSaltLengthInBytes)
+                }
+            });
         });
         modelBuilder.Entity<Login>(entity =>
         {

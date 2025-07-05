@@ -1,10 +1,11 @@
 using Api.Entities;
 using Api.Repositories.EFContext;
+using Api.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories;
 
-public class VaultRepository(AppDbContext db)
+public class VaultRepository(AppDbContext db): IVaultRepository
 {
     public async Task<bool> VaultExistsByUserIdAsync(Guid id, Guid userId)
     {
@@ -20,11 +21,18 @@ public class VaultRepository(AppDbContext db)
             .Where(v => ids.Contains(v.Id) && v.UserId == userId)
             .AnyAsync();
     }
-    
-    public async Task<Vault?> GetVaultByUserIdAsync(Guid id)
+
+    public async Task<Vault?> GetVaultAsync(Guid id)
     {
         return await db.Vaults
             .FirstOrDefaultAsync(v => v.Id == id);
+    }
+    
+    public async Task<List<Vault>> GetVaultsByUserIdAsync(Guid userId)
+    {
+        return await db.Vaults
+            .Where(v => v.UserId == userId)
+            .ToListAsync();
     }
 
     public async Task<Vault> CreateVaultAsync(Vault vault)

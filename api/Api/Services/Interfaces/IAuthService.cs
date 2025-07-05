@@ -4,7 +4,7 @@ namespace Api.Services.Interfaces;
 
 public interface IAuthService
 {
-    public Task<AuthResponseDto> AuthAsync(AuthDto authDto);
-    public Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
-    public Task<int> RevokeRefreshTokenByUserIdAsync(Guid userId);
+    Task<AuthResponseDto> AuthAsync(AuthDto authDto);
+    Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
+    Task<int> RevokeRefreshTokenByUserIdAsync(Guid userId);
 }

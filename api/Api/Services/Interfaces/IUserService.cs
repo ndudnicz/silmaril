@@ -1,4 +1,5 @@
 using Api.Entities;
+using Api.Entities.Dtos;
 using Api.Entities.Dtos.Create;
 using Api.Entities.Dtos.Update;
 
@@ -6,9 +7,9 @@ namespace Api.Services.Interfaces;
 
 public interface IUserService
 {
-    public Task<User> GetUserByUserNameAsync(string username);
-    public Task<User> GetUserAsync(Guid id);
-    public Task<User> CreateUserAsync(CreateUserDto createUserDto);
-    public Task<User> UpdateUserAsync(Guid userId, UpdateUserDto updateUserDto);
-    public Task<User> UpdateUserPasswordAsync(Guid userId, UpdateUserPasswordDto updateUserPasswordDto);
+    Task<UserDto> GetUserByUserNameAsync(string username);
+    Task<UserDto> GetUserAsync(Guid id);
+    Task<UserDto> CreateUserAsync(CreateUserDto createUserDto);
+    Task<UserDto> UpdateUserAsync(Guid userId, UpdateUserDto updateUserDto);
+    Task<UserDto> UpdateUserPasswordAsync(Guid userId, UpdateUserPasswordDto updateUserPasswordDto);
 }

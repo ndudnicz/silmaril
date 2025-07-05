@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { UpdateUserDto, User } from '../entities/user';
 import { Observable } from 'rxjs/internal/Observable';
 import { catchError, map, throwError } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,8 @@ export class UserService {
   private apiEndpointV1 = environment.apiEndpoint + '/v1';
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) { }
 
   getUser$(): Observable<User> {
@@ -26,7 +28,12 @@ export class UserService {
 
   createUser$(username: string, password: string, confirmPassword: string): Observable<boolean> {
     const body = { username, password, confirmPassword };
-    return this.http.post(`${this.apiEndpointV1}/user`, body, { observe: 'response' }).pipe(
+    return this.http.post(`${this.apiEndpointV1}/user`,
+      body, {
+        observe: 'response',
+        withCredentials: true,
+        headers: this.authService.addCsrfHeader()
+      }).pipe(
       map(response => response.ok),
       catchError(error => {
         console.error('Error during user creation:', error);

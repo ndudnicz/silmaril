@@ -11,7 +11,7 @@ public class LoginMapper : ILoginMapper
 {
     public LoginDto ToDto(Login login)
     {
-        return new LoginDto
+        return new LoginDto(login.EncryptedData!, login.InitializationVector!)
         {
             Id = login.Id,
             Created = login.Created,
@@ -19,9 +19,7 @@ public class LoginMapper : ILoginMapper
             UserId = login.UserId,
             VaultId = login.VaultId,
             TagNames = login.Tags?.Select(x => x.Name).ToArray() ?? [],
-            EncryptedData = login.EncryptedData,
             EncryptionVersion = login.EncryptionVersion,
-            InitializationVector = login.InitializationVector,
             Deleted = login.Deleted
         };
     }

@@ -83,7 +83,10 @@ public class LoginServiceTests
             .Returns(Task.CompletedTask);
 
         var service = CreateService();
-        Func<Task> act = async () => await service.UpdateLoginAsync(new UpdateLoginDto(), Guid.NewGuid());
+        Func<Task> act = async () => await service.UpdateLoginAsync(new UpdateLoginDto
+        {
+            Id = Guid.NewGuid()
+        }, Guid.NewGuid());
 
         await act.Should().ThrowAsync<UserNotFound>();
     }
@@ -91,9 +94,11 @@ public class LoginServiceTests
     [Fact]
     public async Task DeleteLoginByUserIdAsync_ShouldReturnCount()
     {
-        _loginRepository.Setup(r => r.DeleteLoginByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+        _loginRepository.Setup(r => r.DeleteLoginAsync(It.IsAny<Guid>()))
             .ReturnsAsync(1);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
+            .Returns(Task.CompletedTask);
+        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
 
         var service = CreateService();
@@ -119,9 +124,11 @@ public class LoginServiceTests
     [Fact]
     public async Task DeleteLoginByUserIdAsync_WhenNoLoginDeleted_ShouldReturnZero()
     {
-        _loginRepository.Setup(r => r.DeleteLoginByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+        _loginRepository.Setup(r => r.DeleteLoginAsync(It.IsAny<Guid>()))
             .ReturnsAsync(0);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
+            .Returns(Task.CompletedTask);
+        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
 
         var service = CreateService();

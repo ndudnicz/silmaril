@@ -10,15 +10,15 @@ public class VaultValidator(IVaultRepository vaultRepository) : IVaultValidator
     {
         if (!await vaultRepository.VaultExistsByUserIdAsync(id, userId))
         {
-            throw new LoginNotFound("id", id.ToString());
+            throw new VaultNotFound("id", id.ToString());
         }
     }
 
-    public async Task EnsureExistsByUserIdAsync(IEnumerable<Guid> ids, Guid userId)
+    public async Task EnsureExistsByUserIdAsync(List<Guid> ids, Guid userId)
     {
         if (!await vaultRepository.VaultExistByUserIdAsync(ids, userId))
         {
-            throw new LoginsNotFound("ids", string.Join(", ", ids.Select(x => x.ToString())));
+            throw new VaultsNotFound("ids", string.Join(", ", ids.Select(x => x.ToString())));
         }
     }
 }

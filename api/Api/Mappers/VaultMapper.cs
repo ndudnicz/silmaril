@@ -12,6 +12,9 @@ public class VaultMapper : IVaultMapper
     {
         return new VaultDto
         {
+            Id = vault.Id,
+            Created = vault.Created,
+            Updated = vault.Updated,
             Name = vault.Name
         };
     }

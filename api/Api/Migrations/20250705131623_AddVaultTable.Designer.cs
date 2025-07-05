@@ -4,6 +4,7 @@ using Api.Repositories.EFContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250705131623_AddVaultTable")]
+    partial class AddVaultTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,16 +179,6 @@ namespace Api.Migrations
                         .HasDatabaseName("ix_users_username_hash");
 
                     b.ToTable("users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a93f1b66-8ffb-4f0b-9959-ed12586c2881"),
-                            Created = new DateTime(2025, 7, 5, 13, 26, 54, 537, DateTimeKind.Utc).AddTicks(8680),
-                            PasswordHash = "$argon2id$v=19$m=16,t=2,p=1$ZEp5eWdQeDBXeGk2OWh6Qw$/sfpIugCYAcUqDG3xmx/2g",
-                            Salt = new byte[] { 47, 127, 42, 112, 128, 90, 76, 129, 61, 243, 242, 251, 114, 228, 240, 167 },
-                            UsernameHash = "2E96772232487FB3A058D58F2C310023E07E4017C94D56CC5FAE4B54B44605F42A75B0B1F358991F8C6CBE9B68B64E5B2A09D0AD23FCAC07EE9A9198A745E1D5"
-                        });
                 });
 
             modelBuilder.Entity("Api.Entities.Vault", b =>

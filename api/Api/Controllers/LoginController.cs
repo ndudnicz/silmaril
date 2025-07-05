@@ -12,7 +12,7 @@ public class LoginController(
     ILoginService loginService
     ) : MyControllerV1
 {
-    [HttpGet]
+    [HttpGet("logins")]
     public async Task<IActionResult> GetLoginsAsync()
     {
         return Ok(await loginService.GetLoginsByUserIdAsync(GetUserId()));
@@ -27,13 +27,15 @@ public class LoginController(
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] CreateLoginDto createLoginDto)
     {
-        return Ok(await loginService.CreateLoginAsync(createLoginDto, GetUserId()));
+        var createdLogin = await loginService.CreateLoginAsync(createLoginDto, GetUserId());
+        return Created($"api/logins", createdLogin);
     }
     
     [HttpPost("bulk")]
     public async Task<IActionResult> CreateBulkAsync([FromBody] List<CreateLoginDto> createLoginDtos)
     {
-        return Ok(await loginService.CreateLoginsAsync(createLoginDtos, GetUserId()));
+        var createdLogins = await loginService.CreateLoginsAsync(createLoginDtos, GetUserId());
+        return Created($"api/logins", createdLogins);
     }
 
     [HttpPut]

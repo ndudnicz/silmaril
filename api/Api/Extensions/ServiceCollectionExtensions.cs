@@ -68,6 +68,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IAuthRepository, AuthRepository>();
+        services.AddScoped<IVaultRepository, VaultRepository>();
     }
     
     public static void AddServices(this IServiceCollection services)
@@ -76,12 +77,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITagService, TagService>();
+        services.AddScoped<IVaultService, VaultService>();
     }
     
     public static void AddValidators(this IServiceCollection services)
     {
         services.AddScoped<IUserValidator, UserValidator>();
         services.AddScoped<ILoginValidator, LoginValidator>();
+        services.AddScoped<IVaultValidator, VaultValidator>();
     }
 
     public static void AddMappers(this IServiceCollection services)

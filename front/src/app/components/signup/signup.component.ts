@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -14,6 +14,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { BaseComponent } from '../base-component/base-component.component';
 import { take } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   standalone: true,
@@ -31,7 +32,7 @@ import { take } from 'rxjs';
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css'
 })
-export class SignupComponent extends BaseComponent {
+export class SignupComponent extends BaseComponent implements OnInit {
   usernameFormControl = new FormControl('');
   passwordFormControl = new FormControl('', this.passwordValidator());
   confirmPasswordFormControl = new FormControl('', this.confirmPasswordValidator());
@@ -45,9 +46,14 @@ export class SignupComponent extends BaseComponent {
 
   constructor(
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService,
   ) {
     super(inject(NgxSpinnerService));
+  }
+
+  ngOnInit(): void {
+    this.authService.getCsrfCookie();
   }
 
   async onSubmit() {
@@ -59,9 +65,8 @@ export class SignupComponent extends BaseComponent {
     ).pipe(take(1)).subscribe({
       next: () => this.onUserCreationSuccess(),
       error: (error: any) => {
-        console.error('Error during user creation:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        ToastWrapper.error('Error during user creation', errorMessage);
+        this.displayError('Error during user creation:', error);
+        this.stopLoading();
       }
     });
   }

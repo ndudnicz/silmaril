@@ -110,12 +110,12 @@ public class LoginRepository(AppDbContext db): ILoginRepository
             .ExecuteDeleteAsync();
     }
     
-    public async Task<int> DeleteLoginByUserIdAsync(Guid id, Guid userId)
-    {
-        return await db.Logins
-            .Where(x => x.Id == id && x.UserId == userId)
-            .ExecuteDeleteAsync();
-    }
+    // public async Task<int> DeleteLoginByUserIdAsync(Guid id)
+    // {
+    //     return await db.Logins
+    //         .Where(x => x.Id == id)
+    //         .ExecuteDeleteAsync();
+    // }
 
     public async Task<int> DeleteLoginsAsync(IEnumerable<Guid> ids)
     {
@@ -124,10 +124,10 @@ public class LoginRepository(AppDbContext db): ILoginRepository
             .ExecuteDeleteAsync();
     }
     
-    public async Task<int> DeleteLoginsByUserIdAsync(IEnumerable<Guid> ids, Guid userId)
-    {
-        return await db.Logins
-            .Where(x => x.UserId == userId && ids.Contains(x.Id))
-            .ExecuteDeleteAsync();
-    }
+    // public async Task<int> DeleteLoginsByUserIdAsync(IEnumerable<Guid> ids, Guid userId)
+    // {
+    //     return await db.Logins
+    //         .Where(x => x.UserId == userId && ids.Contains(x.Id))
+    //         .ExecuteDeleteAsync();
+    // }
 }

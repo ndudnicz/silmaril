@@ -74,8 +74,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         this.computeStacks();
       },
       error: (error: any) => {
-        ToastWrapper.error('Failed to fetch logins: ', error.message ?? error);
-        console.error('Error fetching logins:', error);
+        this.displayError('Error fetching logins', error);
         this.stopLoading();
       },
       complete: async () => {
@@ -187,10 +186,9 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
       next: async (updatedLogins: Login[]) => {
         this.onUpdateLoginsSuccess(updatedLogins);
       },
-
       error: (error: any) => {
-        ToastWrapper.error('Failed to update logins: ', error.message ?? error);
-        console.error('Error updating logins:', error);
+        this.displayError('Error while changing master password', error);
+        this.stopLoading();
       }
     });
   }
@@ -203,7 +201,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     this.computeStacks();
     this.stopLoading();
     ToastWrapper.success('Master password changed successfully');
-
   }
 
   search(value: string) {

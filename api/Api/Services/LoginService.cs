@@ -18,7 +18,7 @@ public class LoginService(
     ILoginMapper loginMapper
 ) : ILoginService
 {
-    public async Task<List<LoginDto>> GetLoginsByUserIdAndVaultIdAsync(Guid userId, Guid vaultId)
+    public async Task<List<LoginDto>> GetLoginsByUserIdAndVaultIdAsync(Guid vaultId, Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
         await vaultValidator.EnsureExistsByUserIdAsync(vaultId, userId);
@@ -58,7 +58,7 @@ public class LoginService(
         }
         await userValidator.EnsureExistsAsync(userId);
         await vaultValidator.EnsureExistsByUserIdAsync(
-            createLoginDtos.Select(c => c.VaultId).Distinct(), userId);
+            createLoginDtos.Select(c => c.VaultId).Distinct().ToList(), userId);
         var logins = loginMapper.ToEntity(createLoginDtos);
         var tags = await tagService.GetTagsAsync();
         logins.ForEach(login => AssignUserAndTagsToLogin(login, userId, tags));
@@ -119,7 +119,8 @@ public class LoginService(
     public async Task<int> DeleteLoginByUserIdAsync(Guid id, Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
-        return await loginRepository.DeleteLoginByUserIdAsync(id, userId);
+        await loginValidator.EnsureExistsByUserIdAsync(id, userId);
+        return await loginRepository.DeleteLoginAsync(id);
     }
     
     public async Task<int> DeleteLoginsByUserIdAsync(List<Guid> ids, Guid userId)
@@ -129,6 +130,7 @@ public class LoginService(
             return 0;
         }
         await userValidator.EnsureExistsAsync(userId);
-        return await loginRepository.DeleteLoginsByUserIdAsync(ids, userId);
+        await loginValidator.EnsureExistsByUserIdAsync(ids, userId);
+        return await loginRepository.DeleteLoginsAsync(ids);
     }
 }

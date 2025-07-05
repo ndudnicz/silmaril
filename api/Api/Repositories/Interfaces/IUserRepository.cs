@@ -4,11 +4,11 @@ namespace Api.Repositories.Interfaces;
 
 public interface IUserRepository
 {
-    public Task<User?> GetUserAsync(Guid id);
-    public Task<User?> GetUserByUserNameAsync(string usernameHash);
-    public Task<bool> UserExistsAsync(Guid id);
-    public Task<bool> UserExistsByUsernameHashAsync(string usernameHash);
-    public Task<User> CreateUserAsync(User user);
-    public Task<User> UpdateUserAsync(User user);
-    public Task<int> DeleteUserAsync(User user);
+    Task<User?> GetUserAsync(Guid id);
+    Task<User?> GetUserByUserNameAsync(string usernameHash);
+    Task<bool> UserExistsAsync(Guid id);
+    Task<bool> UserExistsByUsernameHashAsync(string usernameHash);
+    Task<User> CreateUserAsync(User user);
+    Task<User> UpdateUserAsync(User user);
+    Task<int> DeleteUserAsync(User user);
 }
