@@ -20,7 +20,10 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { BaseComponent } from '../base-component/base-component.component';
-import { take, takeUntil } from 'rxjs';
+import { Subscription, take } from 'rxjs';
+import { Vault } from '../../entities/vault';
+import { ActivatedRoute, Params } from '@angular/router';
+import { truncateString } from '../../utils/string.utils';
 
 @Component({
   selector: 'app-vault',
@@ -44,66 +47,60 @@ import { take, takeUntil } from 'rxjs';
 })
 export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
 
-  readonly dialog = inject(MatDialog);
   allLogins: Login[] = [];
   displayedLogins: Login[] = [];
   displayedLoginStackEntries: KeyValue<string, Login[]>[] = [];
   selectedLogin: Login | null = null;
   searchValue = '';
+  vaultId: string | null = null;
+  selectedVault: Vault | null = null;
+  subscription: Subscription = new Subscription();
+  searchBarPlaceholder = 'Search in Vault';
+  searchBarPlaceholderMaxLength = 30;
 
   constructor(
     private vaultService: VaultService,
     private loginService: LoginService,
-    private dataService: DataService
+    private dataService: DataService,
+    private activatedRoute: ActivatedRoute,
+    private dialog: MatDialog,
   ) {
     super(inject(NgxSpinnerService));
-    this.setupLoginSubscriptions();
+    this.setupSubscriptions();
     console.log('VaultComponent initialized');
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
+
     this.startLoading();
-    this.loginService.getLogins$().pipe(take(1)).subscribe({
-      next: async (logins: Login[]) => {
-        this.allLogins = await this.vaultService.decryptAllLoginsAsync(logins);
-        console.log('Fetched logins:', this.allLogins);
-        if (this.allLogins.length === 0) {
-          ToastWrapper.info('No logins found. Please add a login.');
-        }
-        this.setDisplayedLogins();
-        this.computeStacks();
-      },
-      error: (error: any) => {
-        this.displayError('Error fetching logins', error);
-        this.stopLoading();
-      },
-      complete: async () => {
-        console.log('All logins fetched successfully');
-        this.stopLoading();
-      }
-    });
+    console.log('Activated Route Data:', this.activatedRoute.snapshot);
+
+    this.setupSubscriptions();
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.subscription.unsubscribe();
   }
 
-  setupLoginSubscriptions() {
-    this.dataService.selectedLogin.pipe(takeUntil(this.destroy$)).subscribe((login: Login | null) => {
-      this.selectedLogin = login;
-    });
+  setupSubscriptions(): void {
+    this.subscription.add(this.activatedRoute.params.subscribe(params => {
+      this.setupVault(params);
+    }));
 
-    this.dataService.deletedLogin.pipe(takeUntil(this.destroy$)).subscribe((login: Login | null) => {
+    this.subscription.add(this.dataService.selectedLogin.subscribe((login: Login | null) => {
+      this.selectedLogin = login;
+    }));
+
+    this.subscription.add(this.dataService.deletedLogin.subscribe((login: Login | null) => {
       if (login) {
         this.allLogins = this.allLogins.filter(l => l.id !== login.id);
         this.setDisplayedLogins();
         this.computeStacks();
         ToastWrapper.success('Login deleted successfully');
       }
-    });
+    }));
 
-    this.dataService.updatedLogin.pipe(takeUntil(this.destroy$)).subscribe((login: Login | null) => {
+    this.subscription.add(this.dataService.updatedLogin.subscribe((login: Login | null) => {
       if (login) {
         const index = this.allLogins.findIndex(l => l.id === login.id);
         if (index !== -1) {
@@ -114,6 +111,40 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         } else {
           console.warn('Updated login not found in current logins:', login);
         }
+      }
+    }));
+  }
+
+  setupVault(params: Params): void {
+    this.startLoading
+    console.log('Route params:', params);
+    this.vaultId = params['id'] || null;
+
+    if (this.vaultId) {
+      this.selectedVault = this.dataService.getVaults()?.find(v => v.id === this.vaultId) || null;
+      console.log('Selected Vault:', this.selectedVault);
+      this.searchBarPlaceholder = `Search in ${truncateString(this.selectedVault?.name || 'Vault', this.searchBarPlaceholderMaxLength)}`;
+      this.loadLogins();
+    }
+    else {
+      this.displayError('Vault ID not found in route data', null);
+      this.stopLoading();
+      return;
+    }
+  }
+
+  loadLogins(): void {
+    this.vaultService.getLogins$(this.vaultId!).pipe(take(1)).subscribe({
+      next: async (logins: Login[]) => {
+        console.log('Logins fetched successfully:', logins);
+        this.allLogins = await this.vaultService.decryptAllLoginsAsync(logins);
+        this.setDisplayedLogins();
+        this.computeStacks();
+        this.stopLoading();
+      },
+      error: (error: any) => {
+        this.displayError('Error fetching logins', error);
+        this.stopLoading();
       }
     });
   }
@@ -147,7 +178,8 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         autoFocus: true,
         data: {
           mode: AddEditLoginModalComponent.MODAL_MOD.ADD,
-          login: null
+          login: null,
+          vaultId: this.vaultId
         }
       }
     ).afterClosed().pipe(take(1)).subscribe(async (result: Login) => {

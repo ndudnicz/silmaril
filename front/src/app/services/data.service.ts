@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Login } from '../entities/login';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { Vault } from '../entities/vault';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,16 @@ export class DataService {
   private _updatedLogin: BehaviorSubject<Login | null> = new BehaviorSubject<Login | null>(null);
   public readonly updatedLogin: Observable<Login | null> = this._updatedLogin.asObservable();
   setUpdatedLogin(login: Login): void {
-    console.log(`DataService: Setting updated login:`, login);
     this._updatedLogin.next(login);
+  }
+
+
+  private _vaults: BehaviorSubject<Vault[] | null> = new BehaviorSubject<Vault[] | null>(null);
+  public readonly vaults: Observable<Vault[] | null> = this._vaults.asObservable();
+  setVaults(vaults: Vault[]): void {
+    this._vaults.next(vaults);
+  }
+  getVaults(): Vault[] | null {
+    return this._vaults.getValue();
   }
 }

@@ -1,9 +1,8 @@
 <div id="vault-container">
     <mat-toolbar id="toolbar">
-        <span class="toolbar-title">Vault</span>
         <div id="searchbar-container">
             <mat-form-field id="search-field" appearance="outline" floatLabel="always">
-                <input matInput type="text" [(ngModel)]="searchValue" placeholder="Search"
+                <input matInput type="text" [(ngModel)]="searchValue" [placeholder]="searchBarPlaceholder"
                     (ngModelChange)="search($event)" [ngModelOptions]="{standalone: true}">
                 @if (searchValue) {
                 <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">

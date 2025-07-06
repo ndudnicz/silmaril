@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -10,7 +10,11 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../../utils/toast.wrapper';
 import { VaultService } from '../../../services/vault.service';
 import { BaseComponent } from '../../base-component/base-component.component';
-import { pipe, take } from 'rxjs';
+import { Subscription, take } from 'rxjs';
+import { DataService } from '../../../services/data.service';
+import { Vault } from '../../../entities/vault';
+import { MatMenuModule } from '@angular/material/menu';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
@@ -19,19 +23,38 @@ import { pipe, take } from 'rxjs';
     MatButtonModule,
     RouterLink,
     MatTooltipModule,
-    MatDialogModule
+    MatDialogModule,
+    MatMenuModule,
+    CommonModule
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
-export class NavbarComponent extends BaseComponent {
+export class NavbarComponent extends BaseComponent implements OnDestroy {
+
+  subscription: Subscription = new Subscription();
+  vaults!: Vault[] | null;
+
   constructor(
     private dialog: MatDialog,
     private authService: AuthService,
-    protected vaultService: VaultService
+    protected vaultService: VaultService,
+    private dataService: DataService,
   ) {
     super(inject(NgxSpinnerService));
-    console.log('NavbarComponent initialized', this.vaultService.isUnlocked());
+    this.setupSubscriptions();
+  }
+
+  setupSubscriptions() {
+    this.subscription.add(this.dataService.vaults.subscribe(vaults => {
+      if (vaults) {
+        this.vaults = vaults;
+      }
+    }));
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   signout() {

@@ -13,7 +13,7 @@ public class VaultController(
     ILoginService loginService
     ): MyControllerV1
 {
-    [HttpGet("vaults")]
+    [HttpGet]
     public async Task<IActionResult> GetAsync()
     {
         return Ok(await vaultService.GetVaultsByUserIdAsync(GetUserId()));
@@ -26,14 +26,14 @@ public class VaultController(
         return Ok(logins);
     }
 
-    [HttpPost("")]
+    [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] CreateVaultDto createVaultDto)
     {
         var createdVault = await vaultService.CreateVaultAsync(createVaultDto, GetUserId());
         return Created("api/vaults", createdVault);
     }
     
-    [HttpPut("")]
+    [HttpPut]
     public async Task<IActionResult> UpdateAsync([FromBody] UpdateVaultDto updateVaultDto)
     {
         return Ok(await vaultService.UpdateVaultAsync(updateVaultDto, GetUserId()));

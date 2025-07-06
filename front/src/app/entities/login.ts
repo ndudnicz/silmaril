@@ -3,6 +3,7 @@ import { base64ToUint8Array, uint8ArrayToBase64 } from "../utils/crypto.utils";
 export class Login {
     id: string;
     userId: string;
+    vaultId: string;
     encryptedDataBase64?: string | null;
     encryptedData?: Uint8Array | null;
     decryptedData?: DecryptedData | null;
@@ -11,22 +12,24 @@ export class Login {
     initializationVectorBase64?: string | null;
     tagNames: string[];
     created: Date;
-    updated?: Date | null;
+    updated?: Date;
     deleted: boolean;
 
     constructor(
         id: string, 
         userId: string,
+        vaultId: string,
         deleted: boolean,
         created: Date,
         encryptedDataBase64?: string | null,
         initializationVectorBase64?: string | null,
         tagNames: string[] = [],
-        updated?: Date | null,
+        updated?: Date,
         encryptionVersion?: number | null
         ) {
         this.id = id;
         this.userId = userId;
+        this.vaultId = vaultId;
         this.encryptedDataBase64 = encryptedDataBase64;
         this.encryptedData = encryptedDataBase64 ? base64ToUint8Array(encryptedDataBase64) : null;
         this.initializationVector = initializationVectorBase64 ? base64ToUint8Array(initializationVectorBase64) : null;
@@ -48,6 +51,7 @@ export class Login {
         return new Login(
             obj.id || '',
             obj.userId || '',
+            obj.vaultId || '',
             obj.deleted || false,
             new Date(obj.created),
             obj.encryptedDataBase64 || undefined,
@@ -62,6 +66,7 @@ export class Login {
         return new Login(
             this.id,
             this.userId,
+            this.vaultId,
             this.deleted,
             new Date(this.created),
             this.encryptedDataBase64,
@@ -126,6 +131,7 @@ export class DecryptedData {
 }
 
 export interface CreateLoginDto {
+    vaultId: string;
     encryptedDataBase64: string;
     initializationVectorBase64: string;
     tagNames: string[];

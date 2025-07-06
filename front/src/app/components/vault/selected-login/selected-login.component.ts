@@ -43,7 +43,7 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
   password = '';
   url = '';
   notes = '';
-  selectedLoginSubscription: Subscription | null = null;
+  subscriptions: Subscription = new Subscription();
 
   constructor(
     private dataService: DataService,
@@ -55,19 +55,14 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribeAllSubscriptions();
+    this.subscriptions.unsubscribe();
   }
 
   setupLoginSubscriptions() {
-    this.dataService.selectedLogin.subscribe((login: Login | null) => {
+    this.subscriptions.add(this.dataService.selectedLogin.subscribe((login: Login | null) => {
       this.login = login;
       this.setValues();
-    });
-  }
-
-  unsubscribeAllSubscriptions() {
-    this.selectedLoginSubscription?.unsubscribe();
-    this.selectedLoginSubscription = null;
+    }));
   }
 
   setValues() {
@@ -104,7 +99,8 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
         autoFocus: true,
         data: {
           mode: AddEditLoginModalComponent.MODAL_MOD.EDIT,
-          login: this.login
+          login: this.login,
+          vaultId: this.login!.vaultId
         }
       }
     ).afterClosed().pipe(take(1)).subscribe((result: Login) => {

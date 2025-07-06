@@ -28,3 +28,10 @@
 .navbar-button {
     justify-content: flex-start;
 }
+
+.vaults-mat-menu {
+    background-color: red !important;
+    font-size: 40px !important;
+    position: absolute !important;
+    left: 133px !important;
+}

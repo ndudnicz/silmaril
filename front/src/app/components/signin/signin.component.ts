@@ -71,7 +71,7 @@ export class SigninComponent extends BaseComponent implements OnInit {
         console.log('user:', user);
         this.vaultService.setSalt(user.saltBase64);
         this.stopLoading();
-        this.router.navigate(['/home']);
+        this.router.navigate(['/vault']);
       },
       error: (error: any) => {
         this.displayError('Error fetching user:', error);

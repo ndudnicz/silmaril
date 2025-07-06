@@ -8,5 +8,4 @@ public record UpdateLoginDto
     public string[] TagNames { get; set; } = [];
     public int? EncryptionVersion { get; set; }
     public bool Deleted { get; set; }
-    public Guid VaultId { get; set; }
 }

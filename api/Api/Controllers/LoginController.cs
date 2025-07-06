@@ -12,7 +12,7 @@ public class LoginController(
     ILoginService loginService
     ) : MyControllerV1
 {
-    [HttpGet("logins")]
+    [HttpGet]
     public async Task<IActionResult> GetLoginsAsync()
     {
         return Ok(await loginService.GetLoginsByUserIdAsync(GetUserId()));
