@@ -3,7 +3,7 @@
 import { Injectable } from '@angular/core';
 import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
 import { DecryptedData, Login } from '../entities/login';
-import { Vault } from '../entities/vault';
+import { CreateVaultDto, Vault } from '../entities/vault';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, Observable, throwError } from 'rxjs';
@@ -150,13 +150,12 @@ export class VaultService {
     );
   }
 
-  public getLogins$(vaultId: string): Observable<Login[]> {
-    const url = `${this.apiEndpointV1}/vault/${vaultId}/logins`;
-
-    return this.http.get<Login[]>(url).pipe(
+  public createVault$(createVaultDto: CreateVaultDto): Observable<Vault> {
+    const url = `${this.apiEndpointV1}/vault`;
+    return this.http.post<Vault>(url, createVaultDto).pipe(
       catchError(error => {
-        console.error('Error fetching logins:', error);
-        return throwError(() => new Error('Failed to fetch logins'));
+        console.error('Error creating vault:', error);
+        return throwError(() => new Error('Failed to create vault'));
       })
     );
   }

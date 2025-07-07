@@ -18,12 +18,6 @@ public class LoginController(
         return Ok(await loginService.GetLoginsByUserIdAsync(GetUserId()));
     }
     
-    [HttpGet("deleted")]
-    public async Task<IActionResult> GetDeletedLoginsAsync()
-    {
-        return Ok(await loginService.GetDeletedLoginsByUserIdAsync(GetUserId()));
-    }
-    
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] CreateLoginDto createLoginDto)
     {

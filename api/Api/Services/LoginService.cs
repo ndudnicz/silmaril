@@ -18,23 +18,10 @@ public class LoginService(
     ILoginMapper loginMapper
 ) : ILoginService
 {
-    public async Task<List<LoginDto>> GetLoginsByUserIdAndVaultIdAsync(Guid vaultId, Guid userId)
-    {
-        await userValidator.EnsureExistsAsync(userId);
-        await vaultValidator.EnsureExistsByUserIdAsync(vaultId, userId);
-        return loginMapper.ToDto(await loginRepository.GetLoginsByVaultIdWithTagsAsync(vaultId));
-    }
-
     public async Task<List<LoginDto>> GetLoginsByUserIdAsync(Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
         return loginMapper.ToDto(await loginRepository.GetLoginsByUserIdWithTagsAsync(userId));
-    }
-    
-    public async Task<List<LoginDto>> GetDeletedLoginsByUserIdAsync(Guid userId)
-    {
-        await userValidator.EnsureExistsAsync(userId);
-        return loginMapper.ToDto(await loginRepository.GetLoginsByUserIdWithTagsAsync(userId, true));
     }
     
     public async Task<LoginDto> CreateLoginAsync(CreateLoginDto createLoginDto, Guid userId)

@@ -20,7 +20,6 @@ export class AuthService {
   private readonly CSRF_HEADER_NAME = 'X-CSRF-TOKEN';
   private timeoutRefreshToken: any = null;
   private refreshTokenDelayInSeconds = 60;
-  private refreshTokenSubscription: Subscription | null = null;
 
   constructor(
     private vaultService: VaultService,
@@ -54,19 +53,17 @@ export class AuthService {
       clearTimeout(this.timeoutRefreshToken);
       this.timeoutRefreshToken = null;
     }
-    this.refreshTokenSubscription?.unsubscribe();
-    this.refreshTokenSubscription = null;
     var jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES))
     if (jwtExpires) {
       const now = Math.floor(Date.now() / 1000);
       const refreshTime = jwtExpires - now - this.refreshTokenDelayInSeconds; // Refresh 1 minute before expiration
       console.log(`JWT Expires at: ${jwtExpires}, next refresh in: ${refreshTime} seconds`);
       this.timeoutRefreshToken = setTimeout(() => {
-        this.refreshTokenSubscription = this.refreshToken$()
-        .pipe(take(1))
-        .subscribe({
-          next: () => console.log('Token refreshed successfully'),
-          error: (error) => console.error('Error refreshing token:', error)
+        this.refreshToken$()
+          .pipe(take(1))
+          .subscribe({
+            next: () => console.log('Token refreshed successfully'),
+            error: (error) => console.error('Error refreshing token:', error)
         });
       }, refreshTime * 1000);
     }

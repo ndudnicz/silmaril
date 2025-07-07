@@ -18,13 +18,6 @@ public class VaultController(
     {
         return Ok(await vaultService.GetVaultsByUserIdAsync(GetUserId()));
     }
-    
-    [HttpGet("{id:guid}/logins")]
-    public async Task<IActionResult> GetVaultLoginsAsync([FromRoute] Guid id)
-    {
-        var logins = await loginService.GetLoginsByUserIdAndVaultIdAsync(id, GetUserId());
-        return Ok(logins);
-    }
 
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] CreateVaultDto createVaultDto)

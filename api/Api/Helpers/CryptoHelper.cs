@@ -47,5 +47,6 @@ public static class CryptoHelper
     
     public static byte[] DecodeBase64(string? base64) =>
         string.IsNullOrWhiteSpace(base64) ? [] : Convert.FromBase64String(base64);
-
+    
+    public static Guid GenerateSecureGuid() => new(GenerateRandomByte(16));
 }

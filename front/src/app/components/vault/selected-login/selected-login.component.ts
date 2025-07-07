@@ -17,6 +17,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { AddEditLoginModalComponent } from '../modals/add-edit-login/add-edit-login-modal.component';
 import { BaseComponent } from '../../base-component/base-component.component';
 import { Subscription, take } from 'rxjs';
+import { VaultService } from '../../../services/vault.service';
 
 @Component({
   standalone: true,
@@ -49,6 +50,7 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
     private dataService: DataService,
     private dialog: MatDialog,
     private loginService: LoginService,
+    private vaultService: VaultService,
   ) {
     super(inject(NgxSpinnerService));
     this.setupLoginSubscriptions();
@@ -111,12 +113,12 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
     });
   }
 
-  openDeleteModal(): void {
+  openSoftDeleteModal(): void {
     this.dialog.open(ConfirmModalComponent, {
       panelClass: 'custom-modal',
       data: {
         title: `Delete Login ${this.login?.decryptedData?.title}`,
-        message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? The data will be sent to the recycle bin and can be restored later.`,
+        message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? It will be sent to the recycle bin and can be restored later.`,
         confirmText: 'Confirm',
         cancelText: 'Cancel',
         width: '400px',
@@ -132,7 +134,7 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
         this.loginService.updateLogin$(UpdateLoginDto.fromLogin(this.login!))
           .pipe(take(1))
           .subscribe({
-            next: (updatedLogin: Login) => this.onUpdateLoginSuccess(updatedLogin),
+            next: (updatedLogin: Login) => this.onSoftDeleteLoginSuccess(updatedLogin),
             error: (error: any) => {
               this.displayError('Error deleting login', error);
               this.stopLoading();
@@ -142,11 +144,12 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
     })
   }
 
-  onUpdateLoginSuccess(updatedLogin: Login): void {
-    console.log('Login updated successfully:', updatedLogin);
+  onSoftDeleteLoginSuccess(updatedLogin: Login): void {
+    console.log('Login soft deleted successfully:', updatedLogin);
+    this.dataService.addRecycleBinLogin(updatedLogin);
     this.dataService.setUpdatedLogin(updatedLogin);
     this.dataService.setSelectedLogin(updatedLogin);
-    ToastWrapper.success('Login updated successfully');
+    ToastWrapper.success('Login deleted successfully');
     this.stopLoading();
   }
 

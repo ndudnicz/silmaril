@@ -7,8 +7,6 @@ namespace Api.Services.Interfaces;
 public interface ILoginService
 {
     Task<List<LoginDto>> GetLoginsByUserIdAsync(Guid userId);
-    Task<List<LoginDto>> GetDeletedLoginsByUserIdAsync(Guid userId);
-    Task<List<LoginDto>> GetLoginsByUserIdAndVaultIdAsync(Guid vaultId, Guid userId);
     Task<LoginDto> CreateLoginAsync(CreateLoginDto createLoginDto, Guid userId);
     Task<List<LoginDto>> CreateLoginsAsync(List<CreateLoginDto> createLoginDtos, Guid userId);
     Task<LoginDto> UpdateLoginAsync(UpdateLoginDto updateLoginDto, Guid userId);

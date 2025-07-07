@@ -1,4 +1,3 @@
-using Api.Entities;
 using Api.Entities.Dtos;
 using Api.Entities.Dtos.Create;
 using Api.Entities.Dtos.Update;

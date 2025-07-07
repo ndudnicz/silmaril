@@ -4,6 +4,7 @@ using Api.Repositories.EFContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250707150934_LoginVaultIdNullable")]
+    partial class LoginVaultIdNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,10 +183,10 @@ namespace Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("bffe53c5-f989-d5b7-9a55-0dca3d4d9df9"),
-                            Created = new DateTime(2025, 7, 7, 15, 27, 43, 675, DateTimeKind.Utc).AddTicks(8010),
+                            Id = new Guid("ca770ff3-6698-426a-a264-84cd46de5ea3"),
+                            Created = new DateTime(2025, 7, 7, 15, 9, 33, 662, DateTimeKind.Utc).AddTicks(7010),
                             PasswordHash = "$argon2id$v=19$m=16,t=2,p=1$ZEp5eWdQeDBXeGk2OWh6Qw$/sfpIugCYAcUqDG3xmx/2g",
-                            Salt = new byte[] { 249, 219, 140, 250, 128, 4, 70, 207, 35, 211, 96, 44, 23, 162, 4, 93 },
+                            Salt = new byte[] { 133, 201, 169, 91, 198, 103, 161, 95, 175, 127, 41, 182, 62, 48, 152, 92 },
                             UsernameHash = "2E96772232487FB3A058D58F2C310023E07E4017C94D56CC5FAE4B54B44605F42A75B0B1F358991F8C6CBE9B68B64E5B2A09D0AD23FCAC07EE9A9198A745E1D5"
                         });
                 });
@@ -224,10 +227,10 @@ namespace Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("044ecf10-f1eb-4594-a2a7-cd4d5ba56355"),
-                            Created = new DateTime(2025, 7, 7, 15, 27, 43, 793, DateTimeKind.Utc).AddTicks(7060),
+                            Id = new Guid("c5aaa345-047c-4f95-8073-44ed63906c50"),
+                            Created = new DateTime(2025, 7, 7, 15, 9, 33, 780, DateTimeKind.Utc).AddTicks(1720),
                             Name = "Default Vault",
-                            UserId = new Guid("bffe53c5-f989-d5b7-9a55-0dca3d4d9df9")
+                            UserId = new Guid("ca770ff3-6698-426a-a264-84cd46de5ea3")
                         });
                 });
 

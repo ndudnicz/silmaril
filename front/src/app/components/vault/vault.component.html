@@ -30,7 +30,7 @@
             'left-container-fullscreen': selectedLogin == null
             }">
             <div id="stacks-container">
-                @if (displayedLogins.length == 0 && loading == false) {
+                @if (displayedLogins.length == 0 && loading == false && searchValue == '') {
                 <div id="no-data">
                     <span>No data yet</span>
                     <br>
@@ -38,8 +38,15 @@
                     <br>
                     <button mat-icon-button (click)="openAddLoginModal()" class="example-icon favorite-icon"
                         aria-label="Example icon-button with heart icon">
-                        <mat-icon id="no-data-button">add</mat-icon>
+                        <mat-icon id="no-data-icon">add</mat-icon>
                     </button>
+                </div>
+                }
+                @if (displayedLogins.length == 0 && loading == false && searchValue != '') {
+                <div id="no-data">
+                    <span>No results found</span>
+                    <mat-icon id="no-data-icon" class="margin-top-10">search_off</mat-icon>
+                    <br>
                 </div>
                 }
                 @for (entry of displayedLoginStackEntries; track $index) {

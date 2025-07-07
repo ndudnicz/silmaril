@@ -1,44 +1,24 @@
 import { base64ToUint8Array, uint8ArrayToBase64 } from "../utils/crypto.utils";
 
 export class Login {
-    id: string;
-    userId: string;
-    vaultId: string;
-    encryptedDataBase64?: string | null;
-    encryptedData?: Uint8Array | null;
-    decryptedData?: DecryptedData | null;
-    encryptionVersion?: number | null;
-    initializationVector?: Uint8Array | null;
-    initializationVectorBase64?: string | null;
-    tagNames: string[];
-    created: Date;
-    updated?: Date;
-    deleted: boolean;
+    public encryptedData?: Uint8Array | null;
+    public decryptedData?: DecryptedData | null;
+    public initializationVector?: Uint8Array | null;
 
     constructor(
-        id: string, 
-        userId: string,
-        vaultId: string,
-        deleted: boolean,
-        created: Date,
-        encryptedDataBase64?: string | null,
-        initializationVectorBase64?: string | null,
-        tagNames: string[] = [],
-        updated?: Date,
-        encryptionVersion?: number | null
-        ) {
-        this.id = id;
-        this.userId = userId;
-        this.vaultId = vaultId;
-        this.encryptedDataBase64 = encryptedDataBase64;
+        public id: string,
+        public userId: string,
+        public vaultId: string | null,
+        public deleted: boolean,
+        public created: Date,
+        public encryptedDataBase64?: string | null,
+        public initializationVectorBase64?: string | null,
+        public tagNames: string[] = [],
+        public updated?: Date,
+        public encryptionVersion?: number | null
+    ) {
         this.encryptedData = encryptedDataBase64 ? base64ToUint8Array(encryptedDataBase64) : null;
         this.initializationVector = initializationVectorBase64 ? base64ToUint8Array(initializationVectorBase64) : null;
-        this.initializationVectorBase64 = initializationVectorBase64;
-        this.tagNames = tagNames;
-        this.created = created;
-        this.updated = updated;
-        this.encryptionVersion = encryptionVersion;
-        this.deleted = deleted;
     }
 
     public static fromObject(obj: any): Login {
@@ -51,7 +31,7 @@ export class Login {
         return new Login(
             obj.id || '',
             obj.userId || '',
-            obj.vaultId || '',
+            obj.vaultId,
             obj.deleted || false,
             new Date(obj.created),
             obj.encryptedDataBase64 || undefined,
@@ -131,7 +111,7 @@ export class DecryptedData {
 }
 
 export interface CreateLoginDto {
-    vaultId: string;
+    vaultId: string | null;
     encryptedDataBase64: string;
     initializationVectorBase64: string;
     tagNames: string[];
@@ -142,6 +122,7 @@ export class UpdateLoginDto {
     constructor(
         public id: string,
         public deleted: boolean,
+        public vaultId: string | null,
         public encryptedDataBase64?: string | null,
         public initializationVectorBase64?: string | null,
         public tagNames?: string[],
@@ -157,6 +138,7 @@ export class UpdateLoginDto {
         return new UpdateLoginDto(
             login.id,
             login.deleted,
+            login.vaultId,
             uint8ArrayToBase64(login.encryptedData ?? new Uint8Array()),
             uint8ArrayToBase64(login.initializationVector ?? new Uint8Array()),
             login.tagNames,

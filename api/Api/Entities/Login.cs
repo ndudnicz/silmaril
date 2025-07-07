@@ -19,5 +19,5 @@ public class Login: MyEntity
     [NotMapped]
     public string[] TagNames => Tags.Select(t => t.Name).ToArray();
     [Column("vault_id")]
-    public required Guid VaultId { get; set; }
+    public required Guid? VaultId { get; set; }
 }

@@ -36,6 +36,7 @@ public class LoginMapper : ILoginMapper
         login.InitializationVector = CryptoHelper.DecodeBase64(dto.InitializationVectorBase64 ?? string.Empty);
         login.EncryptionVersion = dto.EncryptionVersion;
         login.Deleted = dto.Deleted;
+        login.VaultId = dto.VaultId;
     }
 
     public Login ToEntity(CreateLoginDto dto)

@@ -2,7 +2,7 @@ import { Component, inject, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ConfirmModalComponent } from '../../modals/confirm-modal/confirm-modal.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AuthService } from '../../../services/auth.service';
@@ -15,6 +15,7 @@ import { DataService } from '../../../services/data.service';
 import { Vault } from '../../../entities/vault';
 import { MatMenuModule } from '@angular/material/menu';
 import { CommonModule } from '@angular/common';
+import { AddVaultModalComponent } from './modals/add-vault-modal/add-vault-modal.component';
 
 @Component({
   selector: 'app-navbar',
@@ -40,6 +41,7 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
     private authService: AuthService,
     protected vaultService: VaultService,
     private dataService: DataService,
+    private router: Router
   ) {
     super(inject(NgxSpinnerService));
     this.setupSubscriptions();
@@ -55,6 +57,40 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  openCreateVaultModal() {
+    this.dialog.open(AddVaultModalComponent, {
+      panelClass: 'custom-modal',
+      data: {
+        title: 'Create New Vault',
+        message: 'Please enter the name for the new vault.',
+        confirmText: 'Create Vault',
+        cancelText: 'Cancel',
+        width: '400px',
+        height: 'auto',
+        closeOnNavigation: false,
+        disableClose: true,
+        autoFocus: true
+      }
+    }).afterClosed().pipe(take(1)).subscribe((result) => {
+      if (result) {
+        this.startLoading();
+        this.vaultService.createVault$(result).pipe(take(1)).subscribe({
+          next: (vault) => {
+            ToastWrapper.success('Vault created successfully');
+            this.dataService.addVault(vault);
+            this.stopLoading();
+            this.router.navigate(['/vault', vault.id]);
+          },
+          error: (error) => {
+            console.error('Error creating vault:', error);
+            this.stopLoading();
+            throw error;
+          }
+        });
+      }
+    })
   }
 
   signout() {

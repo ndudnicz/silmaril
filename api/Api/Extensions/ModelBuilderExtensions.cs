@@ -9,7 +9,7 @@ public static class ModelBuilderExtensions
 {
     private static readonly User SetupUser = new User
     {
-        Id = Guid.NewGuid(),
+        Id = CryptoHelper.GenerateSecureGuid(),
         Created = DateTime.UtcNow,
         // {Username: "q", Password "q"}
         UsernameHash = "2E96772232487FB3A058D58F2C310023E07E4017C94D56CC5FAE4B54B44605F42A75B0B1F358991F8C6CBE9B68B64E5B2A09D0AD23FCAC07EE9A9198A745E1D5",
@@ -19,7 +19,6 @@ public static class ModelBuilderExtensions
     
     public static void SetupUserEntity(this ModelBuilder modelBuilder)
     {
-        var user = 
         modelBuilder.Entity<User>(entity =>
         {
             entity.Property(e => e.Salt)
@@ -52,7 +51,7 @@ public static class ModelBuilderExtensions
             .HasOne<Vault>()
             .WithMany()
             .HasForeignKey(l => l.VaultId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.SetNull);
     }
     
     public static void SetupVaultEntity(this ModelBuilder modelBuilder)

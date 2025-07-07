@@ -24,16 +24,6 @@ export class LoginService {
     );
   }
 
-  getDeletedLogins$(): Observable<Login[]> {
-    return this.http.get<Login[]>(`${this.apiEndpointV1}/login/deleted`).pipe(
-      map(logins => logins.map(login => Login.fromObject(login))),
-      catchError(error => {
-        console.error('Error fetching deleted logins:', error);
-        return throwError(() => new Error('Failed to fetch deleted logins'));
-      })
-    );
-  }
-  
   createLogin$(createLoginDto: CreateLoginDto): Observable<Login> {
     return this.http.post<Login>(`${this.apiEndpointV1}/login`, createLoginDto).pipe(
       map(login => Login.fromObject(login)),

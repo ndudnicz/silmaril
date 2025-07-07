@@ -56,7 +56,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   selectedVault: Vault | null = null;
   subscription: Subscription = new Subscription();
   searchBarPlaceholder = 'Search in Vault';
-  searchBarPlaceholderMaxLength = 30;
+  readonly searchBarPlaceholderMaxLength = 30;
 
   constructor(
     private vaultService: VaultService,
@@ -66,27 +66,21 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
   ) {
     super(inject(NgxSpinnerService));
-    this.setupSubscriptions();
-    console.log('VaultComponent initialized');
+    // this.setupSubscriptionsAndSetupVault();
+    // console.log('VaultComponent initialized');
   }
 
   ngOnInit(): void {
-
     this.startLoading();
     console.log('Activated Route Data:', this.activatedRoute.snapshot);
-
-    this.setupSubscriptions();
+    this.setupSubscriptionsAndSetupVault();
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
-  setupSubscriptions(): void {
-    this.subscription.add(this.activatedRoute.params.subscribe(params => {
-      this.setupVault(params);
-    }));
-
+  setupSubscriptionsAndSetupVault(): void {
     this.subscription.add(this.dataService.selectedLogin.subscribe((login: Login | null) => {
       this.selectedLogin = login;
     }));
@@ -113,17 +107,27 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         }
       }
     }));
+
+    this.subscription.add(this.activatedRoute.params.subscribe(params => {
+      this.setupVault(params);
+    }));
   }
 
   setupVault(params: Params): void {
-    this.startLoading
+    this.startLoading();
     console.log('Route params:', params);
     this.vaultId = params['id'] || null;
 
     if (this.vaultId) {
+      this.dataService.setSelectedLogin(null);
       this.selectedVault = this.dataService.getVaults()?.find(v => v.id === this.vaultId) || null;
       console.log('Selected Vault:', this.selectedVault);
       this.searchBarPlaceholder = `Search in ${truncateString(this.selectedVault?.name || 'Vault', this.searchBarPlaceholderMaxLength)}`;
+      if (this.allLogins.length > 0) {
+        this.setupDataAndDisplay();
+        this.stopLoading();
+        return;
+      }
       this.loadLogins();
     }
     else {
@@ -134,12 +138,11 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   }
 
   loadLogins(): void {
-    this.vaultService.getLogins$(this.vaultId!).pipe(take(1)).subscribe({
+    this.loginService.getLogins$().pipe(take(1)).subscribe({
       next: async (logins: Login[]) => {
         console.log('Logins fetched successfully:', logins);
         this.allLogins = await this.vaultService.decryptAllLoginsAsync(logins);
-        this.setDisplayedLogins();
-        this.computeStacks();
+        this.setupDataAndDisplay();
         this.stopLoading();
       },
       error: (error: any) => {
@@ -149,8 +152,14 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     });
   }
 
+  setupDataAndDisplay() {
+    this.setDisplayedLogins();
+    this.computeStacks();
+    this.setRecycleBinLogins();
+  }
+
   setDisplayedLogins() {
-    this.displayedLogins = this.allLogins.filter(login => !login.deleted);
+    this.displayedLogins = this.allLogins.filter(login => !login.deleted && login.vaultId === this.vaultId);
   }
 
   computeStacks() {
@@ -165,6 +174,10 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     this.displayedLoginStackEntries = Object.entries(loginStacks as Record<string, Login[]>)
       .map(([key, value]) => ({ key, value }));
     this.displayedLoginStackEntries.sort((a, b) => a.key.localeCompare(b.key));
+  }
+
+  setRecycleBinLogins() {
+    this.dataService.setRecycleBinLogins(this.allLogins.filter(login => login.vaultId == null || login.deleted));
   }
 
   openAddLoginModal() {
@@ -231,6 +244,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     this.allLogins = updatedLogins;
     this.setDisplayedLogins();
     this.computeStacks();
+    this.setRecycleBinLogins();
     this.stopLoading();
     ToastWrapper.success('Master password changed successfully');
   }
@@ -242,7 +256,9 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     } else {
       this.displayedLogins = this.allLogins.filter(login => {
         const title = login.decryptedData?.title || '';
-        return title.toLowerCase().includes(this.searchValue.toLowerCase());
+        return !login.deleted
+        && login.vaultId == this.vaultId
+        && title.toLowerCase().includes(this.searchValue.toLowerCase());
       });
     }
     this.computeStacks();
