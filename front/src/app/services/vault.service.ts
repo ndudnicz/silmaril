@@ -1,5 +1,3 @@
-// src/app/services/vault.service.ts
-
 import { Injectable } from '@angular/core';
 import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
 import { DecryptedData, Login } from '../entities/login';

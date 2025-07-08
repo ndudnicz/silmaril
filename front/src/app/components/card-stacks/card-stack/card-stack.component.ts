@@ -17,7 +17,7 @@ import { MatDividerModule } from '@angular/material/divider';
 styleUrls: ['./card-stack.component.css']})
 export class CardStackComponent {
   @Input() title!: string;
-  @Input() logins!: Login[]; // Replace 'any' with the appropriate type if known
+  @Input() logins!: Login[];
 
   constructor(private dataService: DataService) {
   }

@@ -1,4 +1,4 @@
-<div id="vault-container">
+<div id="recycle-bin-container">
     <mat-toolbar id="toolbar">
         <div id="searchbar-container">
             <mat-form-field id="search-field" appearance="outline" floatLabel="always">
@@ -13,33 +13,23 @@
         </div>
         <span class="spacer"></span>
         <div class="toolbar-button">
-            <button mat-icon-button (click)="openAddLoginModal()" matTooltip="Add Login">
+            <button mat-icon-button  matTooltip="Add Login">
                 <mat-icon>add</mat-icon>
             </button>
         </div>
         <div class="toolbar-button">
-            <button mat-icon-button (click)="openChangeMasterPasswordModal()" matTooltip="Change Master Password">
+            <button mat-icon-button  matTooltip="Change Master Password">
                 <mat-icon>vpn_key</mat-icon>
             </button>
         </div>
     </mat-toolbar>
 
-    <div id="vault-grid-container">
-        <div [ngClass]="{
-            'left-container': true,
-            'left-container-fullscreen': selectedLogin == null
-            }">
-            <div id="stacks-container">
+    <div id="recycle-bin-grid-container">
+            <div id="recycle-bin-stacks-container">
                 @if (displayedLogins.length == 0 && loading == false && searchValue == '') {
                 <div id="no-data">
-                    <span>No data yet</span>
+                    <span>Empty</span>
                     <br>
-                    <span>Add your first login</span>
-                    <br>
-                    <button mat-icon-button (click)="openAddLoginModal()" class="example-icon favorite-icon"
-                        aria-label="Example icon-button with heart icon">
-                        <mat-icon id="no-data-icon">add</mat-icon>
-                    </button>
                 </div>
                 }
                 @if (displayedLogins.length == 0 && loading == false && searchValue != '') {
@@ -49,13 +39,9 @@
                     <br>
                 </div>
                 }
-                @if (displayedLogins.length > 0) {
+                 @if (displayedLogins.length > 0) {
                 <app-card-stacks class="card-stacks" [displayedLogins]="displayedLogins"></app-card-stacks>
                 }
             </div>
         </div>
-        <div [hidden]="selectedLogin == null" class="right-container">
-            <app-selected-login></app-selected-login>
-        </div>
-    </div>
 </div>

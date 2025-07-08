@@ -9,11 +9,11 @@ import { Component, Input, OnInit } from '@angular/core';
   imports: [CommonModule]
 })
 export class ProgressBarComponent implements OnInit {
-  @Input() color: string = '#007bff'; // Couleur par défaut (bleu bootstrap)
-  @Input() value: number = 0; // Valeur entre 0 et 100
-  @Input() height: string = '20px'; // Hauteur de la barre de progression
-  @Input() displayValue: boolean = true; // Afficher la valeur dans la barre de progression
-  @Input() borderRadius: string = '4px'; // Bordure de la barre de progression
+  @Input() color: string = '#007bff';
+  @Input() value: number = 0;
+  @Input() height: string = '20px';
+  @Input() displayValue: boolean = true;
+  @Input() borderRadius: string = '4px';
   
   ngOnInit(): void {
     

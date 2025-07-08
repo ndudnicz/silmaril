@@ -105,15 +105,15 @@ export class GeneratePasswordModalComponent implements OnInit {
     return null;
   }
 
-  onSubmit() {
+  onSubmit(): void {
     this.dialogRef.close(this.generatedPassword);
   }
 
-  closeDialog() {
+  closeDialog(): void {
     this.dialogRef.close(null);
   }
 
-  setNewPassword() {
+  setNewPassword(): void {
     if (this.formGeneratePassword.valid) {
       this.generatedPassword = this.generatePassword({
         minLength: this.minLengthFormControl.value || this.defaultMinLength,
@@ -131,14 +131,11 @@ export class GeneratePasswordModalComponent implements OnInit {
   generatePassword(options: PasswordOptions = {
     minLength: this.defaultMinLength,
     readable: false,
-    letters: true, // always true
-    numbers: true, // always true
+    letters: true,
+    numbers: true,
     specialChar: true,
     useWords: true
   }): string {
-    // Base sets
-    // console.log('Generating password with options:', options);
-
     const length = options.minLength || this.defaultMinLength;
     const readable = options.readable;
     const letters = options.letters;
@@ -147,14 +144,12 @@ export class GeneratePasswordModalComponent implements OnInit {
     const useWords = options.useWords;
 
     const allLettersSet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const readableLettersSet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ';  // sans i, l, o
+    const readableLettersSet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ';  // without i, l, o
     const numbersChars = '0123456789';
-    const readableNumbers = '23456789'; // sans 0,1
+    const readableNumbers = '23456789'; // without 0,1
     const specialChars = this.specialChars;
 
-    // Liste de mots simples (exemple réduit, tu peux remplacer par ta liste)
     const simpleWords = [
-      // mots génériques déjà présents
       'cat', 'dog', 'bird', 'fish', 'tree', 'book', 'red', 'blue', 'sun', 'moon', 'star',
       'fire', 'rock', 'wind', 'rain', 'snow', 'leaf', 'cloud', 'frog', 'bear', 'lion', 'wolf',
       'frog', 'ant', 'bee', 'bat', 'owl', 'fox', 'cow', 'pig', 'rat', 'hen', 'bee', 'bee',
@@ -183,7 +178,6 @@ export class GeneratePasswordModalComponent implements OnInit {
       'narsil', 'vilya', 'narya'
     ];
 
-    // Génère un charset lettres selon options style et uppercase
     function getLetterCharset() {
       let lettersSet = '';
       if (readable) {
@@ -231,7 +225,6 @@ export class GeneratePasswordModalComponent implements OnInit {
       return password;
     }
 
-    // Génération classique
     let charset = '';
     if (letters) charset += getLetterCharset();
     if (numbers) charset += readable ? readableNumbers : numbersChars;
@@ -249,9 +242,12 @@ export class GeneratePasswordModalComponent implements OnInit {
     return password;
   }
 
-  getPasswordStrength(password: string): { str: string, color: string, score: number} {
+  getPasswordStrength(password: string): {
+    str: string,
+    color: string,
+    score: number
+  } {
     const hasLetters = /[a-zA-Z]/.test(password);
-    const lettersMatches = password.match(/[a-zA-Z]/g) || [];
 
     const hasUpperCase = /[A-Z]/.test(password);
     const upperCaseMatches = password.match(/[A-Z]/g) || [];
@@ -303,7 +299,7 @@ export class GeneratePasswordModalComponent implements OnInit {
     this.passwordStrength = strength.str;
   }
 
-  disableSubmit() {
+  disableSubmit(): boolean {
     return this.generatedPassword.length < this.minLength;
   } 
 }

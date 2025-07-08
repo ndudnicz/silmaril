@@ -37,7 +37,6 @@ export class ChangeMasterPasswordModalComponent {
     private dialogRef: MatDialogRef<ChangeMasterPasswordModalComponent>,
     private dialog: MatDialog
   ) {
-    // Initialization logic can go here
   }
 
   confirmPasswordValidator(): ValidatorFn {
@@ -51,7 +50,6 @@ export class ChangeMasterPasswordModalComponent {
   }
 
   onSubmit() {
-    // Logic to handle form submission, e.g., changing the master password
     console.log('Form submitted:', this.form.value);
     this.dialog.open(ConfirmModalComponent, {
       data: {
@@ -69,7 +67,6 @@ export class ChangeMasterPasswordModalComponent {
   }
 
   closeDialog() {
-    // Logic to close the dialog
     console.log('Dialog closed');
     this.dialogRef.close(null);
   }
