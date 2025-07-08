@@ -146,3 +146,7 @@ export class UpdateLoginDto {
         );
     }
 }
+
+export interface DeleteLoginsDto {
+    ids: string[];
+}

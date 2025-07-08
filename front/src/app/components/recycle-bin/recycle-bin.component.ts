@@ -3,7 +3,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { BaseComponent } from '../base-component/base-component.component';
 import { MatIconModule } from '@angular/material/icon';
 import { Login } from '../../entities/login';
-import { Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { DataService } from '../../services/data.service';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
 import { CommonModule } from '@angular/common';
@@ -12,6 +12,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { LoginService } from '../../services/login.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-recycle-bin',
@@ -25,21 +29,26 @@ import { MatButtonModule } from '@angular/material/button';
     MatInputModule,
     FormsModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatTooltipModule
   ],
   templateUrl: './recycle-bin.component.html',
   styleUrl: './recycle-bin.component.css'
 })
 export class RecycleBinComponent extends BaseComponent implements OnInit {
-  
+
   searchValue: string = '';
   searchBarPlaceholder = 'Search in Recycle Bin';
   allDeletedLogins: Login[] = [];
   displayedLogins: Login[] = [];
+  selectedLogins: Login[] = [];
   subscription: Subscription = new Subscription();
+  unselectAllTrigger: number = 0;
 
   constructor(
-    private dataService: DataService
+    private dataService: DataService,
+    private loginService: LoginService,
+    private dialog: MatDialog
   ) {
     super(inject(NgxSpinnerService));
   }
@@ -49,21 +58,11 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     this.setupSubscriptions();
     this.allDeletedLogins = this.dataService.getRecycleBinLogins() ?? [];
     console.log('recycle bin ngoninit', this.allDeletedLogins);
-    this.stopLoading(); 
-    // this.dataService.getRecycleBinLogins.pipe(take(1)).subscribe(logins => {
-    //   this.allDeletedLogins = logins;
-    //   this.setDisplayedLogins();
-    //   this.stopLoading();
-    // });
+    this.setDisplayedLogins();
+    this.stopLoading();
   }
-  
+
   setupSubscriptions() {
-    // this.subscription.add(
-    //   this.dataService.getRecycleBinLogins.subscribe(logins => {
-    //     this.allDeletedLogins = logins;
-    //     this.setDisplayedLogins();
-    //   })
-    // );
   }
 
   setDisplayedLogins() {
@@ -74,12 +73,59 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     }
   }
 
-  restoreLogin(loginId: string): void {
-    console.log(`Restoring login with ID: ${loginId}`);
+  select(login: Login): void {
+    if (this.selectedLogins.includes(login)) {
+      this.selectedLogins = this.selectedLogins.filter(l => l !== login);
+      console.log(`Login deselected`, login);
+      return;
+    } else {
+      this.selectedLogins.push(login);
+    }
   }
 
-  permanentlyDeleteLogin(loginId: string): void {
-    console.log(`Permanently deleting login with ID: ${loginId}`);
+  restoreSelectedLogins(): void {
+    console.log(`Restoring logins `, this.selectedLogins);
+  }
+
+  confirmDeleteSelectedLogins(): void {
+    this.dialog.open(ConfirmModalComponent, {
+      data: {
+        title: 'Confirm Permanent Deletion',
+        message: `Are you sure you want to permanently delete ${this.selectedLogins.length} logins? This action cannot be undone.`,
+        confirmText: 'Permanently Delete',
+        cancelText: 'Cancel'
+      },
+      panelClass: 'custom-modal'
+    }).afterClosed().pipe(take(1)).subscribe(confirmed => {
+      if (confirmed) {
+        this.proceedDeleteSelectedLogins();
+      } else {
+        console.log('Permanent deletion cancelled');
+      }
+    });
+  }
+
+  proceedDeleteSelectedLogins(): void {
+    this.startLoading();
+    console.log(`Permanently deleting logins `, this.selectedLogins);
+    this.loginService.deleteLogins$({ ids: this.selectedLogins.map(login => login.id) }).pipe(take(1)).subscribe({
+      next: (deletedCount: number) => {
+        this.onSuccededDeleteLogins(deletedCount);
+      },
+      error: (error: any) => {
+        this.stopLoading();
+        console.error('Error permanently deleting logins:', error);
+        this.displayError('Failed to permanently delete logins', error);
+      }
+    });
+  }
+
+  onSuccededDeleteLogins(deletedCount: number): void {
+    console.log(`Permanently deleted ${deletedCount} logins`);
+    this.allDeletedLogins = this.allDeletedLogins.filter(login => !this.selectedLogins.includes(login));
+    this.setDisplayedLogins();
+    this.selectedLogins = [];
+    this.stopLoading();
   }
 
   search(value: string) {
@@ -97,5 +143,11 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   clearSearch() {
     this.searchValue = '';
     this.setDisplayedLogins();
+  }
+
+  clearSelection() {
+    this.unselectAllTrigger++;
+    this.selectedLogins = [];
+    console.log('Selection cleared');
   }
 }

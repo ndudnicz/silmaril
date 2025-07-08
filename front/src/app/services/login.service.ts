@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CreateLoginDto, Login, UpdateLoginDto } from '../entities/login';
+import { CreateLoginDto, DeleteLoginsDto, Login, UpdateLoginDto } from '../entities/login';
 import { environment } from '../../environments/environment';
 import { catchError, map, Observable, tap, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -34,7 +34,7 @@ export class LoginService {
     );
   }
 
-  createLoginsBulk$(createLoginDtos: CreateLoginDto[]): Observable<Login[]> {
+  createLogins$(createLoginDtos: CreateLoginDto[]): Observable<Login[]> {
     return this.http.post<Login[]>(`${this.apiEndpointV1}/login/bulk`, createLoginDtos).pipe(
       map(logins => logins.map(login => Login.fromObject(login))),
       catchError(error => {
@@ -55,7 +55,7 @@ export class LoginService {
     );
   }
 
-  updateLoginsBulk$(updateLoginDtos: UpdateLoginDto[]): Observable<Login[]> {
+  updateLogins$(updateLoginDtos: UpdateLoginDto[]): Observable<Login[]> {
     return this.http.put<Login[]>(`${this.apiEndpointV1}/login/bulk`, updateLoginDtos).pipe(
       map(logins => logins.map(login => Login.fromObject(login))),
       catchError(error => {
@@ -70,6 +70,17 @@ export class LoginService {
       catchError(error => {
         console.error('Error deleting login:', error);
         return throwError(() => new Error('Failed to delete login'));
+      })
+    );
+  }
+
+  deleteLogins$(deleteLoginsDto: DeleteLoginsDto): Observable<number> {
+    return this.http.delete<number>(`${this.apiEndpointV1}/login/bulk`, {
+      body: deleteLoginsDto
+    }).pipe(
+      catchError(error => {
+        console.error('Error deleting logins:', error);
+        return throwError(() => new Error('Failed to delete logins'));
       })
     );
   }

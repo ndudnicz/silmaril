@@ -1,6 +1,6 @@
 @for (entry of displayedLoginStackEntries; track $index) {
 @if (entry.value.length > 0) {
-<app-card-stack class="card-stack" [logins]="entry.value" [title]="entry.key">
+<app-card-stack class="card-stack" (clickEvent)="clickEvent.emit($event)" [logins]="entry.value" [title]="entry.key" [enableSelectedFeature]="enableSelectedFeature" [unselectAllTrigger]="unselectAllTrigger">
 </app-card-stack>
 }
 }

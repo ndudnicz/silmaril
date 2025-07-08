@@ -1,5 +1,8 @@
 <div id="vault-container">
     <mat-toolbar id="toolbar">
+        <div class="toolbar-button">
+            <mat-icon>diamond</mat-icon>
+        </div>
         <div id="searchbar-container">
             <mat-form-field id="search-field" appearance="outline" floatLabel="always">
                 <input matInput type="text" [(ngModel)]="searchValue" [placeholder]="searchBarPlaceholder"
@@ -50,7 +53,8 @@
                 </div>
                 }
                 @if (displayedLogins.length > 0) {
-                <app-card-stacks class="card-stacks" [displayedLogins]="displayedLogins"></app-card-stacks>
+                <app-card-stacks class="card-stacks" (clickEvent)="setSelectedLogin($event)"
+                    [displayedLogins]="displayedLogins"></app-card-stacks>
                 }
             </div>
         </div>

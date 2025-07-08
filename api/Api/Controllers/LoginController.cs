@@ -1,4 +1,5 @@
 using Api.Entities.Dtos.Create;
+using Api.Entities.Dtos.Delete;
 using Api.Entities.Dtos.Update;
 using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -48,5 +49,11 @@ public class LoginController(
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid id)
     {
         return Ok(await loginService.DeleteLoginByUserIdAsync(id, GetUserId()));
+    }
+    
+    [HttpDelete("bulk")]
+    public async Task<IActionResult> DeleteBulkAsync([FromBody] DeleteLoginsDto deleteLoginsDto)
+    {
+        return Ok(await loginService.DeleteLoginsByUserIdAsync(deleteLoginsDto.Ids.ToList(), GetUserId()));
     }
 }

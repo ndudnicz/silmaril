@@ -4,15 +4,6 @@
   display: flex;
   flex-direction: column;
   margin-left: 10px;
-  /* padding-top: 10px; */
-}
-
-#toolbar {
-  background-color: #faf9fd;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  justify-content: flex-start;
 }
 
 .toolbar-button {
@@ -23,18 +14,19 @@
   display: flex;
   width: 100%;
   height: 100%;
-  background: red;
 }
 
 .left-container {
   background-color: #faf9fd;
   width: 60%;
   border-right: 3px solid #b1b1b1;
+  transition: width 0.1s ease;
 }
 
 .left-container-fullscreen {
   width: 100%;
   border-right: none;
+  transition: width 0.1s ease;
 }
 
 #stacks-container {
@@ -45,13 +37,6 @@
   align-items: flex-start;
   height: 100%;
   overflow: scroll;
-}
-
-.card-stack {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .right-container {

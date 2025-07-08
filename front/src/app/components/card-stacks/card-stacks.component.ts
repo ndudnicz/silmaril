@@ -1,5 +1,5 @@
 import { KeyValue } from '@angular/common';
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { Login } from '../../entities/login';
 import { CardStackComponent } from './card-stack/card-stack.component';
 
@@ -13,18 +13,20 @@ import { CardStackComponent } from './card-stack/card-stack.component';
 })
 export class CardStacksComponent implements OnInit, OnChanges {
   @Input() displayedLogins!: Login[];
+  @Input() enableSelectedFeature: boolean = false;
+  @Input() unselectAllTrigger: number = 0;
+  
+  @Output() clickEvent: EventEmitter<Login> = new EventEmitter<Login>();
+
   displayedLoginStackEntries: KeyValue<string, Login[]>[] = [];
 
   ngOnInit(): void {
-    console.log('CardStacksComponent initialized with displayedLogins:', this.displayedLogins);
-    
     this.computeStacks();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['displayedLogins']) {
-      console.log('CardStacksComponent displayedLogins changed:', changes['displayedLogins'].currentValue);
-    this.computeStacks();
+      this.computeStacks();
     }
   }
 

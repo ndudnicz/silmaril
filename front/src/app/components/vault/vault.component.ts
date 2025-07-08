@@ -207,7 +207,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     await this.vaultService.setKeyAsync(newMasterPassword);
     this.dataService.setSelectedLogin(null);
     this.allLogins = await this.vaultService.encryptAllLoginsAsync(this.allLogins);
-    this.loginService.updateLoginsBulk$(this.allLogins.map(l => UpdateLoginDto.fromLogin(l))).pipe(take(1)).subscribe({
+    this.loginService.updateLogins$(this.allLogins.map(l => UpdateLoginDto.fromLogin(l))).pipe(take(1)).subscribe({
       next: async (updatedLogins: Login[]) => {
         this.onUpdateLoginsSuccess(updatedLogins);
       },
@@ -245,5 +245,9 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   clearSearch() {
     this.searchValue = '';
     this.setDisplayedLogins();
+  }
+
+  setSelectedLogin(login: Login | null) {
+    this.dataService.setSelectedLogin(login)
   }
 }

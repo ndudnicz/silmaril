@@ -88,3 +88,7 @@
   width: 100px;
   font-size: 13px;
 }
+
+#selected-logins-counter {
+    font-size: 12px;
+}
