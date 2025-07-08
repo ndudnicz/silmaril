@@ -2,7 +2,6 @@ using Api.Configuration;
 using Api.Extensions;
 using Api.Middlewares;
 using Microsoft.AspNetCore.Antiforgery;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -15,6 +14,8 @@ builder.Services.AddContexts(mysqlConfiguration);
 builder.Services.AddJwtAuthentication(jwtConfiguration);
 builder.Services.AddRepositories();
 builder.Services.AddServices();
+builder.Services.AddValidators();
+builder.Services.AddMappers();
 builder.Services.AddCsrf(csrfConfiguration);
 builder.Services.AddControllers();
 builder.Services.AddRouting(opt => opt.LowercaseUrls = true);

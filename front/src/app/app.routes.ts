@@ -18,7 +18,7 @@ export const routes: Routes = [
     {
         path: '', title: title, component: LayoutComponent, children: [
             { path: 'unlock', title: title + ': Unlock', component: UnlockComponent, canActivate: [authGuard] },
-            { path: 'vault', title: title + ': Vault', component: VaultComponent, canActivate: [authGuard, vaultUnlocked] },
+            { path: 'vault/:id', title: title + ': Vault', component: VaultComponent, canActivate: [authGuard, vaultUnlocked] },
             { path: 'settings', title: title + ': Settings', component: SettingsComponent, canActivate: [authGuard] },
             { path: '', redirectTo: 'unlock', pathMatch: 'full' },
             { path: '**', redirectTo: 'unlock', pathMatch: 'full' }

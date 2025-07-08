@@ -39,6 +39,7 @@ export class AddEditLoginModalComponent extends BaseComponent {
   }
   MODAL_MOD = AddEditLoginModalComponent.MODAL_MOD;
   login: Login | null = this.data.login || null;
+  vaultId = this.data.vaultId;
   mode = this.data.mode;
   characterLimit = 2000;
   passwordCharacterLimit = 10000;
@@ -105,17 +106,15 @@ export class AddEditLoginModalComponent extends BaseComponent {
     const encryptionResult = await CryptoUtilsV1.encryptDataAsync(this.vaultService.getKey(), decryptedData.toString());
     if (this.mode === AddEditLoginModalComponent.MODAL_MOD.ADD) {
       this.startLoading();
-      this.createLogin(encryptionResult).pipe(take(1)).subscribe({
+      this.createLogin$(encryptionResult).pipe(take(1)).subscribe({
         next: (login: Login) => {
           console.log('Login created successfully:', login);
           this.stopLoading();
           this.dialogRef.close(login);
         },
         error: (error: any) => {
-          console.error('Error creating login:', error);
-          ToastWrapper.error('Failed to create login: ', error instanceof Error ? error.message : 'Unknown error');
+          this.displayError('Error creating login', error);
           this.stopLoading();
-          throw error;
         }
       });
     } else {
@@ -137,7 +136,7 @@ export class AddEditLoginModalComponent extends BaseComponent {
           return;
         }
         this.startLoading();
-        this.editLogin(encryptionResult).pipe(take(1)).subscribe({
+        this.editLogin$(encryptionResult).pipe(take(1)).subscribe({
           next: (updatedLogin: Login) => {
             console.log('Login updated successfully:', updatedLogin);
             ToastWrapper.success('Login updated successfully');
@@ -145,18 +144,17 @@ export class AddEditLoginModalComponent extends BaseComponent {
             this.dialogRef.close(updatedLogin);
           },
           error: (error: any) => {
-            console.error('Error updating login:', error);
-            ToastWrapper.error('Failed to update login: ', error instanceof Error ? error.message : 'Unknown error');
+            this.displayError('Error updating login', error);
             this.stopLoading();
-            throw error;
           }
         });
       });
     }
   }
 
-  createLogin(encryptionResult: EncryptionResult): Observable<Login> {
+  createLogin$(encryptionResult: EncryptionResult): Observable<Login> {
     const createLoginDto: CreateLoginDto = {
+      vaultId: this.vaultId,
       encryptedDataBase64: uint8ArrayToBase64(encryptionResult.ciphertext),
       initializationVectorBase64: uint8ArrayToBase64(encryptionResult.initializationVector),
       encryptionVersion: encryptionResult.encryptionVersion,
@@ -164,14 +162,13 @@ export class AddEditLoginModalComponent extends BaseComponent {
     };
 
     return this.loginService.createLogin$(createLoginDto).pipe(
-      take(1),
       switchMap((createdLogin: Login) =>
         from(this.vaultService.decryptLoginDataAsync(createdLogin))
       )
     );
   }
 
-  editLogin(encryptionResult: EncryptionResult): Observable<Login> {
+  editLogin$(encryptionResult: EncryptionResult): Observable<Login> {
     this.login!.encryptedData = encryptionResult.ciphertext;
     this.login!.initializationVector = encryptionResult.initializationVector;
     this.login!.encryptionVersion = encryptionResult.encryptionVersion;

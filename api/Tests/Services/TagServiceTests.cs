@@ -1,6 +1,6 @@
 using Api.Entities;
 using Api.Exceptions;
-using Api.Repositories;
+using Api.Repositories.Interfaces;
 using Api.Services;
 using FluentAssertions;
 using Moq;

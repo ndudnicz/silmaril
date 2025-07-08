@@ -5,8 +5,9 @@ using Api.Entities;
 using Api.Entities.Dtos.Authentication;
 using Api.Exceptions;
 using Api.Helpers;
-using Api.Repositories;
-using Api.Services.Validation;
+using Api.Repositories.Interfaces;
+using Api.Services.Interfaces;
+using Api.Services.Validation.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Services;
@@ -21,7 +22,7 @@ public class AuthService(
     private readonly int _jwtTokenExpirationTimeInMinutes = jwtConfiguration.AccessTokenExpirationMinutes;
     private readonly int _jwtRefreshTokenExpirationTimeInHours = jwtConfiguration.RefreshTokenExpirationMinutes; 
     
-    public static void ValidatePasswordFormat(string password)
+    public static void EnsurePasswordFormatIsValid(string password)
     {
         if (!PasswordFormatIsValid(password))
         {
@@ -43,7 +44,7 @@ public class AuthService(
                && password.Any(c => specialCharacters.Contains(c));
     }
     
-    public static void VerifyPasswordHash(string password, string passwordHash)
+    public static void EnsurePasswordIsValid(string password, string passwordHash)
     {
         if (!CryptoHelper.Argon2idVerify(password, passwordHash))
         {
@@ -56,7 +57,7 @@ public class AuthService(
         var usernameHash = CryptoHelper.Sha512(authDto.Username);
         await userValidator.EnsureExistsByUsernameHashAsync(usernameHash);
         var user = await userRepository.GetUserByUserNameAsync(CryptoHelper.Sha512(authDto.Username));
-        VerifyPasswordHash(authDto.Password, user!.PasswordHash);
+        EnsurePasswordIsValid(authDto.Password, user!.PasswordHash);
         var jwt = GenerateJwtToken(user.Id);
         var (refreshTokenStr, refreshToken, refreshTokenExpiration) = GenerateRefreshToken(user.Id);
         await authRepository.UpsertAsync(refreshToken);

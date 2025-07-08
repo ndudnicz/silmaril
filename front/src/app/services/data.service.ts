@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Login } from '../entities/login';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { Vault } from '../entities/vault';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,53 @@ export class DataService {
   private _updatedLogin: BehaviorSubject<Login | null> = new BehaviorSubject<Login | null>(null);
   public readonly updatedLogin: Observable<Login | null> = this._updatedLogin.asObservable();
   setUpdatedLogin(login: Login): void {
-    console.log(`DataService: Setting updated login:`, login);
     this._updatedLogin.next(login);
+  }
+
+
+  private _vaults: BehaviorSubject<Vault[] | null> = new BehaviorSubject<Vault[] | null>(null);
+  public readonly vaults: Observable<Vault[] | null> = this._vaults.asObservable();
+  setVaults(vaults: Vault[]): void {
+    this._vaults.next(vaults);
+  }
+  addVault(vault: Vault): void {
+    console.log('Adding vault:', vault);
+    const currentVaults = this._vaults.getValue() || [];
+    this._vaults.next([...currentVaults, vault]);
+  }
+  updateVault(vault: Vault): void {
+    console.log('Updating vault:', vault);
+    const currentVaults = this._vaults.getValue() || [];
+    const index = currentVaults.findIndex(v => v.id === vault.id);
+    if (index !== -1) {
+      currentVaults[index] = vault;
+      this._vaults.next([...currentVaults]);
+    } else {
+      console.warn('Vault not found for update:', vault);
+    }
+  }
+  deleteVault(vaultId: string): void {
+    console.log('Removing vault with ID:', vaultId);
+    const currentVaults = this._vaults.getValue() || [];
+    const updatedVaults = currentVaults.filter(v => v.id !== vaultId);
+    this._vaults.next(updatedVaults);
+  }
+  getVaults(): Vault[] | null {
+    return this._vaults.getValue();
+  }
+
+  private _recycleBinLogins: BehaviorSubject<Login[] | null> = new BehaviorSubject<Login[] | null>(null);
+  public readonly recycleBinLogins: Observable<Login[] | null> = this._recycleBinLogins.asObservable();
+  setRecycleBinLogins(logins: Login[]): void {
+    console.log('Saving logins to recycle bin:', logins);
+    this._recycleBinLogins.next(logins);
+  }
+  addRecycleBinLogin(login: Login): void {
+    console.log('Adding login to recycle bin:', login);
+    const currentLogins = this._recycleBinLogins.getValue() || [];
+    this._recycleBinLogins.next([...currentLogins, login]);
+  }
+  getRecycleBinLogins(): Login[] | null {
+    return this._recycleBinLogins.getValue();
   }
 }

@@ -1,5 +1,7 @@
 using Api.Entities;
+using Api.Helpers;
 using Api.Repositories.EFContext;
+using Api.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories;
@@ -33,6 +35,7 @@ public class UserRepository(AppDbContext db): IUserRepository
     public async Task<User> CreateUserAsync(User user)
     {
         user.Created = DateTime.Now;
+        user.Id = CryptoHelper.GenerateSecureGuid();
         db.Users.Add(user);
         await db.SaveChangesAsync();
         return user;
@@ -44,5 +47,12 @@ public class UserRepository(AppDbContext db): IUserRepository
         db.Users.Update(user);
         await db.SaveChangesAsync();
         return user;
+    }
+    
+    public async Task<int> DeleteUserAsync(User user)
+    {
+        return await db.Users
+            .Where(u => u.Id == user.Id)
+            .ExecuteDeleteAsync();
     }
 }

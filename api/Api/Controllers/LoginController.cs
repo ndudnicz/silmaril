@@ -1,5 +1,6 @@
-using Api.Entities.Dtos;
-using Api.Services;
+using Api.Entities.Dtos.Create;
+using Api.Entities.Dtos.Update;
+using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,22 +18,18 @@ public class LoginController(
         return Ok(await loginService.GetLoginsByUserIdAsync(GetUserId()));
     }
     
-    [HttpGet("deleted")]
-    public async Task<IActionResult> GetDeletedLoginsAsync()
-    {
-        return Ok(await loginService.GetDeletedLoginsByUserIdAsync(GetUserId()));
-    }
-    
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] CreateLoginDto createLoginDto)
     {
-        return Ok(await loginService.CreateLoginAsync(createLoginDto, GetUserId()));
+        var createdLogin = await loginService.CreateLoginAsync(createLoginDto, GetUserId());
+        return Created($"api/logins", createdLogin);
     }
     
     [HttpPost("bulk")]
     public async Task<IActionResult> CreateBulkAsync([FromBody] List<CreateLoginDto> createLoginDtos)
     {
-        return Ok(await loginService.CreateLoginsAsync(createLoginDtos, GetUserId()));
+        var createdLogins = await loginService.CreateLoginsAsync(createLoginDtos, GetUserId());
+        return Created($"api/logins", createdLogins);
     }
 
     [HttpPut]

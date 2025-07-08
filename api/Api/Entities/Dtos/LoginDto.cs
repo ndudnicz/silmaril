@@ -1,32 +1,16 @@
 namespace Api.Entities.Dtos;
 
-public class LoginDto: MyEntity
+public class LoginDto(byte[] encryptedData, byte[] initializationVector) : MyEntity
 {
-    public string[] TagNames { get; set; } = [];
     public Guid UserId { get; set; }
-    public string? EncryptedDataBase64 { get; set; }
+    private byte[]? EncryptedData { get; set; } = encryptedData;
     public int? EncryptionVersion { get; set; }
-    public string? InitializationVectorBase64 { get; set; }
-    public bool Deleted { get; set; }
-    
-    public static LoginDto FromLogin(Login login)
-    {
-        return new LoginDto
-        {
-            Id = login.Id,
-            Created = login.Created,
-            Updated = login.Updated,
-            UserId = login.UserId,
-            EncryptedDataBase64 = Convert.ToBase64String(login.EncryptedData ?? []),
-            TagNames = login.Tags?.Select(x => x.Name).ToArray() ?? [],
-            EncryptionVersion = login.EncryptionVersion,
-            InitializationVectorBase64 = Convert.ToBase64String(login.InitializationVector ?? []),
-            Deleted = login.Deleted
-        };
-    }
-    
-    public static List<LoginDto> FromLogin(IEnumerable<Login> logins)
-    {
-        return logins.Select(FromLogin).ToList();
-    }
+    private byte[]? InitializationVector { get; set; } = initializationVector;
+    public bool Deleted { get; set; } = false;
+    public string[] TagNames { get; set; } = [];
+    public Guid? VaultId { get; set; }
+    public string? EncryptedDataBase64
+        => EncryptedData != null ? Convert.ToBase64String(EncryptedData) : "";
+    public string? InitializationVectorBase64
+        => InitializationVector != null ? Convert.ToBase64String(InitializationVector) : "";
 }

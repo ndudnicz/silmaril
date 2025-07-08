@@ -57,11 +57,15 @@ namespace Api.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("user_id");
 
+                    b.Property<Guid?>("VaultId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("vault_id");
+
                     b.HasKey("Id")
                         .HasName("pk_logins");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_logins_user_id");
+                    b.HasIndex("VaultId")
+                        .HasDatabaseName("ix_logins_vault_id");
 
                     b.ToTable("logins");
                 });
@@ -172,6 +176,59 @@ namespace Api.Migrations
                         .HasDatabaseName("ix_users_username_hash");
 
                     b.ToTable("users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("bffe53c5-f989-d5b7-9a55-0dca3d4d9df9"),
+                            Created = new DateTime(2025, 7, 7, 15, 27, 43, 675, DateTimeKind.Utc).AddTicks(8010),
+                            PasswordHash = "$argon2id$v=19$m=16,t=2,p=1$ZEp5eWdQeDBXeGk2OWh6Qw$/sfpIugCYAcUqDG3xmx/2g",
+                            Salt = new byte[] { 249, 219, 140, 250, 128, 4, 70, 207, 35, 211, 96, 44, 23, 162, 4, 93 },
+                            UsernameHash = "2E96772232487FB3A058D58F2C310023E07E4017C94D56CC5FAE4B54B44605F42A75B0B1F358991F8C6CBE9B68B64E5B2A09D0AD23FCAC07EE9A9198A745E1D5"
+                        });
+                });
+
+            modelBuilder.Entity("Api.Entities.Vault", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("Updated")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_vaults");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_vaults_user_id");
+
+                    b.ToTable("vaults");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("044ecf10-f1eb-4594-a2a7-cd4d5ba56355"),
+                            Created = new DateTime(2025, 7, 7, 15, 27, 43, 793, DateTimeKind.Utc).AddTicks(7060),
+                            Name = "Default Vault",
+                            UserId = new Guid("bffe53c5-f989-d5b7-9a55-0dca3d4d9df9")
+                        });
                 });
 
             modelBuilder.Entity("LoginTag", b =>
@@ -195,12 +252,11 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Entities.Login", b =>
                 {
-                    b.HasOne("Api.Entities.User", null)
+                    b.HasOne("Api.Entities.Vault", null)
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_logins_users_user_id");
+                        .HasForeignKey("VaultId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_logins_vaults_vault_id");
                 });
 
             modelBuilder.Entity("Api.Entities.RefreshToken", b =>
@@ -211,6 +267,16 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_refresh_tokens_users_user_id");
+                });
+
+            modelBuilder.Entity("Api.Entities.Vault", b =>
+                {
+                    b.HasOne("Api.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_vaults_users_user_id");
                 });
 
             modelBuilder.Entity("LoginTag", b =>

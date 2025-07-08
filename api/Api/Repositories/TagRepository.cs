@@ -1,5 +1,6 @@
 using Api.Entities;
 using Api.Repositories.EFContext;
+using Api.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories;

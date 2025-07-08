@@ -1,5 +1,6 @@
 using Api.Exceptions;
-using Api.Repositories;
+using Api.Repositories.Interfaces;
+using Api.Services.Validation.Interfaces;
 
 namespace Api.Services.Validation;
 
@@ -17,7 +18,7 @@ public class LoginValidator(ILoginRepository loginRepository) : ILoginValidator
     {
         if (!await loginRepository.LoginsExistByUserIdAsync(ids, userId))
         {
-            throw new LoginsNotFoundBulk("ids", string.Join(", ", ids.Select(x => x.ToString())));
+            throw new LoginsNotFound("ids", string.Join(", ", ids.Select(x => x.ToString())));
         }
     }
 }

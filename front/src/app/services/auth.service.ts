@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { AuthResponse } from '../entities/authentication/authResponse';
 import { VaultService } from './vault.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map, Observable, Subscription, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, Subscription, take, tap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +20,6 @@ export class AuthService {
   private readonly CSRF_HEADER_NAME = 'X-CSRF-TOKEN';
   private timeoutRefreshToken: any = null;
   private refreshTokenDelayInSeconds = 60;
-  private refreshTokenSubscription: Subscription | null = null;
 
   constructor(
     private vaultService: VaultService,
@@ -54,17 +53,17 @@ export class AuthService {
       clearTimeout(this.timeoutRefreshToken);
       this.timeoutRefreshToken = null;
     }
-    this.refreshTokenSubscription?.unsubscribe();
-    this.refreshTokenSubscription = null;
     var jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES))
     if (jwtExpires) {
       const now = Math.floor(Date.now() / 1000);
       const refreshTime = jwtExpires - now - this.refreshTokenDelayInSeconds; // Refresh 1 minute before expiration
       console.log(`JWT Expires at: ${jwtExpires}, next refresh in: ${refreshTime} seconds`);
       this.timeoutRefreshToken = setTimeout(() => {
-        this.refreshTokenSubscription = this.refreshToken$().subscribe({
-          next: () => console.log('Token refreshed successfully'),
-          error: (error) => console.error('Error refreshing token:', error)
+        this.refreshToken$()
+          .pipe(take(1))
+          .subscribe({
+            next: () => console.log('Token refreshed successfully'),
+            error: (error) => console.error('Error refreshing token:', error)
         });
       }, refreshTime * 1000);
     }
@@ -75,7 +74,8 @@ export class AuthService {
     const body = { username, password };
 
     return this.http.post<AuthResponse>(url, body, {
-      withCredentials: true
+      withCredentials: true,
+      headers: this.addCsrfHeader()
     }).pipe(
       tap(response => {
         this.setLocalStorage(response);
@@ -84,10 +84,38 @@ export class AuthService {
       }),
       map(() => true),
       catchError(error => {
-        console.error('Error during authentication:', error);
-        return throwError(() => new Error('Authentication failed'));
+        let message = error.error || 'Authentication failed';
+        console.error('Error during authentication:', message);
+        return throwError(() => new Error(message));
       })
     );
+  }
+
+  public getCsrfCookie(): void {
+    const url = `${this.apiEndpointV1}/auth/csrf-cookie`;
+
+    this.http.get(url, {
+      withCredentials: true 
+    }).pipe(
+      take(1),
+      tap(() => {
+        const csrfToken = this.getCookie(this.CSRF_COOKIE_NAME);
+        if (csrfToken) {
+          this.setCsrfToken(csrfToken);
+          console.log('CSRF token set successfully');
+        } else {
+          console.warn('CSRF token not found in cookies');
+        }
+      }),
+      catchError(error => {
+        let message = error.error || 'Error fetching CSRF cookie';
+        console.error('Error fetching CSRF cookie:', message);
+        return throwError(() => new Error(message));
+      })
+    ).subscribe({
+      next: () => console.log('CSRF cookie fetched successfully'),
+      error: (error) => console.error('Error in CSRF cookie subscription:', error)
+    });
   }
 
   public refreshToken$(): Observable<boolean> {
@@ -104,8 +132,9 @@ export class AuthService {
       }),
       map(() => true),
       catchError(error => {
-        console.error('Error during token refresh:', error);
-        return throwError(() => new Error('Token refresh failed'));
+        let message = error.error || 'Token refresh failed';
+        console.error('Error during token refresh:', message);
+        return throwError(() => new Error(message));
       })
     );
   }
@@ -124,8 +153,9 @@ export class AuthService {
       }),
       map(() => true),
       catchError(error => {
-        console.error('Error during signout:', error);
-        return throwError(() => new Error('Signout failed'));
+        let message = error.error || 'Signout failed';
+        console.error('Error during signout:', message);
+        return throwError(() => new Error(message));
       })
     );
   }

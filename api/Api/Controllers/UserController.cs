@@ -1,5 +1,8 @@
-using Api.Entities.Dtos;
-using Api.Services;
+using Api.Entities.Dtos.Create;
+using Api.Entities.Dtos.Update;
+using Api.Mappers.Interfaces;
+using Api.Services.Interfaces;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,64 +11,45 @@ namespace Api.Controllers;
 [Authorize]
 public class UserController(
     ILogger<UserController> logger,
-    IUserService userService
+    IUserService userService,
+    IUserMapper userMapper
     ) : MyControllerV1
 {
     [HttpGet]
     public async Task<IActionResult> GetAsync()
     {
-        try
-        {
-            return Ok(UserDto.FromUser(await userService.GetUserAsync(GetUserId())));
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error getting user");
-            return BadRequest(ex.Message);
-        }
+        return Ok(await userService.GetUserAsync(GetUserId()));
     }
     
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateUserDto createUserDto)
+    public async Task<IActionResult> CreateAsync(
+        [FromServices] IAntiforgery antiforgery,
+        [FromBody] CreateUserDto createUserDto
+        )
     {
         try
         {
-            return Ok(UserDto.FromUser(await userService.CreateUserAsync(createUserDto)));
+            await antiforgery.ValidateRequestAsync(HttpContext);
+            var createdUser = await userService.CreateUserAsync(createUserDto);
+            return Created($"api/user", createdUser);
         }
-        catch (Exception ex)
+        catch (AntiforgeryValidationException)
         {
-            logger.LogError(ex, "Error creating user");
-            return BadRequest(ex.InnerException?.Message ?? ex.Message);
+            return StatusCode(StatusCodes.Status403Forbidden, "Invalid CSRF token.");
         }
     }
     
     [HttpPut]
     public async Task<IActionResult> UpdateAsync([FromBody] UpdateUserDto updateUserDto)
     {
-        try
-        {
-            return Ok(UserDto.FromUser(await userService.UpdateUserAsync(GetUserId(), updateUserDto)));
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error updating user");
-            return BadRequest(ex.InnerException?.Message ?? ex.Message);
-        }
+        return Ok(await userService.UpdateUserAsync(GetUserId(), updateUserDto));
     }
     
     [HttpPut]
     [Route("password")]
     public async Task<IActionResult> UpdatePasswordAsync([FromBody] UpdateUserPasswordDto updateUserPasswordDto)
     {
-        try
-        {
-            return Ok(UserDto.FromUser(await userService.UpdateUserPasswordAsync(GetUserId(), updateUserPasswordDto)));
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error updating user password");
-            return BadRequest(ex.InnerException?.Message ?? ex.Message);
-        }
+        return Ok(await userService.UpdateUserPasswordAsync(GetUserId(), updateUserPasswordDto));
     }
 }

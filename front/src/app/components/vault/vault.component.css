@@ -68,7 +68,7 @@
   align-items: center;
 }
 
-#no-data-button {
+#no-data-icon {
   transform: scale(2);
 }
 
@@ -97,4 +97,5 @@
 
 .toolbar-title {
   width: 100px;
+  font-size: 13px;
 }

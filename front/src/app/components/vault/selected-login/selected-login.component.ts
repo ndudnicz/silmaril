@@ -17,6 +17,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { AddEditLoginModalComponent } from '../modals/add-edit-login/add-edit-login-modal.component';
 import { BaseComponent } from '../../base-component/base-component.component';
 import { Subscription, take } from 'rxjs';
+import { VaultService } from '../../../services/vault.service';
 
 @Component({
   standalone: true,
@@ -43,31 +44,27 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
   password = '';
   url = '';
   notes = '';
-  selectedLoginSubscription: Subscription | null = null;
+  subscriptions: Subscription = new Subscription();
 
   constructor(
     private dataService: DataService,
     private dialog: MatDialog,
     private loginService: LoginService,
+    private vaultService: VaultService,
   ) {
     super(inject(NgxSpinnerService));
     this.setupLoginSubscriptions();
   }
 
   ngOnDestroy() {
-    this.unsubscribeAllSubscriptions();
+    this.subscriptions.unsubscribe();
   }
 
   setupLoginSubscriptions() {
-    this.dataService.selectedLogin.subscribe((login: Login | null) => {
+    this.subscriptions.add(this.dataService.selectedLogin.subscribe((login: Login | null) => {
       this.login = login;
       this.setValues();
-    });
-  }
-
-  unsubscribeAllSubscriptions() {
-    this.selectedLoginSubscription?.unsubscribe();
-    this.selectedLoginSubscription = null;
+    }));
   }
 
   setValues() {
@@ -104,7 +101,8 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
         autoFocus: true,
         data: {
           mode: AddEditLoginModalComponent.MODAL_MOD.EDIT,
-          login: this.login
+          login: this.login,
+          vaultId: this.login!.vaultId
         }
       }
     ).afterClosed().pipe(take(1)).subscribe((result: Login) => {
@@ -115,12 +113,12 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
     });
   }
 
-  openDeleteModal(): void {
+  openSoftDeleteModal(): void {
     this.dialog.open(ConfirmModalComponent, {
       panelClass: 'custom-modal',
       data: {
         title: `Delete Login ${this.login?.decryptedData?.title}`,
-        message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? The data will be sent to the recycle bin and can be restored later.`,
+        message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? It will be sent to the recycle bin and can be restored later.`,
         confirmText: 'Confirm',
         cancelText: 'Cancel',
         width: '400px',
@@ -136,23 +134,22 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
         this.loginService.updateLogin$(UpdateLoginDto.fromLogin(this.login!))
           .pipe(take(1))
           .subscribe({
-            next: (updatedLogin: Login) => this.onUpdateLoginSuccess(updatedLogin),
+            next: (updatedLogin: Login) => this.onSoftDeleteLoginSuccess(updatedLogin),
             error: (error: any) => {
-              console.error('Error deleting login:', error);
-              ToastWrapper.error('Failed to delete login: ', error.message || 'Unknown error');
+              this.displayError('Error deleting login', error);
               this.stopLoading();
-              throw error;
             }
           });
       }
     })
   }
 
-  onUpdateLoginSuccess(updatedLogin: Login): void {
-    console.log('Login updated successfully:', updatedLogin);
+  onSoftDeleteLoginSuccess(updatedLogin: Login): void {
+    console.log('Login soft deleted successfully:', updatedLogin);
+    this.dataService.addRecycleBinLogin(updatedLogin);
     this.dataService.setUpdatedLogin(updatedLogin);
     this.dataService.setSelectedLogin(updatedLogin);
-    ToastWrapper.success('Login updated successfully');
+    ToastWrapper.success('Login deleted successfully');
     this.stopLoading();
   }
 
