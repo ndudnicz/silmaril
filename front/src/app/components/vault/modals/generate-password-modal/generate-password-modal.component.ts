@@ -13,6 +13,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { CommonModule } from '@angular/common';
 import { ProgressBarComponent } from '../../../progress-bar/progress-bar.component';
+import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 
 interface PasswordOptions {
@@ -53,9 +55,8 @@ enum PasswordStrength {
   templateUrl: './generate-password-modal.component.html',
   styleUrl: './generate-password-modal.component.css'
 })
-export class GeneratePasswordModalComponent implements OnInit {
+export class GeneratePasswordModalComponent extends BaseModalComponent implements OnInit {
 
-  dialogRef = inject(MatDialogRef);
   private defaultMinLength = 32;
   minLength = 8;
   specialChars = '!@#$%^&*()-_=+[]{}|;:,.<>?';
@@ -91,6 +92,13 @@ export class GeneratePasswordModalComponent implements OnInit {
   progressBarValue = 0;
   progressBarColor = this.progressBarColors[PasswordStrength.WEAK];
   passwordStrength = PasswordStrength.WEAK.toString();
+
+  constructor() {
+    super(
+      inject(MatDialogRef<GeneratePasswordModalComponent>),
+      inject(NgxSpinnerService)
+    );
+  }
 
   ngOnInit(): void {
     this.formGeneratePassword.valueChanges.subscribe(this.setNewPassword.bind(this));

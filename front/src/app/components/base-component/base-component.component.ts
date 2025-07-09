@@ -1,10 +1,8 @@
 import { NgxSpinnerService } from "ngx-spinner";
-import { Subject, Subscription } from "rxjs";
 import { ToastWrapper } from "../../utils/toast.wrapper";
 
 export class BaseComponent {
   protected loading = false;
-  protected destroy$ = new Subject<void>();
 
   protected constructor(private spinner: NgxSpinnerService) { }
 

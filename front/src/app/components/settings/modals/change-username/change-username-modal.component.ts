@@ -4,13 +4,13 @@ import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dial
 import { NgxSpinnerService } from 'ngx-spinner';
 import { UserService } from '../../../../services/user.service';
 import { ToastWrapper } from '../../../../utils/toast.wrapper';
-import { BaseComponent } from '../../../base-component/base-component.component';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { take } from 'rxjs';
+import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
 
 @Component({
   selector: 'app-change-username-modal',
@@ -25,7 +25,7 @@ import { take } from 'rxjs';
   templateUrl: './change-username-modal.component.html',
   styleUrl: './change-username-modal.component.css'
 })
-export class ChangeUsernameModalComponent extends BaseComponent {
+export class ChangeUsernameModalComponent extends BaseModalComponent {
   userNameFormControl = new FormControl('', [Validators.required]);
   form: FormGroup = new FormGroup({
     username: this.userNameFormControl
@@ -33,10 +33,9 @@ export class ChangeUsernameModalComponent extends BaseComponent {
 
   constructor(
     private dialog: MatDialog,
-    private dialogRef: MatDialogRef<ChangeUsernameModalComponent>,
     private userService: UserService
   ) {
-    super(inject(NgxSpinnerService));
+    super(inject(MatDialogRef<ChangeUsernameModalComponent>), inject(NgxSpinnerService));
   }
 
   async onSubmit() {
@@ -86,10 +85,6 @@ export class ChangeUsernameModalComponent extends BaseComponent {
     this.form.reset();
     this.stopLoading();
     this.closeDialog();
-  }
-
-  closeDialog() {
-    this.dialogRef.close();
   }
 
   keypress(event: KeyboardEvent) {

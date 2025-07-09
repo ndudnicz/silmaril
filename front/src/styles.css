@@ -2,34 +2,34 @@
 
 html,
 body {
-    height: 100%;
+  height: 100%;
 }
 
 /* roboto-300 - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 300;
-  src: url('/assets/fonts/roboto/roboto-v48-latin-300.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('/assets/fonts/roboto/roboto-v48-latin-300.woff2') format('woff2');
 }
 
 /* roboto-regular - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
-  src: url('/assets/fonts/roboto/roboto-v48-latin-400.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('/assets/fonts/roboto/roboto-v48-latin-400.woff2') format('woff2');
 }
 
 /* roboto-500 - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 500;
-  src: url('/assets/fonts/roboto/roboto-v48-latin-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('/assets/fonts/roboto/roboto-v48-latin-500.woff2') format('woff2');
 }
 
 @font-face {
@@ -56,13 +56,13 @@ body {
 }
 
 body {
-    margin: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
-    background-color:#faf9fd
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #faf9fd
 }
 
 .link {
-    color: #007bff;
+  color: #007bff;
 }
 
 mat-icon,
@@ -73,32 +73,33 @@ button,
 .a-button:hover,
 .a-button:focus,
 .a-button:active {
-    color: #44474e !important;
-    border-radius: 4px !important;
+  color: #44474e !important;
+  border-radius: 4px !important;
 }
 
-button:disabled, .disabled {
-    color: #737373 !important;
-    cursor: auto !important;
+button:disabled,
+.disabled {
+  color: #737373 !important;
+  cursor: auto !important;
 }
 
 .custom-modal .mat-mdc-dialog-container {
-   border-radius: 4px !important;
-   background-color: #faf9fd !important;
+  border-radius: 4px !important;
+  background-color: #faf9fd !important;
 }
 
 .close-button {
-    cursor: pointer !important;
+  cursor: pointer !important;
 }
 
 .close-button:hover {
-    color: #737373 !important;
+  color: #737373 !important;
 }
 
 .close-dialog-button {
-    position: absolute !important;
-    right: 10px;
-    top: 10px;
+  position: absolute !important;
+  right: 10px;
+  top: 10px;
 }
 
 :host ::ng-deep .mat-chip {
@@ -107,15 +108,15 @@ button:disabled, .disabled {
 }
 
 .full-width {
-    width: 100%;
+  width: 100%;
 }
 
 .margin-top-10 {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 .my-textarea {
-    max-height: 300px;
+  max-height: 300px;
 }
 
 .spacer {
@@ -133,4 +134,10 @@ button:disabled, .disabled {
   align-items: center;
   overflow: hidden;
   justify-content: flex-start;
+}
+
+.modal-body {
+  width: 100%;
+  height: 100%;
+  background-color: inherit;
 }
