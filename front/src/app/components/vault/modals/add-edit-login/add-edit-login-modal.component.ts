@@ -14,11 +14,11 @@ import { VaultService } from '../../../../services/vault.service';
 import { LoginService } from '../../../../services/login.service';
 import { ToastWrapper } from '../../../../utils/toast.wrapper';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
-import { BaseComponent } from '../../../base-component/base-component.component';
 import { from, Observable, switchMap, take } from 'rxjs';
 import { CreateLoginDto } from '../../../../entities/create/create-login-dto';
 import { DecryptedData } from '../../../../entities/decrypted-data';
 import { UpdateLoginDto } from '../../../../entities/update/update-login-dto';
+import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
 
 @Component({
 
@@ -34,7 +34,7 @@ import { UpdateLoginDto } from '../../../../entities/update/update-login-dto';
   templateUrl: './add-edit-login-modal.component.html',
   styleUrl: './add-edit-login-modal.component.css'
 })
-export class AddEditLoginModalComponent extends BaseComponent {
+export class AddEditLoginModalComponent extends BaseModalComponent {
   data = inject(MAT_DIALOG_DATA);
   public static MODAL_MOD = {
     ADD: 'add',
@@ -66,10 +66,10 @@ export class AddEditLoginModalComponent extends BaseComponent {
   constructor(
     private vaultService: VaultService,
     private loginService: LoginService,
-    private dialogRef: MatDialogRef<AddEditLoginModalComponent>,
+    // private dialogRef: MatDialogRef<AddEditLoginModalComponent>,
     private dialog: MatDialog
   ) {
-    super(inject(NgxSpinnerService));
+    super(inject(MatDialogRef<AddEditLoginModalComponent>), inject(NgxSpinnerService));
     if (this.mode === AddEditLoginModalComponent.MODAL_MOD.EDIT && !this.login) {
       const msg = 'Edit mode requires a login object';
       console.error(msg);
@@ -183,10 +183,6 @@ export class AddEditLoginModalComponent extends BaseComponent {
         from(this.vaultService.decryptLoginDataAsync(updatedLogin))
       )
     );
-  }
-
-  closeDialog() {
-    this.dialogRef.close();
   }
 
   addEditTogglePasswordVisibility() {
