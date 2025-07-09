@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { ChipComponent } from '../../../chip/chip.component';
 import { CommonModule } from '@angular/common';
 import { Login } from '../../../../entities/login';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-card',
@@ -10,7 +11,8 @@ import { Login } from '../../../../entities/login';
   standalone: true,
   imports: [
     CommonModule,
-    ChipComponent
+    ChipComponent,
+    MatIconModule
   ]
 })
 export class CardComponent implements OnChanges {

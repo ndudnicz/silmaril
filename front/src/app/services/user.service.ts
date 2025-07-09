@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { UpdateUserDto, User } from '../entities/user';
+import { User } from '../entities/user';
 import { Observable } from 'rxjs/internal/Observable';
 import { catchError, map, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
+import { UpdateUserDto } from '../entities/update/update-user-dto';
 
 @Injectable({
   providedIn: 'root'

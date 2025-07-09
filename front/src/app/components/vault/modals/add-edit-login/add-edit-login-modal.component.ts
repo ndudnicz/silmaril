@@ -8,7 +8,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { GeneratePasswordModalComponent } from '../generate-password-modal/generate-password-modal.component';
-import { CreateLoginDto, DecryptedData, Login, UpdateLoginDto } from '../../../../entities/login';
+import { Login } from '../../../../entities/login';
 import { CryptoUtilsV1, EncryptionResult, uint8ArrayToBase64 } from '../../../../utils/crypto.utils';
 import { VaultService } from '../../../../services/vault.service';
 import { LoginService } from '../../../../services/login.service';
@@ -16,6 +16,9 @@ import { ToastWrapper } from '../../../../utils/toast.wrapper';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
 import { BaseComponent } from '../../../base-component/base-component.component';
 import { from, Observable, switchMap, take } from 'rxjs';
+import { CreateLoginDto } from '../../../../entities/create/create-login-dto';
+import { DecryptedData } from '../../../../entities/decrypted-data';
+import { UpdateLoginDto } from '../../../../entities/update/update-login-dto';
 
 @Component({
 

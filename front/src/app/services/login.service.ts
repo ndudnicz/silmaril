@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CreateLoginDto, DeleteLoginsDto, Login, UpdateLoginDto } from '../entities/login';
+import { Login } from '../entities/login';
 import { environment } from '../../environments/environment';
 import { catchError, map, Observable, tap, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { CreateLoginDto } from '../entities/create/create-login-dto';
+import { DeleteLoginsDto } from '../entities/delete/delete-login-dto';
+import { UpdateLoginDto } from '../entities/update/update-login-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +23,18 @@ export class LoginService {
       catchError(error => {
         console.error('Error fetching logins:', error);
         return throwError(() => new Error('Failed to fetch logins'));
+      })
+    );
+  }
+
+  getDeletedLogins$(): Observable<Login[]> {
+    return this.http.get<Login[]>(`${this.apiEndpointV1}/login/deleted`).pipe(
+      map((logins: Login[]) =>
+        logins.map(login => Login.fromObject(login))
+      ),
+      catchError(error => {
+        console.error('Error fetching deleted logins:', error);
+        return throwError(() => new Error('Failed to fetch deleted logins'));
       })
     );
   }

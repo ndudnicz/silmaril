@@ -45,12 +45,12 @@ public class LoginRepository(AppDbContext db): ILoginRepository
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<List<Login>> GetLoginsByUserIdWithTagsAsync(Guid userId)
+    public async Task<List<Login>> GetLoginsByUserIdWithTagsAsync(Guid userId, bool deleted = false)
     {
         return await db.Logins
             .AsNoTracking()
             .Include(l => l.Tags)
-            .Where(l => l.UserId == userId)
+            .Where(l => l.UserId == userId && l.Deleted == deleted)
             .ToListAsync();
     }
 

@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy } from '@angular/core';
-import { Login, UpdateLoginDto } from '../../../entities/login';
+import { Login } from '../../../entities/login';
 import { DataService } from '../../../services/data.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,6 +18,7 @@ import { AddEditLoginModalComponent } from '../modals/add-edit-login/add-edit-lo
 import { BaseComponent } from '../../base-component/base-component.component';
 import { Subscription, take } from 'rxjs';
 import { VaultService } from '../../../services/vault.service';
+import { UpdateLoginDto } from '../../../entities/update/update-login-dto';
 
 @Component({
   standalone: true,
@@ -146,7 +147,6 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
 
   onSoftDeleteLoginSuccess(updatedLogin: Login): void {
     console.log('Login soft deleted successfully:', updatedLogin);
-    this.dataService.addRecycleBinLogin(updatedLogin);
     this.dataService.setUpdatedLogin(updatedLogin);
     this.dataService.setSelectedLogin(updatedLogin);
     ToastWrapper.success('Login deleted successfully');

@@ -3,7 +3,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { BaseComponent } from '../base-component/base-component.component';
 import { MatIconModule } from '@angular/material/icon';
 import { Login } from '../../entities/login';
-import { Subscription, take } from 'rxjs';
+import { catchError, from, Observable, Subscription, switchMap, take, throwError } from 'rxjs';
 import { DataService } from '../../services/data.service';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
 import { CommonModule } from '@angular/common';
@@ -16,6 +16,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { LoginService } from '../../services/login.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.component';
+import { VaultService } from '../../services/vault.service';
 
 @Component({
   selector: 'app-recycle-bin',
@@ -48,21 +49,39 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   constructor(
     private dataService: DataService,
     private loginService: LoginService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private vaultService: VaultService
   ) {
     super(inject(NgxSpinnerService));
   }
 
   ngOnInit(): void {
-    this.startLoading();
-    this.setupSubscriptions();
-    this.allDeletedLogins = this.dataService.getRecycleBinLogins() ?? [];
-    console.log('recycle bin ngoninit', this.allDeletedLogins);
-    this.setDisplayedLogins();
-    this.stopLoading();
+    this.loadDeletedLogins();
   }
 
-  setupSubscriptions() {
+  loadDeletedLogins() {
+    this.startLoading();
+    this.getDecryptedDeletedlogins$().pipe(take(1)).subscribe({
+      next: (logins: Login[]) => {
+        this.allDeletedLogins = logins;
+        this.setDisplayedLogins();
+        this.stopLoading();
+      },
+      error: (error: any) => {
+        this.stopLoading();
+        this.displayError('Failed to load deleted logins', error);
+      }
+    })
+  }
+
+  getDecryptedDeletedlogins$(): Observable<Login[]> {
+    return this.loginService.getDeletedLogins$()
+      .pipe(
+        take(1),
+        switchMap(logins => {
+          return from(this.vaultService.decryptAllLoginsAsync(logins));
+        })
+      )
   }
 
   setDisplayedLogins() {
@@ -110,7 +129,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     console.log(`Permanently deleting logins `, this.selectedLogins);
     this.loginService.deleteLogins$({ ids: this.selectedLogins.map(login => login.id) }).pipe(take(1)).subscribe({
       next: (deletedCount: number) => {
-        this.onSuccededDeleteLogins(deletedCount);
+        this.onDeleteLoginsSuccess(deletedCount);
       },
       error: (error: any) => {
         this.stopLoading();
@@ -120,7 +139,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     });
   }
 
-  onSuccededDeleteLogins(deletedCount: number): void {
+  onDeleteLoginsSuccess(deletedCount: number): void {
     console.log(`Permanently deleted ${deletedCount} logins`);
     this.allDeletedLogins = this.allDeletedLogins.filter(login => !this.selectedLogins.includes(login));
     this.setDisplayedLogins();
@@ -148,6 +167,5 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   clearSelection() {
     this.unselectAllTrigger++;
     this.selectedLogins = [];
-    console.log('Selection cleared');
   }
 }

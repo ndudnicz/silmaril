@@ -62,19 +62,4 @@ export class DataService {
   getVaults(): Vault[] | null {
     return this._vaults.getValue();
   }
-
-  private _recycleBinLogins: BehaviorSubject<Login[] | null> = new BehaviorSubject<Login[] | null>(null);
-  public readonly recycleBinLogins: Observable<Login[] | null> = this._recycleBinLogins.asObservable();
-  setRecycleBinLogins(logins: Login[]): void {
-    console.log('Saving logins to recycle bin:', logins);
-    this._recycleBinLogins.next(logins);
-  }
-  addRecycleBinLogin(login: Login): void {
-    console.log('Adding login to recycle bin:', login);
-    const currentLogins = this._recycleBinLogins.getValue() || [];
-    this._recycleBinLogins.next([...currentLogins, login]);
-  }
-  getRecycleBinLogins(): Login[] | null {
-    return this._recycleBinLogins.getValue();
-  }
 }

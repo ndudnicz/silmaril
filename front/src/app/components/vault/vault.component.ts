@@ -9,7 +9,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AddEditLoginModalComponent } from './modals/add-edit-login/add-edit-login-modal.component';
-import { Login, UpdateLoginDto } from '../../entities/login';
+import { Login } from '../../entities/login';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { SelectedLoginComponent } from "./selected-login/selected-login.component";
@@ -19,11 +19,12 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { BaseComponent } from '../base-component/base-component.component';
-import { Subscription, take } from 'rxjs';
+import { from, Observable, Subscription, switchMap, take } from 'rxjs';
 import { Vault } from '../../entities/vault';
 import { ActivatedRoute, Params } from '@angular/router';
 import { truncateString } from '../../utils/string.utils';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
+import { UpdateLoginDto } from '../../entities/update/update-login-dto';
 
 @Component({
   selector: 'app-vault',
@@ -133,10 +134,11 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   }
 
   loadLogins(): void {
-    this.loginService.getLogins$().pipe(take(1)).subscribe({
+    this.startLoading();
+    this.getDecryptedLogins$().pipe(take(1)).subscribe({
       next: async (logins: Login[]) => {
         console.log('Logins fetched successfully:', logins);
-        this.allLogins = await this.vaultService.decryptAllLoginsAsync(logins);
+        this.allLogins = logins;
         this.setupDataAndDisplay();
         this.stopLoading();
       },
@@ -144,21 +146,26 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         this.displayError('Error fetching logins', error);
         this.stopLoading();
       }
-    });
+    })
+  }
+
+  getDecryptedLogins$(): Observable<Login[]> {
+    return this.loginService.getLogins$()
+      .pipe(
+        take(1),
+        switchMap(logins => {
+          return from(this.vaultService.decryptAllLoginsAsync(logins));
+        })
+      );
   }
 
   setupDataAndDisplay() {
     this.setDisplayedLogins();
-    this.setRecycleBinLogins();
   }
 
   setDisplayedLogins() {
-    this.displayedLogins = this.allLogins.filter(login => !login.deleted && login.vaultId === this.vaultId);
+    this.displayedLogins = this.allLogins.filter(login => login.vaultId === this.vaultId);
     console.log('Setting displayed logins for vault:', this.displayedLogins);
-  }
-
-  setRecycleBinLogins() {
-    this.dataService.setRecycleBinLogins(this.allLogins.filter(login => login.vaultId == null || login.deleted));
   }
 
   openAddLoginModal() {
@@ -223,7 +230,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
     this.allLogins = updatedLogins;
     this.setDisplayedLogins();
-    this.setRecycleBinLogins();
+    // this.setRecycleBinLogins();
     this.stopLoading();
     ToastWrapper.success('Master password changed successfully');
   }
@@ -236,8 +243,8 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
       this.displayedLogins = this.allLogins.filter(login => {
         const title = login.decryptedData?.title || '';
         return !login.deleted
-        && login.vaultId == this.vaultId
-        && title.toLowerCase().includes(this.searchValue.toLowerCase());
+          && login.vaultId == this.vaultId
+          && title.toLowerCase().includes(this.searchValue.toLowerCase());
       });
     }
   }

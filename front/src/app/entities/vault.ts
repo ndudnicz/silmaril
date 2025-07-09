@@ -5,11 +5,3 @@ export interface Vault {
     updated?: Date;
     userId: string;
 }
-
-export interface CreateVaultDto {
-    name: string;
-}
-
-export interface UpdateVaultDto {
-    name: string;
-}
