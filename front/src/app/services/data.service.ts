@@ -59,7 +59,7 @@ export class DataService {
     const updatedVaults = currentVaults.filter(v => v.id !== vaultId);
     this._vaults.next(updatedVaults);
   }
-  getVaults(): Vault[] | null {
-    return this._vaults.getValue();
+  getVaults(): Vault[] {
+    return this._vaults.getValue() ?? [];
   }
 }

@@ -17,6 +17,9 @@ import { LoginService } from '../../services/login.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.component';
 import { VaultService } from '../../services/vault.service';
+import { Vault } from '../../entities/vault';
+import { RestoreLoginsModalComponent } from './modals/restore-logins/restore-logins-modal.component';
+import { UpdateLoginDto } from '../../entities/update/update-login-dto';
 
 @Component({
   selector: 'app-recycle-bin',
@@ -45,6 +48,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   selectedLogins: Login[] = [];
   subscription: Subscription = new Subscription();
   unselectAllTrigger: number = 0;
+  vaults: Vault[] = [];
 
   constructor(
     private dataService: DataService,
@@ -53,6 +57,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     private vaultService: VaultService
   ) {
     super(inject(NgxSpinnerService));
+    this.vaults = this.dataService.getVaults();
   }
 
   ngOnInit(): void {
@@ -103,7 +108,83 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   }
 
   restoreSelectedLogins(): void {
+    const orphanedLogins = this.selectedLogins.filter(login => !this.vaults.some(vault => vault.id === login.vaultId));
+    if (orphanedLogins.length > 0) {
+      this.openRestoreLoginsModal(orphanedLogins);
+    } else {
+      this.openConfirmRestoreLoginsModal();
+    }
+  }
+
+  openRestoreLoginsModal(orphanedLogins: Login[]): void {
+    this.dialog.open(RestoreLoginsModalComponent, {
+      data: {
+        orphanedLogins: orphanedLogins
+      },
+      panelClass: 'custom-modal',
+      width: '400px',
+      height: 'auto',
+      disableClose: true,
+      autoFocus: false,
+      restoreFocus: false
+    }).afterClosed().pipe(take(1)).subscribe(destinationVaultId => {
+      if (destinationVaultId) {
+        this.proceedRestoreSelectedLogins(destinationVaultId);
+      } else {
+        console.log('Restore cancelled');
+      }
+    });
+  }
+
+  openConfirmRestoreLoginsModal(): void {
+    this.dialog.open(ConfirmModalComponent, {
+      data: {
+        title: 'Confirm Restore Logins',
+        message: `Are you sure you want to restore ${this.selectedLogins.length} logins?`,
+        confirmText: 'Restore',
+        cancelText: 'Cancel',
+      },
+      panelClass: 'custom-modal',
+      width: '400px',
+      height: 'auto',
+      disableClose: true,
+      autoFocus: false,
+      restoreFocus: false
+    }).afterClosed().pipe(take(1)).subscribe(confirmed => {
+      if (confirmed) {
+        this.proceedRestoreSelectedLogins(null);
+      } else {
+        console.log('Restore cancelled');
+      }
+    });
+  }
+
+  proceedRestoreSelectedLogins(destinationVaultId: string | null): void {
+    this.startLoading();
     console.log(`Restoring logins `, this.selectedLogins);
+    this.selectedLogins.forEach(login => {
+      login.vaultId = destinationVaultId ?? login.vaultId;
+      login.deleted = false;
+    });
+    this.loginService.updateLogins$(this.selectedLogins.map(login => UpdateLoginDto.fromLogin(login)))
+      .pipe(take(1))
+      .subscribe({
+        next: updatedlogins => {
+          this.onRestoreLoginSuccess();
+          console.log(`Restored ${updatedlogins.length} logins`);
+        },
+        error: (error: any) => {
+          this.stopLoading();
+          this.displayError('Failed to restore logins', error);
+        }
+      })
+  }
+
+  onRestoreLoginSuccess(): void {
+    this.allDeletedLogins = this.allDeletedLogins.filter(login => !this.selectedLogins.includes(login));
+    this.setDisplayedLogins();
+    this.selectedLogins = [];
+    this.stopLoading();
   }
 
   confirmDeleteSelectedLogins(): void {

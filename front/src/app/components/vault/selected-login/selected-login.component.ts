@@ -117,16 +117,16 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
   openSoftDeleteModal(): void {
     this.dialog.open(ConfirmModalComponent, {
       panelClass: 'custom-modal',
+      width: '400px',
+      height: 'auto',
+      closeOnNavigation: false,
+      disableClose: true,
+      autoFocus: true,
       data: {
         title: `Delete Login ${this.login?.decryptedData?.title}`,
         message: `Are you sure you want to delete the login "${this.login?.decryptedData?.title}"? It will be sent to the recycle bin and can be restored later.`,
         confirmText: 'Confirm',
-        cancelText: 'Cancel',
-        width: '400px',
-        height: 'auto',
-        closeOnNavigation: false,
-        disableClose: true,
-        autoFocus: true
+        cancelText: 'Cancel'
       }
     }).afterClosed().pipe(take(1)).subscribe((confirmed: boolean): void => {
       if (confirmed) {
@@ -147,8 +147,8 @@ export class SelectedLoginComponent extends BaseComponent implements OnDestroy {
 
   onSoftDeleteLoginSuccess(updatedLogin: Login): void {
     console.log('Login soft deleted successfully:', updatedLogin);
-    this.dataService.setUpdatedLogin(updatedLogin);
-    this.dataService.setSelectedLogin(updatedLogin);
+    this.dataService.setDeletedLogin(updatedLogin);
+    this.dataService.setSelectedLogin(null);
     ToastWrapper.success('Login deleted successfully');
     this.stopLoading();
   }

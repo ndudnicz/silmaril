@@ -117,10 +117,6 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
     this.dialogRef.close(this.generatedPassword);
   }
 
-  closeDialog(): void {
-    this.dialogRef.close(null);
-  }
-
   setNewPassword(): void {
     if (this.formGeneratePassword.valid) {
       this.generatedPassword = this.generatePassword({

@@ -87,7 +87,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
       if (login) {
         this.allLogins = this.allLogins.filter(l => l.id !== login.id);
         this.setDisplayedLogins();
-        ToastWrapper.success('Login deleted successfully');
       }
     }));
 
@@ -97,7 +96,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         if (index !== -1) {
           this.allLogins[index] = login;
           this.setDisplayedLogins();
-          ToastWrapper.success('Login updated successfully');
         } else {
           console.warn('Updated login not found in current logins:', login);
         }

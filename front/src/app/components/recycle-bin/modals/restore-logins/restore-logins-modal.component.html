@@ -1,34 +1,23 @@
 <div class="modal-body">
-    <h1 mat-dialog-title>Change Your Signin Password</h1>
+    <h1 mat-dialog-title>Restore Logins</h1>
     <mat-icon class="close-button close-dialog-button" (click)="closeDialog()">close</mat-icon>
     <mat-dialog-content>
-        <div class="change-password-title-container">
-            <div class="change-password-title-text">
-                <strong>This is <u>not</u> your master password</strong>
+        <div class="restore-login-title-container">
+            <div class="restore-login-title-text">
             </div>
         </div>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
             <mat-form-field class="full-width" appearance="fill" floatLabel="always">
-                <mat-label>Old Password</mat-label>
-                <input matInput placeholder="" type="password" formControlName="oldPassword" required>
-                <mat-icon matSuffix>lock</mat-icon>
-            </mat-form-field>
-            <br>
-            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
-                <mat-label>New Password</mat-label>
-                <input matInput placeholder="" on-focusout="inputFocusOut()" type="password"
-                    formControlName="newPassword" required>
-                <mat-icon matSuffix>lock</mat-icon>
-            </mat-form-field>
-            <br>
-            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
-                <mat-label>Confirm New Password</mat-label>
-                <input matInput placeholder="" type="password" formControlName="confirmNewPassword" required>
-                <mat-icon matSuffix>lock</mat-icon>
+                <mat-select name="food" formControlName="vaultId">
+                    @for (vault of vaults; track vault) {
+                    <mat-option [value]="vault.id">{{vault.name}}</mat-option>
+                    }
+                </mat-select>
             </mat-form-field>
             <br>
             <div class="buttons">
-                <button mat-raised-button type="submit" matButton [disabled]="form.invalid || loading">Change Password</button>
+                <button mat-raised-button type="submit" matButton [disabled]="form.invalid || loading">Restore
+                    Logins</button>
             </div>
         </form>
     </mat-dialog-content>
