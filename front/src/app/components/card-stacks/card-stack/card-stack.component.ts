@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import { Login } from '../../../entities/login';
 import { CardComponent } from "./card/card.component";
 import { CommonModule } from '@angular/common';
@@ -17,12 +17,11 @@ import { MatDividerModule } from '@angular/material/divider';
 styleUrls: ['./card-stack.component.css']})
 export class CardStackComponent {
   @Input() title!: string;
-  @Input() logins!: Login[]; // Replace 'any' with the appropriate type if known
+  @Input() logins!: Login[];
+  @Input() enableSelectedFeature: boolean = false;
+  @Input() unselectAllTrigger: number = 0;
 
-  constructor(private dataService: DataService) {
-  }
+  @Output() clickEvent: EventEmitter<Login> = new EventEmitter<Login>();
 
-  setSelectedLogin(login: Login) {
-    this.dataService.setSelectedLogin(login);
-  }
+  constructor() {}
 }

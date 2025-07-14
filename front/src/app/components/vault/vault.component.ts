@@ -9,9 +9,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AddEditLoginModalComponent } from './modals/add-edit-login/add-edit-login-modal.component';
-import { Login, UpdateLoginDto } from '../../entities/login';
-import { CommonModule, KeyValue } from '@angular/common';
-import { CardStackComponent } from './card-stack/card-stack.component';
+import { Login } from '../../entities/login';
+import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { SelectedLoginComponent } from "./selected-login/selected-login.component";
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -20,10 +19,12 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { BaseComponent } from '../base-component/base-component.component';
-import { Subscription, take } from 'rxjs';
+import { from, Observable, Subscription, switchMap, take } from 'rxjs';
 import { Vault } from '../../entities/vault';
 import { ActivatedRoute, Params } from '@angular/router';
 import { truncateString } from '../../utils/string.utils';
+import { CardStacksComponent } from '../card-stacks/card-stacks.component';
+import { UpdateLoginDto } from '../../entities/update/update-login-dto';
 
 @Component({
   selector: 'app-vault',
@@ -33,14 +34,14 @@ import { truncateString } from '../../utils/string.utils';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    CardStackComponent,
     CommonModule,
     SelectedLoginComponent,
     MatTooltipModule,
     MatInputModule,
     FormsModule,
     ReactiveFormsModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    CardStacksComponent
   ],
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'
@@ -49,7 +50,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
 
   allLogins: Login[] = [];
   displayedLogins: Login[] = [];
-  displayedLoginStackEntries: KeyValue<string, Login[]>[] = [];
   selectedLogin: Login | null = null;
   searchValue = '';
   vaultId: string | null = null;
@@ -66,8 +66,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
   ) {
     super(inject(NgxSpinnerService));
-    // this.setupSubscriptionsAndSetupVault();
-    // console.log('VaultComponent initialized');
   }
 
   ngOnInit(): void {
@@ -89,8 +87,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
       if (login) {
         this.allLogins = this.allLogins.filter(l => l.id !== login.id);
         this.setDisplayedLogins();
-        this.computeStacks();
-        ToastWrapper.success('Login deleted successfully');
       }
     }));
 
@@ -100,8 +96,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         if (index !== -1) {
           this.allLogins[index] = login;
           this.setDisplayedLogins();
-          this.computeStacks();
-          ToastWrapper.success('Login updated successfully');
         } else {
           console.warn('Updated login not found in current logins:', login);
         }
@@ -138,10 +132,11 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   }
 
   loadLogins(): void {
-    this.loginService.getLogins$().pipe(take(1)).subscribe({
+    this.startLoading();
+    this.getDecryptedLogins$().pipe(take(1)).subscribe({
       next: async (logins: Login[]) => {
         console.log('Logins fetched successfully:', logins);
-        this.allLogins = await this.vaultService.decryptAllLoginsAsync(logins);
+        this.allLogins = logins;
         this.setupDataAndDisplay();
         this.stopLoading();
       },
@@ -149,35 +144,26 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
         this.displayError('Error fetching logins', error);
         this.stopLoading();
       }
-    });
+    })
+  }
+
+  getDecryptedLogins$(): Observable<Login[]> {
+    return this.loginService.getLogins$()
+      .pipe(
+        take(1),
+        switchMap(logins => {
+          return from(this.vaultService.decryptAllLoginsAsync(logins));
+        })
+      );
   }
 
   setupDataAndDisplay() {
     this.setDisplayedLogins();
-    this.computeStacks();
-    this.setRecycleBinLogins();
   }
 
   setDisplayedLogins() {
-    this.displayedLogins = this.allLogins.filter(login => !login.deleted && login.vaultId === this.vaultId);
-  }
-
-  computeStacks() {
-    let loginStacks: any = {};
-    for (const login of this.displayedLogins) {
-      const stackName = login.decryptedData?.title.charAt(0).toLocaleUpperCase() || 'Uncategorized';
-      if (!loginStacks[stackName]) {
-        loginStacks[stackName] = [];
-      }
-      loginStacks[stackName].push(login);
-    }
-    this.displayedLoginStackEntries = Object.entries(loginStacks as Record<string, Login[]>)
-      .map(([key, value]) => ({ key, value }));
-    this.displayedLoginStackEntries.sort((a, b) => a.key.localeCompare(b.key));
-  }
-
-  setRecycleBinLogins() {
-    this.dataService.setRecycleBinLogins(this.allLogins.filter(login => login.vaultId == null || login.deleted));
+    this.displayedLogins = this.allLogins.filter(login => login.vaultId === this.vaultId);
+    console.log('Setting displayed logins for vault:', this.displayedLogins);
   }
 
   openAddLoginModal() {
@@ -198,8 +184,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     ).afterClosed().pipe(take(1)).subscribe(async (result: Login) => {
       if (result) {
         this.allLogins.push(result);
-        this.displayedLogins.push(result);
-        this.computeStacks();
+        this.displayedLogins = [...this.displayedLogins, result];
       }
     });
   }
@@ -227,7 +212,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     await this.vaultService.setKeyAsync(newMasterPassword);
     this.dataService.setSelectedLogin(null);
     this.allLogins = await this.vaultService.encryptAllLoginsAsync(this.allLogins);
-    this.loginService.updateLoginsBulk$(this.allLogins.map(l => UpdateLoginDto.fromLogin(l))).pipe(take(1)).subscribe({
+    this.loginService.updateLogins$(this.allLogins.map(l => UpdateLoginDto.fromLogin(l))).pipe(take(1)).subscribe({
       next: async (updatedLogins: Login[]) => {
         this.onUpdateLoginsSuccess(updatedLogins);
       },
@@ -243,8 +228,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
     this.allLogins = updatedLogins;
     this.setDisplayedLogins();
-    this.computeStacks();
-    this.setRecycleBinLogins();
+    // this.setRecycleBinLogins();
     this.stopLoading();
     ToastWrapper.success('Master password changed successfully');
   }
@@ -257,16 +241,18 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
       this.displayedLogins = this.allLogins.filter(login => {
         const title = login.decryptedData?.title || '';
         return !login.deleted
-        && login.vaultId == this.vaultId
-        && title.toLowerCase().includes(this.searchValue.toLowerCase());
+          && login.vaultId == this.vaultId
+          && title.toLowerCase().includes(this.searchValue.toLowerCase());
       });
     }
-    this.computeStacks();
   }
 
   clearSearch() {
     this.searchValue = '';
     this.setDisplayedLogins();
-    this.computeStacks();
+  }
+
+  setSelectedLogin(login: Login | null) {
+    this.dataService.setSelectedLogin(login)
   }
 }

@@ -12,7 +12,8 @@ public interface ILoginRepository
     Task<Login?> GetLoginWithTagsAsync(Guid id);
     Task<List<Login>> GetLoginsWithTagsAsync(IEnumerable<Guid> ids);
     Task<List<Login>> GetLoginsByVaultIdWithTagsAsync(Guid vaultId);
-    Task<List<Login>> GetLoginsByUserIdWithTagsAsync(Guid userId);
+    Task<List<Login>> GetLoginsByUserIdWithTagsAsync(Guid userId, bool deleted = false);
+
     
     Task<Login> CreateLoginAsync(Login login);
     Task<List<Login>> CreateLoginsAsync(List<Login> logins);

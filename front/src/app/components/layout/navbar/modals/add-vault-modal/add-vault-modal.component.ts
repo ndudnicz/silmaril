@@ -4,11 +4,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { BaseComponent } from '../../../../base-component/base-component.component';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { VaultService } from '../../../../../services/vault.service';
 import { ToastWrapper } from '../../../../../utils/toast.wrapper';
+import { BaseModalComponent } from '../../../../base-component/modal/base-modal/base-modal.component';
 
 @Component({
   selector: 'app-add-vault-modal',
@@ -23,7 +23,7 @@ import { ToastWrapper } from '../../../../../utils/toast.wrapper';
   templateUrl: './add-vault-modal.component.html',
   styleUrl: './add-vault-modal.component.css'
 })
-export class AddVaultModalComponent extends BaseComponent {
+export class AddVaultModalComponent extends BaseModalComponent {
   private readonly vaultNameMaxLength = 128;
 
   vaultNameFormControl = new FormControl('', [
@@ -35,10 +35,9 @@ export class AddVaultModalComponent extends BaseComponent {
   });
 
   constructor(
-    private dialogRef: MatDialogRef<AddVaultModalComponent>,
     private vaultService: VaultService
   ) {
-    super(inject(NgxSpinnerService));
+    super(inject(MatDialogRef<AddVaultModalComponent>), inject(NgxSpinnerService));
   }
 
   onSubmit() {
@@ -63,10 +62,6 @@ export class AddVaultModalComponent extends BaseComponent {
     } else {
       console.error('Form is invalid:', this.form.errors);
     }
-  }
-
-  closeDialog() {
-    this.dialogRef.close();
   }
 
   keypress(event: KeyboardEvent) {

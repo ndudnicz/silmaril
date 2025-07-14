@@ -1,0 +1,26 @@
+<div class="modal-body">
+    <h1 mat-dialog-title>Restore Logins</h1>
+    <mat-icon class="close-button close-dialog-button" (click)="closeDialog()">close</mat-icon>
+    <mat-dialog-content>
+        <div class="restore-login-title-container">
+            <div class="restore-login-title-text">
+                <p>Restore deleted logins to a vault.</p>
+                <p>Choose a vault to restore the orphaned deleted logins to.</p>
+            </div>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
+                <mat-select name="food" formControlName="vaultId">
+                    @for (vault of vaults; track vault) {
+                    <mat-option [value]="vault.id">{{vault.name}}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+            <br>
+            <div class="buttons">
+                <button mat-raised-button type="submit" matButton [disabled]="form.invalid || loading">Restore
+                    Logins</button>
+            </div>
+        </form>
+    </mat-dialog-content>
+</div>

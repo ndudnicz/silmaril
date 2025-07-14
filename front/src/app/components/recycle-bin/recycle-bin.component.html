@@ -1,0 +1,62 @@
+<div id="recycle-bin-container">
+    <mat-toolbar id="toolbar">
+        <div class="toolbar-button">
+            <mat-icon>recycling</mat-icon>
+        </div>
+        <div id="searchbar-container">
+            <mat-form-field id="search-field" appearance="outline" floatLabel="always">
+                <input matInput type="text" [(ngModel)]="searchValue" [placeholder]="searchBarPlaceholder"
+                    (ngModelChange)="search($event)" [ngModelOptions]="{standalone: true}">
+                @if (searchValue) {
+                <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
+                    <mat-icon>close</mat-icon>
+                </button>
+                }
+            </mat-form-field>
+        </div>
+        <span class="spacer"></span>
+        <div class="toolbar-button" *ngIf="selectedLogins.length > 0">
+            <button mat-icon-button matTooltip="Clear Selection" (click)="clearSelection()">
+                <mat-icon [ngClass]="{'disabled': selectedLogins.length == 0}">cancel</mat-icon>
+            </button>
+        </div>
+        <span id="selected-logins-counter">
+            <i>({{ selectedLogins.length }} selected)</i>
+        </span>
+        <div class="toolbar-button">
+            <button mat-icon-button matTooltip="Restore Selected Logins" [disabled]="selectedLogins.length == 0" (click)="restoreSelectedLogins()">
+                <mat-icon [ngClass]="{'disabled': selectedLogins.length == 0}">restore_from_trash</mat-icon>
+            </button>
+        </div>
+        <div class="toolbar-button">
+            <button mat-icon-button matTooltip="Permanently Delete Selected Logins" [disabled]="selectedLogins.length == 0" (click)="confirmDeleteSelectedLogins()">
+                <mat-icon [ngClass]="{'disabled': selectedLogins.length == 0}">delete_forever</mat-icon>
+            </button>
+        </div>
+    </mat-toolbar>
+
+    <div id="recycle-bin-grid-container">
+        <div id="recycle-bin-stacks-container">
+            @if (displayedLogins.length == 0 && loading == false && searchValue == '') {
+            <div id="no-data">
+                <span>Empty</span>
+                <br>
+            </div>
+            }
+            @if (displayedLogins.length == 0 && loading == false && searchValue != '') {
+            <div id="no-data">
+                <span>No results found</span>
+                <mat-icon id="no-data-icon" class="margin-top-10">search_off</mat-icon>
+                <br>
+            </div>
+            }
+            @if (displayedLogins.length > 0) {
+            <app-card-stacks class="card-stacks"
+            (clickEvent)="select($event)"
+            [displayedLogins]="displayedLogins" [enableSelectedFeature]="true"
+            [unselectAllTrigger]="unselectAllTrigger"
+            ></app-card-stacks>
+            }
+        </div>
+    </div>
+</div>

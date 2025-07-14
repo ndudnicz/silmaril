@@ -8,6 +8,7 @@ import { LayoutComponent } from './components/layout/layout.component';
 import { WhatIsMasterPasswordComponent } from './components/what-is-master-password/what-is-master-password.component';
 import { FaqComponent } from './components/faq/faq.component';
 import { SettingsComponent } from './components/settings/settings.component';
+import { RecycleBinComponent } from './components/recycle-bin/recycle-bin.component';
 
 const title = 'Silmaril - Password Manager';
 export const routes: Routes = [
@@ -19,6 +20,7 @@ export const routes: Routes = [
         path: '', title: title, component: LayoutComponent, children: [
             { path: 'unlock', title: title + ': Unlock', component: UnlockComponent, canActivate: [authGuard] },
             { path: 'vault/:id', title: title + ': Vault', component: VaultComponent, canActivate: [authGuard, vaultUnlocked] },
+            { path: 'recycle-bin', title: title + ': Recycle Bin', component: RecycleBinComponent, canActivate: [authGuard, vaultUnlocked] },
             { path: 'settings', title: title + ': Settings', component: SettingsComponent, canActivate: [authGuard] },
             { path: '', redirectTo: 'unlock', pathMatch: 'full' },
             { path: '**', redirectTo: 'unlock', pathMatch: 'full' }

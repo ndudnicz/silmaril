@@ -1,9 +1,9 @@
 <nav id="navbar-container">
     <div class="navbar-element" [matTooltipDisabled]="vaultService.isUnlocked()" matTooltip="The Vaults are locked" matTooltipPosition="right">
         @if (!vaults || vaults.length === 0) {
-        <button mat-button class="full-width navbar-button" routerLink="/unlock">
+        <button mat-button class="full-width navbar-button" [disabled]="!vaultService.isUnlocked()" routerLink="/unlock">
             Unlock
-            <mat-icon class="navbar-icon">lock</mat-icon>
+            <mat-icon class="navbar-icon disabled-button disabled">lock</mat-icon>
         </button>
 
         }
@@ -31,10 +31,10 @@
             <mat-icon class="navbar-icon">settings</mat-icon>
         </button>
     </div>
-    <div class="navbar-element">
+    <div class="navbar-element" *ngIf="vaultService.isUnlocked()">
         <button mat-button class="full-width navbar-button" routerLink="/recycle-bin">
             Recycle Bin
-            <mat-icon class="navbar-icon">delete</mat-icon>
+            <mat-icon class="navbar-icon">recycling</mat-icon>
         </button>
     </div>
     <div class="navbar-element">

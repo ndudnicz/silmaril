@@ -13,8 +13,8 @@ import { ToastWrapper } from '../../../../utils/toast.wrapper';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../../services/auth.service';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
-import { BaseComponent } from '../../../base-component/base-component.component';
 import { take } from 'rxjs';
+import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
 
 @Component({
   selector: 'app-change-password-modal',
@@ -31,7 +31,7 @@ import { take } from 'rxjs';
   templateUrl: './change-password-modal.component.html',
   styleUrl: './change-password-modal.component.css'
 })
-export class ChangePasswordModalComponent extends BaseComponent {
+export class ChangePasswordModalComponent extends BaseModalComponent {
   displayPasswordRequirements = false;
   oldPasswordFormControl = new FormControl('', [Validators.required]);
   newPasswordFormControl = new FormControl('', this.passwordValidator());
@@ -44,11 +44,10 @@ export class ChangePasswordModalComponent extends BaseComponent {
 
   constructor(
     private userService: UserService,
-    private dialogRef: MatDialogRef<ChangePasswordModalComponent>,
     private authService: AuthService,
     private dialog: MatDialog
   ) {
-    super(inject(NgxSpinnerService));
+    super(inject(MatDialogRef<ChangePasswordModalComponent>), inject(NgxSpinnerService));
   }
 
   passwordValidator(): ValidatorFn {
@@ -127,10 +126,6 @@ export class ChangePasswordModalComponent extends BaseComponent {
         throw error;
       }
     });
-  }
-
-  closeDialog() {
-    this.dialogRef.close();
   }
 
   inputFocusOut() {

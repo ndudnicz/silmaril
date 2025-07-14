@@ -9,9 +9,7 @@
     </div>
     <div class="stack-content">
         @for (login of logins; track $index) {
-            @if (!login.deleted) {
-                <app-card (click)="setSelectedLogin(login)" [login]="login"></app-card>
-            }
+        <app-card (clickEvent)="clickEvent.emit(login)" [login]="login" [enableSelectedFeature]="enableSelectedFeature" [unselectTrigger]="unselectAllTrigger"></app-card>
         }
     </div>
 </div>

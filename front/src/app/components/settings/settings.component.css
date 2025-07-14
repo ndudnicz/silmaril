@@ -16,10 +16,6 @@
 #settings-menu-container {
   background-color: #faf9fd;
   width: 100%;
-        /* display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center; */
 }
 
 .settings-button-container {
@@ -103,4 +99,5 @@
 
 .toolbar-title {
   width: 100px;
+  margin-left: 10px;
 }

@@ -1,12 +1,12 @@
-// src/app/services/vault.service.ts
-
 import { Injectable } from '@angular/core';
 import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
-import { DecryptedData, Login } from '../entities/login';
-import { CreateVaultDto, Vault } from '../entities/vault';
+import { Login } from '../entities/login';
+import { Vault } from '../entities/vault';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, Observable, throwError } from 'rxjs';
+import { CreateVaultDto } from '../entities/create/create-vault-dto';
+import { DecryptedData } from '../entities/decrypted-data';
 
 @Injectable({ providedIn: 'root' })
 export class VaultService {

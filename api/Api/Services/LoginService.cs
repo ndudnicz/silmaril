@@ -23,6 +23,12 @@ public class LoginService(
         await userValidator.EnsureExistsAsync(userId);
         return loginMapper.ToDto(await loginRepository.GetLoginsByUserIdWithTagsAsync(userId));
     }
+
+    public async Task<List<LoginDto>> GetDeletedLoginsByUserIdAsync(Guid userId)
+    {
+        await userValidator.EnsureExistsAsync(userId);
+        return loginMapper.ToDto(await loginRepository.GetLoginsByUserIdWithTagsAsync(userId, deleted: true));
+    }
     
     public async Task<LoginDto> CreateLoginAsync(CreateLoginDto createLoginDto, Guid userId)
     {

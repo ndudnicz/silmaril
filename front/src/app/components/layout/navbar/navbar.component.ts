@@ -75,20 +75,7 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
       }
     }).afterClosed().pipe(take(1)).subscribe((result) => {
       if (result) {
-        this.startLoading();
-        this.vaultService.createVault$(result).pipe(take(1)).subscribe({
-          next: (vault) => {
-            ToastWrapper.success('Vault created successfully');
-            this.dataService.addVault(vault);
-            this.stopLoading();
-            this.router.navigate(['/vault', vault.id]);
-          },
-          error: (error) => {
-            console.error('Error creating vault:', error);
-            this.stopLoading();
-            throw error;
-          }
-        });
+        this.dataService.addVault(result);
       }
     })
   }
@@ -109,24 +96,30 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
       }
     }).afterClosed().pipe(take(1)).subscribe(async (confirmed: boolean) => {
       if (confirmed) {
-        this.startLoading();
-        console.log('Signing out...');
-        this.authService.signout$().pipe(take(1)).subscribe({
-          next: (result) => {
-            console.log('Signout result:', result);
-            
-            ToastWrapper.success('Signed out successfully');
-            setTimeout(() => {
-              window.location.reload();
-            }, 1500)
-          },
-          error: (error: any) => {
-            console.error('Signout error:', error);
-            this.stopLoading();
-            throw error;
-          },
-        });
+        this.onSignoutConfirmed();
       }
     });
+  }
+
+  onSignoutConfirmed() {
+    this.startLoading();
+    console.log('Signing out...');
+    this.authService.signout$().pipe(take(1)).subscribe({
+      next: (result) => {
+        console.log('Signout result:', result);
+        this.onSignoutSuccess();
+      },
+      error: (error: any) => {
+        this.displayError('Signout failed', error);
+        this.stopLoading();
+      },
+    });
+  }
+
+  onSignoutSuccess() {
+    ToastWrapper.success('Signed out successfully');
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500)
   }
 }
