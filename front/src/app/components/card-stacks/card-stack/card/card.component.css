@@ -7,7 +7,7 @@
   margin: 5px;
   cursor: pointer;
   background-color: #4867e2;
-  color: #ebeaea;
+  color: #ebeaea !important;
   height: 100px;
 }
 
@@ -25,6 +25,20 @@
   padding: 10px;
 }
 
+.card-icon-container {
+  display: flex;
+  align-items: center;
+  color: inherit !important;
+  font-size: 13px;
+  font-size: 12px;
+  color: inherit !important;
+}
+
+.card-icon {
+  font-size: 12px;
+  color: inherit !important;
+}
+
 .card-title {
   margin: 0 0 8px 0;
   font-size: 1em;
@@ -37,7 +51,5 @@
 
 .card-footer {
   padding: 12px;
-  /* background-color: #f5f5f5; */
-  /* border-top: 1px solid #e0e0e0; */
   text-align: start;
 }

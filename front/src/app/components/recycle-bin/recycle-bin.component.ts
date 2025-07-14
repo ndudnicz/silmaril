@@ -122,7 +122,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
         orphanedLogins: orphanedLogins
       },
       panelClass: 'custom-modal',
-      width: '400px',
+      width: '450px',
       height: 'auto',
       disableClose: true,
       autoFocus: false,
@@ -183,7 +183,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   onRestoreLoginSuccess(): void {
     this.allDeletedLogins = this.allDeletedLogins.filter(login => !this.selectedLogins.includes(login));
     this.setDisplayedLogins();
-    this.selectedLogins = [];
+    this.clearSelection();
     this.stopLoading();
   }
 
@@ -224,7 +224,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     console.log(`Permanently deleted ${deletedCount} logins`);
     this.allDeletedLogins = this.allDeletedLogins.filter(login => !this.selectedLogins.includes(login));
     this.setDisplayedLogins();
-    this.selectedLogins = [];
+    this.clearSelection();
     this.stopLoading();
   }
 

@@ -3,6 +3,8 @@ import { ChipComponent } from '../../../chip/chip.component';
 import { CommonModule } from '@angular/common';
 import { Login } from '../../../../entities/login';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-card',
@@ -12,7 +14,9 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [
     CommonModule,
     ChipComponent,
-    MatIconModule
+    MatIconModule,
+    MatTooltipModule,
+    MatButtonModule
   ]
 })
 export class CardComponent implements OnChanges {
