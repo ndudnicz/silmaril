@@ -1,7 +1,7 @@
 <nav id="navbar-container">
     <div class="navbar-element" [matTooltipDisabled]="vaultService.isUnlocked()" matTooltip="The Vaults are locked" matTooltipPosition="right">
         @if (!vaults || vaults.length === 0) {
-        <button mat-button class="full-width navbar-button" [disabled]="!vaultService.isUnlocked()" routerLink="/unlock">
+        <button mat-button class="full-width navbar-button" routerLink="/unlock">
             Unlock
             <mat-icon class="navbar-icon disabled-button disabled">lock</mat-icon>
         </button>

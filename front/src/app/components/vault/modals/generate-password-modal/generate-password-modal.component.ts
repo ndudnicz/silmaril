@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { ProgressBarComponent } from '../../../progress-bar/progress-bar.component';
 import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { simpleWords } from '../../../../utils/word-list.utils';
 
 
 interface PasswordOptions {
@@ -34,7 +35,6 @@ enum PasswordStrength {
 }
 
 @Component({
-
   selector: 'app-generate-password-modal',
   imports: [
     MatDialogModule,
@@ -149,38 +149,10 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
 
     const allLettersSet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const readableLettersSet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ';  // without i, l, o
+    const unReadableLetterSet = ['i', 'l', 'o', '0', '1', 'I', 'L', 'O'];
     const numbersChars = '0123456789';
     const readableNumbers = '23456789'; // without 0,1
     const specialChars = this.specialChars;
-
-    const simpleWords = [
-      'cat', 'dog', 'bird', 'fish', 'tree', 'book', 'red', 'blue', 'sun', 'moon', 'star',
-      'fire', 'rock', 'wind', 'rain', 'snow', 'leaf', 'cloud', 'frog', 'bear', 'lion', 'wolf',
-      'frog', 'ant', 'bee', 'bat', 'owl', 'fox', 'cow', 'pig', 'rat', 'hen', 'bee', 'bee',
-      'cup', 'pen', 'key', 'box', 'car', 'bus', 'van', 'jet', 'sky', 'sea', 'lake', 'pond',
-      'hill', 'path', 'road', 'door', 'wall', 'roof', 'farm', 'barn', 'yard', 'park', 'play',
-      'walk', 'run', 'jump', 'swim', 'read', 'sing', 'song', 'tree', 'wood', 'seed', 'root',
-      'leaf', 'rose', 'tulip', 'daisy', 'lily', 'cafe', 'food', 'milk', 'cake', 'salt', 'soup',
-      'rice', 'fish', 'meat', 'bird', 'frog', 'ant', 'bee', 'cow', 'dog', 'cat', 'rat', 'bat',
-      'egg', 'oil', 'tea', 'jam', 'pie', 'pot', 'pan', 'cup', 'lid', 'bin', 'mat', 'rug', 'bed',
-      'box', 'bag', 'hat', 'cap', 'sun', 'sky', 'sea', 'ice', 'mud', 'wax', 'web', 'net', 'zip',
-      'key', 'log', 'map', 'toy', 'car', 'bus', 'van', 'jet', 'cab', 'taxi', 'bike', 'boat',
-
-      'hobbit', 'shire', 'gandalf', 'frodo', 'samwise', 'aragorn', 'legolas', 'gimli', 'boromir',
-      'sauron', 'mordor', 'rivendell', 'gollum', 'balrog', 'elf', 'dwarf', 'orc', 'ring', 'ent',
-      'rohan', 'isengard', 'mithril', 'galadriel', 'saruman', 'elfstone', 'numenor', 'anduril',
-      'barad-dur', 'pelennor', 'urgal', 'lothlorien', 'shirefolk', 'warg', 'troll', 'oden',
-      'beren', 'melkor', 'valar', 'maiar', 'eowyn', 'faramir', 'glorfindel', 'silmaril', 'eldar',
-      'durin', 'noldor', 'dunedain', 'gwaith', 'ithilien', 'angmar', 'turin', 'hurin', 'morwen',
-      'beleg', 'feanor', 'fingolfin', 'finrod', 'tulkas', 'ulmo', 'manwe', 'yavanna', 'mandos',
-      'nerevar', 'tinuviel', 'elbereth', 'earendil', 'melian', 'namarie', 'celebrimbor', 'earendil',
-      'gil-galad', 'ancalagon', 'maeglin', 'thalion', 'thorondor', 'glaurung', 'varda', 'nienna',
-      'mandos', 'luthien', 'beleriand', 'feanorian', 'ornament', 'silmarils', 'angband', 'dagor',
-      'nargothrond', 'dol-guldur', 'mirrormere', 'telerin', 'aeglos', 'rohirrim', 'glorfindel',
-      'morgoth', 'gondolin', 'helcaraxe', 'noldorin', 'valinor', 'tol-in-galduroth', 'aegnor',
-      'finwe', 'fingon', 'galathilion', 'haldir', 'hithlum', 'lothlann', 'gorthaur', 'annatar',
-      'narsil', 'vilya', 'narya'
-    ];
 
     function getLetterCharset() {
       let lettersSet = '';
@@ -197,10 +169,14 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
     }
 
     if (useWords) {
+      const words = readable ? simpleWords.filter(word =>
+        !unReadableLetterSet.some(char => word.includes(char))
+      ) : simpleWords;
+
       let password = '';
       while (password.length < length) {
         if (password.length > 0) password += '-';
-        let word = simpleWords[Math.floor(Math.random() * simpleWords.length)];
+        let word = words[Math.floor(Math.random() * words.length)];
         word = word.charAt(0).toUpperCase() + word.slice(1);
 
         let insertChars = '';
@@ -282,8 +258,8 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
     if (hasSpecial) score += 10;
 
     score += upperCaseMatches.length
-    + numbersMatches.length
-    + specialMatches.length * 3
+      + numbersMatches.length
+      + specialMatches.length * 3
 
     if (score >= 100) {
       return { str: PasswordStrength.STRONG, color: this.progressBarColors[PasswordStrength.STRONG], score: score };
@@ -305,5 +281,5 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
 
   disableSubmit(): boolean {
     return this.generatedPassword.length < this.minLength;
-  } 
+  }
 }
