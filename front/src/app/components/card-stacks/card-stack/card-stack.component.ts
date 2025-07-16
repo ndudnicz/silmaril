@@ -18,8 +18,6 @@ styleUrls: ['./card-stack.component.css']})
 export class CardStackComponent {
   @Input() title!: string;
   @Input() logins!: Login[];
-  @Input() enableSelectedFeature: boolean = false;
-  @Input() unselectAllTrigger: number = 0;
 
   @Output() clickEvent: EventEmitter<Login> = new EventEmitter<Login>();
 

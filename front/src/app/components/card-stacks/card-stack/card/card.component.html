@@ -1,4 +1,4 @@
-<div class="card" (click)="click()" [ngClass]="{'card-selected': isSelected}">
+<div class="card" (click)="click()" [ngClass]="{'card-selected': login.selected}">
   <div class="card-content">
     <h2 class="card-title">{{login.decryptedData?.title ?? '*********' }}</h2>
     <div  class="card-icon-container">

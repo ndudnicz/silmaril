@@ -47,7 +47,6 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   displayedLogins: Login[] = [];
   selectedLogins: Login[] = [];
   subscription: Subscription = new Subscription();
-  unselectAllTrigger: number = 0;
   vaults: Vault[] = [];
 
   constructor(
@@ -246,7 +245,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   }
 
   clearSelection() {
-    this.unselectAllTrigger++;
+    this.selectedLogins.forEach(login => login.selected = false);
     this.selectedLogins = [];
   }
 }

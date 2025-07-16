@@ -4,12 +4,12 @@ import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dial
 import { MatIconModule } from '@angular/material/icon';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { take } from 'rxjs';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
+import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-change-master-password-modal',

@@ -1,5 +1,6 @@
 <nav id="navbar-container">
-    <div class="navbar-element" [matTooltipDisabled]="vaultService.isUnlocked()" matTooltip="The Vaults are locked" matTooltipPosition="right">
+    <div class="navbar-element" [matTooltipDisabled]="vaultService.isUnlocked()" matTooltip="The Vaults are locked"
+        matTooltipPosition="right">
         @if (!vaults || vaults.length === 0) {
         <button mat-button class="full-width navbar-button" routerLink="/unlock">
             Unlock
@@ -44,13 +45,14 @@
         </button>
     </div>
     <span class="spacer"></span>
-    <div class="navbar-element" >
+    <div class="navbar-element">
         <button mat-button class="full-width navbar-button" (click)="signout()">
             Signout
             <mat-icon class="navbar-icon">logout</mat-icon>
         </button>
     </div>
-    <div class="navbar-element navbar-text-element" matTooltip="https://github.com/ndudnicz/silmaril" matTooltipPosition="right">
+    <div class="navbar-element navbar-text-element" matTooltip="https://github.com/ndudnicz/silmaril"
+        matTooltipPosition="right">
         <a href="https://github.com/ndudnicz/silmaril" class="link" target="_blank">
             <img src="assets/images/github.svg" width="17" height="17">
             Silmaril

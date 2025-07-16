@@ -13,9 +13,6 @@ import { CardStackComponent } from './card-stack/card-stack.component';
 })
 export class CardStacksComponent implements OnInit, OnChanges {
   @Input() displayedLogins!: Login[];
-  @Input() enableSelectedFeature: boolean = false;
-  @Input() unselectAllTrigger: number = 0;
-  
   @Output() clickEvent: EventEmitter<Login> = new EventEmitter<Login>();
 
   displayedLoginStackEntries: KeyValue<string, Login[]>[] = [];

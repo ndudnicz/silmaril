@@ -5,6 +5,8 @@ export class Login {
     public encryptedData?: Uint8Array | null;
     public decryptedData?: DecryptedData | null;
     public initializationVector?: Uint8Array | null;
+    // The following properties are used for UI purposes
+    public selected: boolean = false;
 
     constructor(
         public id: string,

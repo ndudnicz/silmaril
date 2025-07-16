@@ -14,7 +14,6 @@ import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { SelectedLoginComponent } from "./selected-login/selected-login.component";
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ChangeMasterPasswordModalComponent } from './modals/change-master-password-modal/change-master-password-modal.component';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,6 +25,7 @@ import { truncateString } from '../../utils/string.utils';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
 import { UpdateLoginDto } from '../../entities/update/update-login-dto';
 import { EditVaultModalComponent } from './modals/edit-vault-modal/edit-vault-modal.component';
+import { ChangeMasterPasswordModalComponent } from './modals/change-master-password-modal/change-master-password-modal.component';
 
 @Component({
   selector: 'app-vault',
@@ -57,7 +57,8 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   selectedVault: Vault | null = null;
   subscription: Subscription = new Subscription();
   searchBarPlaceholder = 'Search in Vault';
-  readonly searchBarPlaceholderMaxLength = 30;
+
+  private readonly searchBarPlaceholderMaxLength = 30;
 
   constructor(
     private vaultService: VaultService,
@@ -81,7 +82,13 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
 
   setupSubscriptionsAndSetupVault(): void {
     this.subscription.add(this.dataService.selectedLogin.subscribe((login: Login | null) => {
+      if (this.selectedLogin && this.selectedLogin.id !== login?.id) {
+        this.selectedLogin!.selected = false;
+      }
       this.selectedLogin = login;
+      if (this.selectedLogin) {
+        this.selectedLogin.selected = true;
+      }
     }));
 
     this.subscription.add(this.dataService.deletedLogin.subscribe((login: Login | null) => {
@@ -163,7 +170,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   }
 
   setDisplayedLogins() {
-    this.displayedLogins = this.allLogins.filter(login => login.vaultId === this.vaultId);
+    this.displayedLogins = this.allLogins.filter(login => login.vaultId === this.vaultId && !login.deleted);
     console.log('Setting displayed logins for vault:', this.displayedLogins);
   }
 
@@ -209,10 +216,13 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
 
   private async changeMasterPassword(newMasterPassword: string) {
     this.startLoading();
+    const deletedLogins = await this.getDeletedLoginsAsync();
     this.vaultService.clearKey();
     await this.vaultService.setKeyAsync(newMasterPassword);
     this.dataService.setSelectedLogin(null);
-    this.allLogins = await this.vaultService.encryptAllLoginsAsync(this.allLogins);
+    this.allLogins = await this.vaultService.encryptAllLoginsAsync([
+      ...this.allLogins, ...deletedLogins
+    ]);
     this.loginService.updateLogins$(this.allLogins.map(l => UpdateLoginDto.fromLogin(l))).pipe(take(1)).subscribe({
       next: async (updatedLogins: Login[]) => {
         this.onUpdateLoginsSuccess(updatedLogins);
@@ -224,7 +234,26 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     });
   }
 
-  async onUpdateLoginsSuccess(updatedLogins: Login[]) {
+  private async getDeletedLoginsAsync(): Promise<Login[]> {
+    return new Promise<Login[]>(async (resolve, reject) => {
+      this.startLoading();
+      this.loginService.getDeletedLogins$().pipe(
+        take(1),
+        switchMap(deletedLogins => from(this.vaultService.decryptAllLoginsAsync(deletedLogins)))
+      ).subscribe({
+        next: (deletedLogins: Login[]) => {
+          this.stopLoading();
+          resolve(deletedLogins);
+        },
+        error: (error: any) => {
+          this.stopLoading();
+          reject(error);
+        }
+      });
+    });
+  }
+
+  private async onUpdateLoginsSuccess(updatedLogins: Login[]) {
     console.log('All logins updated successfully');
     updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
     this.allLogins = updatedLogins;
@@ -253,11 +282,13 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   }
 
   setSelectedLogin(login: Login | null) {
-    this.dataService.setSelectedLogin(login)
+    if (this.selectedLogin === null || this.selectedLogin.id !== login?.id) {
+      this.dataService.setSelectedLogin(login)
+    }
   }
 
   setSearchBarPlaceholder() {
-      this.searchBarPlaceholder = `Search in ${truncateString(this.selectedVault!.name, this.searchBarPlaceholderMaxLength)}`;
+    this.searchBarPlaceholder = `Search in ${truncateString(this.selectedVault!.name, this.searchBarPlaceholderMaxLength)}`;
   }
 
   openEditVaultModal() {

@@ -87,7 +87,7 @@ public class LoginService(
         }
         await userValidator.EnsureExistsAsync(userId);
         await loginValidator.EnsureExistsByUserIdAsync(updateLoginDtos.Select(l => l.Id).ToList(), userId);
-        var existingLogins = await loginRepository.GetLoginsWithTagsAsync(
+        var existingLogins = await loginRepository.GetLoginsByIdsWithTagsAsync(
             updateLoginDtos.Select(l => l.Id));
         var existingLoginsDictionary = existingLogins.ToDictionary(l => l.Id, l => l);
         await ApplyDtosToLoginsAsync(updateLoginDtos, existingLoginsDictionary);

@@ -62,7 +62,7 @@ public class LoginRepository(AppDbContext db): ILoginRepository
             .ToListAsync();
     }
     
-    public async Task<List<Login>> GetLoginsWithTagsAsync(IEnumerable<Guid> ids)
+    public async Task<List<Login>> GetLoginsByIdsWithTagsAsync(IEnumerable<Guid> ids)
     {
         return await db.Logins
             .Include(l => l.Tags)

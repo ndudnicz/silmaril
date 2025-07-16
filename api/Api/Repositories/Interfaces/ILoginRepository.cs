@@ -10,7 +10,7 @@ public interface ILoginRepository
     Task<bool> LoginsExistByVaultIdAsync(IEnumerable<Guid> ids, Guid vaultId);
     
     Task<Login?> GetLoginWithTagsAsync(Guid id);
-    Task<List<Login>> GetLoginsWithTagsAsync(IEnumerable<Guid> ids);
+    Task<List<Login>> GetLoginsByIdsWithTagsAsync(IEnumerable<Guid> ids);
     Task<List<Login>> GetLoginsByVaultIdWithTagsAsync(Guid vaultId);
     Task<List<Login>> GetLoginsByUserIdWithTagsAsync(Guid userId, bool deleted = false);
 
