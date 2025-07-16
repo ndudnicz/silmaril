@@ -78,7 +78,7 @@ public class AuthServiceTests
         var authDto = new AuthDto { Username = userName, Password = "ValidPass1!" };
         var user = CreateTestUser(userName, authDto.Password);
 
-        _userRepositoryMock.Setup(u => u.GetUserByUserNameAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _userRepositoryMock.Setup(u => u.GetUserByUserNameHashAsync(It.IsAny<string>())).ReturnsAsync(user);
         _userValidatorMock.Setup(u => u.EnsureExistsByUsernameHashAsync(It.IsAny<string>()))
             .Returns(Task.CompletedTask);
 
@@ -100,7 +100,7 @@ public class AuthServiceTests
         var authDto = new AuthDto { Username = userName, Password = "InvalidPass" };
         var user = CreateTestUser(userName, "validPassword");
 
-        _userRepositoryMock.Setup(u => u.GetUserByUserNameAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _userRepositoryMock.Setup(u => u.GetUserByUserNameHashAsync(It.IsAny<string>())).ReturnsAsync(user);
         _userValidatorMock.Setup(u => u.EnsureExistsByUsernameHashAsync(It.IsAny<string>()))
             .Returns(Task.CompletedTask);
 
@@ -119,7 +119,7 @@ public class AuthServiceTests
         var authDto = new AuthDto { Username = userName, Password = "validPassword" };
         var user = CreateTestUser(userName, "validPassword");
 
-        _userRepositoryMock.Setup(u => u.GetUserByUserNameAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
+        _userRepositoryMock.Setup(u => u.GetUserByUserNameHashAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
         _userValidatorMock.Setup(u => u.EnsureExistsByUsernameHashAsync(It.IsAny<string>()))
             .Throws(new UserNotFound("username", userName));
 

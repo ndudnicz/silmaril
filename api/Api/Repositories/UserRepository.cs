@@ -13,7 +13,7 @@ public class UserRepository(AppDbContext db): IUserRepository
         return await db.Users.FirstOrDefaultAsync(u => u.Id == id);
     }
     
-    public async Task<User?> GetUserByUserNameAsync(string usernameHash)
+    public async Task<User?> GetUserByUserNameHashAsync(string usernameHash)
     {
         return await db.Users.FirstOrDefaultAsync(x => x.UsernameHash == usernameHash);
     }

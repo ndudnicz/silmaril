@@ -34,7 +34,7 @@ public class UserService(
     
     public async Task<UserDto> GetUserByUserNameAsync(string username)
     {
-        var user = await userRepository.GetUserByUserNameAsync(CryptoHelper.Sha512(username));
+        var user = await userRepository.GetUserByUserNameHashAsync(CryptoHelper.Sha512(username));
         if (user == null)
         {
             throw new UserNotFound("username", username);
@@ -60,6 +60,7 @@ public class UserService(
     
     public async Task<UserDto> UpdateUserAsync(Guid userId, UpdateUserDto updateUserDto)
     {
+        await userValidator.EnsureExistsAsync(userId);
         var usernameHash = CryptoHelper.Sha512(updateUserDto.Username);
         await userValidator.EnsureDoesNotExistByUsernameHashAsync(usernameHash);
         var existingUser = await userRepository.GetUserAsync(userId);
@@ -72,7 +73,7 @@ public class UserService(
         await userValidator.EnsureExistsAsync(userId);
         AuthService.EnsurePasswordFormatIsValid(updateUserPasswordDto.NewPassword);
         var existingUser = await userRepository.GetUserAsync(userId);
-        AuthService.EnsurePasswordIsValid(updateUserPasswordDto.OldPassword, existingUser!.UsernameHash);
+        AuthService.EnsurePasswordIsValid(updateUserPasswordDto.OldPassword, existingUser!.PasswordHash);
         existingUser.PasswordHash = CryptoHelper.Argon2idHash(updateUserPasswordDto.NewPassword);
         return userMapper.ToDto(await userRepository.UpdateUserAsync(existingUser));
     }
