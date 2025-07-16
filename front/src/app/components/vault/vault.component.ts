@@ -25,6 +25,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { truncateString } from '../../utils/string.utils';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
 import { UpdateLoginDto } from '../../entities/update/update-login-dto';
+import { EditVaultModalComponent } from './modals/edit-vault-modal/edit-vault-modal.component';
 
 @Component({
   selector: 'app-vault',
@@ -116,7 +117,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
       this.dataService.setSelectedLogin(null);
       this.selectedVault = this.dataService.getVaults()?.find(v => v.id === this.vaultId) || null;
       console.log('Selected Vault:', this.selectedVault);
-      this.searchBarPlaceholder = `Search in ${truncateString(this.selectedVault?.name || 'Vault', this.searchBarPlaceholderMaxLength)}`;
+      this.setSearchBarPlaceholder();
       if (this.allLogins.length > 0) {
         this.setupDataAndDisplay();
         this.stopLoading();
@@ -228,7 +229,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
     this.allLogins = updatedLogins;
     this.setDisplayedLogins();
-    // this.setRecycleBinLogins();
     this.stopLoading();
     ToastWrapper.success('Master password changed successfully');
   }
@@ -254,5 +254,54 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
 
   setSelectedLogin(login: Login | null) {
     this.dataService.setSelectedLogin(login)
+  }
+
+  setSearchBarPlaceholder() {
+      this.searchBarPlaceholder = `Search in ${truncateString(this.selectedVault!.name, this.searchBarPlaceholderMaxLength)}`;
+  }
+
+  openEditVaultModal() {
+    this.dialog.open(EditVaultModalComponent, {
+      panelClass: 'custom-modal',
+      width: '400px',
+      height: 'auto',
+      closeOnNavigation: false,
+      disableClose: true,
+      autoFocus: true,
+      data: {
+        vaultName: this.selectedVault!.name
+      }
+    }).afterClosed().pipe(take(1)).subscribe((newVaultName: string | null) => {
+      if (newVaultName !== null && newVaultName !== this.selectedVault?.name) {
+        this.updateVaultName(newVaultName);
+      }
+    });
+  }
+
+  updateVaultName(newVaultName: string) {
+    this.startLoading();
+    this.vaultService.updateVault$({
+      id: this.selectedVault!.id,
+      name: newVaultName
+    }).pipe(take(1)).subscribe({
+      next: (updatedVault: Vault) => {
+        this.onVaultUpdateSuccess(updatedVault);
+      },
+      error: (error: any) => {
+        this.displayError('Error updating vault', error);
+      },
+      complete: () => {
+        this.stopLoading();
+      }
+    });
+  }
+
+  onVaultUpdateSuccess(updatedVault: Vault) {
+    console.log('Vault updated successfully:', updatedVault);
+    this.selectedVault = updatedVault;
+    this.dataService.updateVault(updatedVault);
+    this.setSearchBarPlaceholder();
+    ToastWrapper.success('Vault updated successfully');
+    this.stopLoading();
   }
 }

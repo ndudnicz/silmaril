@@ -7,6 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { CreateVaultDto } from '../entities/create/create-vault-dto';
 import { DecryptedData } from '../entities/decrypted-data';
+import { UpdateVaultDto } from '../entities/update/update-vault-dto';
 
 @Injectable({ providedIn: 'root' })
 export class VaultService {
@@ -98,10 +99,9 @@ export class VaultService {
         }
         const encryptedLogins = await Promise.all(logins.map(this.encryptLoginDataAsync.bind(this)));
         console.log('All logins encrypted successfully');
-        return resolve(encryptedLogins);
+        resolve(encryptedLogins);
       } catch (error: any) {
-        console.error('Error encrypting logins:', error);
-        reject(new Error('Error encrypting logins:' + error ? error.message : 'Unknown error during encryption'));
+        reject(error);
       }
     });
   }
@@ -115,10 +115,9 @@ export class VaultService {
         const decryptDataString = await CryptoUtilsV1.decryptDataAsync(this.key, login.encryptedData!, login.initializationVector!);
         login.decryptedData = DecryptedData.fromString(decryptDataString);
         console.log('Login data decrypted successfully:', login.decryptedData.toString());
-        return resolve(login);
+        resolve(login);
       } catch (error: any) {
-        console.error('Error decrypting login data:', error);
-        reject(new Error('Error decrypting login data:' + error ? error.message : 'Unknown error during decryption'));
+        reject(error);
       }
     });
   }
@@ -131,32 +130,30 @@ export class VaultService {
         }
         const decryptedLogins = await Promise.all(logins.map(this.decryptLoginDataAsync.bind(this)));
         console.log('All logins decrypted successfully');
-        return resolve(decryptedLogins);
+        resolve(decryptedLogins);
       } catch (error: any) {
-        console.error('Error decrypting logins:', error);
-        reject(new Error('Error decrypting logins:' + error ? error.message : 'Unknown error during decryption'));
+        reject(error);
       }
     });
   }
 
   public getVaults$(): Observable<Vault[]> {
     const url = `${this.apiEndpointV1}/vault`;
-
-    return this.http.get<Vault[]>(url).pipe(
-      catchError(error => {
-        console.error('Error fetching vaults:', error);
-        return throwError(() => new Error('Failed to fetch vaults'));
-      }) 
-    );
+    return this.http.get<Vault[]>(url);
   }
 
   public createVault$(createVaultDto: CreateVaultDto): Observable<Vault> {
     const url = `${this.apiEndpointV1}/vault`;
-    return this.http.post<Vault>(url, createVaultDto).pipe(
-      catchError(error => {
-        console.error('Error creating vault:', error);
-        return throwError(() => new Error('Failed to create vault'));
-      })
-    );
+    return this.http.post<Vault>(url, createVaultDto);
+  }
+
+  public updateVault$(UpdateVaultDto: UpdateVaultDto): Observable<Vault> {
+    const url = `${this.apiEndpointV1}/vault`;
+    return this.http.put<Vault>(url, UpdateVaultDto);
+  }
+
+  public deleteVault$(vaultId: string): Observable<number> {
+    const url = `${this.apiEndpointV1}/vault/${vaultId}`;
+    return this.http.delete<number>(url);
   }
 }

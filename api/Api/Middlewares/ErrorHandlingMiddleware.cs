@@ -34,7 +34,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         
         var result = JsonSerializer.Serialize(new
         {
-            error = message,
+            message,
             statusCode = (int)statusCode
         });
 

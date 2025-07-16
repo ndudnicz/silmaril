@@ -23,7 +23,7 @@ export class BaseComponent {
 
   protected displayError(title: string, error: any): void {
     console.error(title, error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    const errorMessage = error?.error?.message ?? 'An unknown error occurred';
     ToastWrapper.error(title, errorMessage);
   }
 }

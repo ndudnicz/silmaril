@@ -17,86 +17,47 @@ export class LoginService {
 
   getLogins$(): Observable<Login[]> {
     return this.http.get<Login[]>(`${this.apiEndpointV1}/login`).pipe(
-      map((logins: Login[]) =>
-        logins.map(login => Login.fromObject(login))
-      ),
-      catchError(error => {
-        console.error('Error fetching logins:', error);
-        return throwError(() => new Error('Failed to fetch logins'));
-      })
+      map(logins => logins.map(login => Login.fromObject(login)))
     );
   }
 
   getDeletedLogins$(): Observable<Login[]> {
     return this.http.get<Login[]>(`${this.apiEndpointV1}/login/deleted`).pipe(
-      map((logins: Login[]) =>
-        logins.map(login => Login.fromObject(login))
-      ),
-      catchError(error => {
-        console.error('Error fetching deleted logins:', error);
-        return throwError(() => new Error('Failed to fetch deleted logins'));
-      })
+      map(logins => logins.map(login => Login.fromObject(login)))
     );
   }
 
   createLogin$(createLoginDto: CreateLoginDto): Observable<Login> {
     return this.http.post<Login>(`${this.apiEndpointV1}/login`, createLoginDto).pipe(
-      map(login => Login.fromObject(login)),
-      catchError(error => {
-        console.error('Error creating login:', error);
-        return throwError(() => new Error('Failed to create login'));
-      })
+      map(login => Login.fromObject(login))
     );
   }
 
   createLogins$(createLoginDtos: CreateLoginDto[]): Observable<Login[]> {
     return this.http.post<Login[]>(`${this.apiEndpointV1}/login/bulk`, createLoginDtos).pipe(
-      map(logins => logins.map(login => Login.fromObject(login))),
-      catchError(error => {
-        console.error('Error creating logins bulk:', error);
-        return throwError(() => new Error('Failed to create logins bulk'));
-      })
+      map(logins => logins.map(login => Login.fromObject(login)))
     );
   }
 
   updateLogin$(updateLoginDto: UpdateLoginDto): Observable<Login> {
     return this.http.put<Login>(`${this.apiEndpointV1}/login`, updateLoginDto).pipe(
-      tap(() => console.log('Updating login with data:', updateLoginDto)),
-      map(login => Login.fromObject(login)),
-      catchError(error => {
-        console.error('Error updating login:', error);
-        return throwError(() => new Error('Failed to update login'));
-      })
+      map(login => Login.fromObject(login))
     );
   }
 
   updateLogins$(updateLoginDtos: UpdateLoginDto[]): Observable<Login[]> {
     return this.http.put<Login[]>(`${this.apiEndpointV1}/login/bulk`, updateLoginDtos).pipe(
-      map(logins => logins.map(login => Login.fromObject(login))),
-      catchError(error => {
-        console.error('Error updating logins:', error);
-        return throwError(() => new Error('Failed to update logins bulk'));
-      })
+      map(logins => logins.map(login => Login.fromObject(login)))
     );
   }
 
   deleteLogin$(id: string): Observable<number> {
-    return this.http.delete<number>(`${this.apiEndpointV1}/login/${id}`).pipe(
-      catchError(error => {
-        console.error('Error deleting login:', error);
-        return throwError(() => new Error('Failed to delete login'));
-      })
-    );
+    return this.http.delete<number>(`${this.apiEndpointV1}/login/${id}`);
   }
 
   deleteLogins$(deleteLoginsDto: DeleteLoginsDto): Observable<number> {
     return this.http.delete<number>(`${this.apiEndpointV1}/login/bulk`, {
       body: deleteLoginsDto
-    }).pipe(
-      catchError(error => {
-        console.error('Error deleting logins:', error);
-        return throwError(() => new Error('Failed to delete logins'));
-      })
-    );
+    });
   }
 }

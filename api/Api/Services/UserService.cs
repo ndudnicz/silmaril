@@ -70,8 +70,8 @@ public class UserService(
     public async Task<UserDto> UpdateUserPasswordAsync(Guid userId, UpdateUserPasswordDto updateUserPasswordDto)
     {
         await userValidator.EnsureExistsAsync(userId);
-        var existingUser = await userRepository.GetUserAsync(userId);
         AuthService.EnsurePasswordFormatIsValid(updateUserPasswordDto.NewPassword);
+        var existingUser = await userRepository.GetUserAsync(userId);
         AuthService.EnsurePasswordIsValid(updateUserPasswordDto.OldPassword, existingUser!.UsernameHash);
         existingUser.PasswordHash = CryptoHelper.Argon2idHash(updateUserPasswordDto.NewPassword);
         return userMapper.ToDto(await userRepository.UpdateUserAsync(existingUser));

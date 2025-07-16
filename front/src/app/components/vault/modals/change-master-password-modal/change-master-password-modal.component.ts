@@ -58,7 +58,7 @@ export class ChangeMasterPasswordModalComponent extends BaseModalComponent {
     this.dialog.open(ConfirmModalComponent, {
       data: {
         title: 'Change Master Password',
-        message: 'Are you sure you want to change your master password? This will reencrypt your vault with the new master password.',
+        message: 'Are you sure you want to change your master password? This will reencrypt all your vaults with the new master password.',
         confirmText: 'Confirm',
         cancelText: 'Cancel'
       },

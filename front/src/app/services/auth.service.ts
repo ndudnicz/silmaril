@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { AuthResponse } from '../entities/authentication/authResponse';
 import { VaultService } from './vault.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map, Observable, Subscription, take, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, take, tap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -82,12 +82,7 @@ export class AuthService {
         this.setRefreshTokenTimeout();
         this.setCsrfToken(this.getCookie(this.CSRF_COOKIE_NAME) ?? '');
       }),
-      map(() => true),
-      catchError(error => {
-        let message = error.error || 'Authentication failed';
-        console.error('Error during authentication:', message);
-        return throwError(() => new Error(message));
-      })
+      map(() => true)
     );
   }
 
@@ -106,11 +101,6 @@ export class AuthService {
         } else {
           console.warn('CSRF token not found in cookies');
         }
-      }),
-      catchError(error => {
-        let message = error.error || 'Error fetching CSRF cookie';
-        console.error('Error fetching CSRF cookie:', message);
-        return throwError(() => new Error(message));
       })
     ).subscribe({
       next: () => console.log('CSRF cookie fetched successfully'),
@@ -132,8 +122,7 @@ export class AuthService {
       }),
       map(() => true),
       catchError(error => {
-        let message = error.error || 'Token refresh failed';
-        console.error('Error during token refresh:', message);
+        let message = error.error.message || 'Token refresh failed';
         return throwError(() => new Error(message));
       })
     );
@@ -151,12 +140,7 @@ export class AuthService {
         this.vaultService.clearSalt();
         this.clearLocalStorage();
       }),
-      map(() => true),
-      catchError(error => {
-        let message = error.error || 'Signout failed';
-        console.error('Error during signout:', message);
-        return throwError(() => new Error(message));
-      })
+      map(() => true)
     );
   }
   public getJwtToken(): string | null {

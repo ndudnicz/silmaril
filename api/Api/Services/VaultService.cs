@@ -2,6 +2,7 @@ using Api.Entities;
 using Api.Entities.Dtos;
 using Api.Entities.Dtos.Create;
 using Api.Entities.Dtos.Update;
+using Api.Exceptions;
 using Api.Mappers.Interfaces;
 using Api.Repositories.Interfaces;
 using Api.Services.Interfaces;

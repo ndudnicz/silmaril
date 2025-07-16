@@ -1,0 +1,9 @@
+.modal-field {
+    margin: 0;
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}

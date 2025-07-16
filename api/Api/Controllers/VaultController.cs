@@ -25,7 +25,7 @@ public class VaultController(
         var createdVault = await vaultService.CreateVaultAsync(createVaultDto, GetUserId());
         return Created("api/vaults", createdVault);
     }
-    
+
     [HttpPut]
     public async Task<IActionResult> UpdateAsync([FromBody] UpdateVaultDto updateVaultDto)
     {
