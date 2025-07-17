@@ -18,7 +18,7 @@ public class LoginMapper : ILoginMapper
             Updated = login.Updated,
             UserId = login.UserId,
             VaultId = login.VaultId,
-            TagNames = login.Tags?.Select(x => x.Name).ToArray() ?? [],
+            TagNames = login.Tags.Select(x => x.Name).ToArray(),
             EncryptionVersion = login.EncryptionVersion,
             Deleted = login.Deleted
         };

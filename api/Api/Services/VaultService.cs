@@ -2,7 +2,6 @@ using Api.Entities;
 using Api.Entities.Dtos;
 using Api.Entities.Dtos.Create;
 using Api.Entities.Dtos.Update;
-using Api.Exceptions;
 using Api.Mappers.Interfaces;
 using Api.Repositories.Interfaces;
 using Api.Services.Interfaces;
@@ -50,6 +49,8 @@ public class VaultService(
     public async Task<int> DeleteVaultAsync(Guid id, Guid userId)
     {
         await vaultValidator.EnsureExistsByUserIdAsync(id, userId);
+        // Forbid deleting the last vault
+        await vaultValidator.EnsureMultipleVaultsExistAsync(userId);
         return await vaultRepository.DeleteVaultAsync(id);
     }
 }

@@ -66,7 +66,6 @@ export class VaultService {
   }
   
   public clearKey(): void {
-    console.log('Clearing key');
     this.key = null;
   }
 
