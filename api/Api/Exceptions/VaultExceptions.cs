@@ -11,3 +11,8 @@ public class VaultsNotFound(string propertyName, string properties) : MyExceptio
 {
     public override HttpStatusCode StatusCode => HttpStatusCode.NotFound;
 }
+
+public class CannotDeleteLastVaultException() : MyException("Cannot delete the last vault. At least one vault must remain.")
+{
+    public override HttpStatusCode StatusCode => HttpStatusCode.BadRequest;
+}

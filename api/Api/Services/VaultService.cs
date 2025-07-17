@@ -2,7 +2,6 @@ using Api.Entities;
 using Api.Entities.Dtos;
 using Api.Entities.Dtos.Create;
 using Api.Entities.Dtos.Update;
-using Api.Exceptions;
 using Api.Mappers.Interfaces;
 using Api.Repositories.Interfaces;
 using Api.Services.Interfaces;
@@ -13,7 +12,8 @@ namespace Api.Services;
 public class VaultService(
     IVaultRepository vaultRepository,
     IVaultValidator vaultValidator,
-    IVaultMapper vaultMapper
+    IVaultMapper vaultMapper,
+    ILoginRepository loginRepository
 ) : IVaultService
 {
     private const string DefaultFirstVaultName = "Default Vault";
@@ -50,6 +50,19 @@ public class VaultService(
     public async Task<int> DeleteVaultAsync(Guid id, Guid userId)
     {
         await vaultValidator.EnsureExistsByUserIdAsync(id, userId);
-        return await vaultRepository.DeleteVaultAsync(id);
+        // Forbid deleting the last vault
+        await vaultValidator.EnsureMultipleVaultsExistAsync(userId);
+        var logins = await loginRepository.GetLoginsByVaultIdWithTagsAsync(id);
+        if (logins.Count > 0)
+        {
+            await loginRepository.UpdateLoginsAsync(logins.Select(l =>
+            {
+                l.Deleted = true;
+                l.VaultId = null;
+                return l;
+            }).ToList());
+        }
+        var result = await vaultRepository.DeleteVaultAsync(id);
+        return result;
     }
 }

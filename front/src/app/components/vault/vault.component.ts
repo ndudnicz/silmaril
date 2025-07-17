@@ -20,12 +20,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { BaseComponent } from '../base-component/base-component.component';
 import { from, Observable, Subscription, switchMap, take } from 'rxjs';
 import { Vault } from '../../entities/vault';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { truncateString } from '../../utils/string.utils';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
 import { UpdateLoginDto } from '../../entities/update/update-login-dto';
 import { EditVaultModalComponent } from './modals/edit-vault-modal/edit-vault-modal.component';
 import { ChangeMasterPasswordModalComponent } from './modals/change-master-password-modal/change-master-password-modal.component';
+import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-vault',
@@ -66,6 +67,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     private dataService: DataService,
     private activatedRoute: ActivatedRoute,
     private dialog: MatDialog,
+    private router: Router
   ) {
     super(inject(NgxSpinnerService));
   }
@@ -334,5 +336,49 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     this.setSearchBarPlaceholder();
     ToastWrapper.success('Vault updated successfully');
     this.stopLoading();
+  }
+
+  openDeleteVaultModal() {
+    this.dialog.open(ConfirmModalComponent, {
+      panelClass: 'custom-modal',
+      width: 'auto',
+      height: 'auto',
+      closeOnNavigation: false,
+      disableClose: true,
+      autoFocus: true,
+      data: {
+        title: 'Delete Vault',
+        message: `Are you sure you want to delete the vault "${this.selectedVault?.name}"? This action cannot be undone. The vault's logins will be sent to the recycle bin.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel'
+      }
+    }).afterClosed().pipe(take(1)).subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.deleteVaultModal();
+      }
+    });
+  }
+
+  deleteVaultModal() {
+    this.startLoading();
+    this.vaultService.deleteVault$(this.selectedVault!.id).pipe(take(1)).subscribe({
+      next: (deletedVaultNumber: number) => {
+        this.onVaultDeleteSuccess();
+      },
+      error: (error: any) => {
+        this.displayError('Error deleting vault', error);
+        this.stopLoading();
+      }
+    });
+  }
+
+  onVaultDeleteSuccess() {
+    const vaults = this.dataService.getVaults().filter(v => v.id !== this.selectedVault!.id);
+    this.dataService.setVaults(vaults);
+    this.dataService.setSelectedLogin(null);
+    this.allLogins = [];
+    this.stopLoading();
+    ToastWrapper.success(`Vault "${this.selectedVault?.name}" deleted successfully`);
+    this.router.navigate(['/vault', vaults[0]?.id]);
   }
 }

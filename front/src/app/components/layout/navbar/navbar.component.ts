@@ -76,6 +76,7 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
     }).afterClosed().pipe(take(1)).subscribe((result) => {
       if (result) {
         this.dataService.addVault(result);
+        this.router.navigate(['/vault', result.id]);
       }
     })
   }

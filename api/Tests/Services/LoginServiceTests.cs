@@ -30,7 +30,7 @@ public class LoginServiceTests
             _vaultValidator.Object,
             _loginMapper);
 
-    private static Login CreateTestLogin(
+    public static Login CreateTestLogin(
         Guid userId = new(),
         Guid vaultId = new(),
         List<Tag>? tags = null,
@@ -76,70 +76,6 @@ public class LoginServiceTests
     }
 
     [Fact]
-    public async Task UpdateLoginAsync_WhenUserNotFound_ShouldThrow()
-    {
-        _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
-            .Throws(new UserNotFound("id", Guid.NewGuid().ToString()));
-        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
-            .Returns(Task.CompletedTask);
-        var service = CreateService();
-        
-        Func<Task> act = async () => await service.UpdateLoginAsync(new UpdateLoginDto
-        {
-            Id = Guid.NewGuid()
-        }, Guid.NewGuid());
-
-        await act.Should().ThrowAsync<UserNotFound>();
-    }
-
-    [Fact]
-    public async Task DeleteLoginByUserIdAsync_ShouldReturnCount()
-    {
-        _loginRepository.Setup(r => r.DeleteLoginAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(1);
-        _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
-            .Returns(Task.CompletedTask);
-        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
-            .Returns(Task.CompletedTask);
-        var service = CreateService();
-        
-        var result = await service.DeleteLoginByUserIdAsync(Guid.NewGuid(), Guid.NewGuid());
-
-        result.Should().Be(1);
-    }
-    
-    [Fact]
-    public async Task CreateLoginAsync_WhenTagsNotFound_ShouldThrow()
-    {
-        var createDto = new CreateLoginDto { VaultId = Guid.Empty, TagNames = new[] { "inexistant" } };
-        _tagService.Setup(t => t.GetTagsByNamesAsync(It.IsAny<string[]>()))
-            .ThrowsAsync(new TagsNotFound("Name", "inexistant"));
-        _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
-            .Returns(Task.CompletedTask);
-        var service = CreateService();
-        
-        Func<Task> act = async () => await service.CreateLoginAsync(createDto, Guid.NewGuid());
-
-        await act.Should().ThrowAsync<TagsNotFound>();
-    }
-    
-    [Fact]
-    public async Task DeleteLoginByUserIdAsync_WhenNoLoginDeleted_ShouldReturnZero()
-    {
-        _loginRepository.Setup(r => r.DeleteLoginAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(0);
-        _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
-            .Returns(Task.CompletedTask);
-        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
-            .Returns(Task.CompletedTask);
-
-        var service = CreateService();
-        var result = await service.DeleteLoginByUserIdAsync(Guid.NewGuid(), Guid.NewGuid());
-
-        result.Should().Be(0);
-    }
-    
-    [Fact]
     public async Task CreateLoginsAsync_ShouldReturnLoginDtos()
     {
         var userId = Guid.NewGuid();
@@ -174,7 +110,21 @@ public class LoginServiceTests
         result.Select(l => l.Id).Should().BeEquivalentTo(logins.Select(l => l.Id));
     }
     
-    
+    [Fact]
+    public async Task CreateLoginAsync_WhenTagsNotFound_ShouldThrow()
+    {
+        var createDto = new CreateLoginDto { VaultId = Guid.Empty, TagNames = new[] { "inexistant" } };
+        _tagService.Setup(t => t.GetTagsByNamesAsync(It.IsAny<string[]>()))
+            .ThrowsAsync(new TagsNotFound("Name", "inexistant"));
+        _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
+            .Returns(Task.CompletedTask);
+        var service = CreateService();
+        
+        Func<Task> act = async () => await service.CreateLoginAsync(createDto, Guid.NewGuid());
+
+        await act.Should().ThrowAsync<TagsNotFound>();
+    }
+
     [Fact]
     public async Task CreateLoginsAsync_WhenTagsNotFound_ShouldThrow()
     {
@@ -194,5 +144,54 @@ public class LoginServiceTests
         Func<Task> act = async () => await service.CreateLoginsAsync(createDtos, Guid.NewGuid());
 
         await act.Should().ThrowAsync<TagsNotFound>();
+    }
+    
+    [Fact]
+    public async Task UpdateLoginAsync_WhenUserNotFound_ShouldThrow()
+    {
+        _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
+            .Throws(new UserNotFound("id", Guid.NewGuid().ToString()));
+        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .Returns(Task.CompletedTask);
+        var service = CreateService();
+        
+        Func<Task> act = async () => await service.UpdateLoginAsync(new UpdateLoginDto
+        {
+            Id = Guid.NewGuid()
+        }, Guid.NewGuid());
+
+        await act.Should().ThrowAsync<UserNotFound>();
+    }
+
+    [Fact]
+    public async Task DeleteLoginByUserIdAsync_ShouldReturnCount()
+    {
+        _loginRepository.Setup(r => r.DeleteLoginAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(1);
+        _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
+            .Returns(Task.CompletedTask);
+        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .Returns(Task.CompletedTask);
+        var service = CreateService();
+        
+        var result = await service.DeleteLoginByUserIdAsync(Guid.NewGuid(), Guid.NewGuid());
+
+        result.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task DeleteLoginByUserIdAsync_WhenNoLoginDeleted_ShouldReturnZero()
+    {
+        _loginRepository.Setup(r => r.DeleteLoginAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(0);
+        _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
+            .Returns(Task.CompletedTask);
+        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .Returns(Task.CompletedTask);
+
+        var service = CreateService();
+        var result = await service.DeleteLoginByUserIdAsync(Guid.NewGuid(), Guid.NewGuid());
+
+        result.Should().Be(0);
     }
 }

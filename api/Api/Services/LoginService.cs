@@ -71,6 +71,10 @@ public class LoginService(
     {
         await userValidator.EnsureExistsAsync(userId);
         await loginValidator.EnsureExistsByUserIdAsync(dto.Id, userId);
+        if (dto.VaultId.HasValue)
+        {
+            await vaultValidator.EnsureExistsByUserIdAsync(dto.VaultId.Value, userId);
+        }
         var login = await loginRepository.GetLoginWithTagsAsync(dto.Id);
         var tags = await tagService.GetTagsByNamesAsync(dto.TagNames);
         loginMapper.FillEntityFromUpdateDto(login!, dto, tags);
@@ -87,6 +91,15 @@ public class LoginService(
         }
         await userValidator.EnsureExistsAsync(userId);
         await loginValidator.EnsureExistsByUserIdAsync(updateLoginDtos.Select(l => l.Id).ToList(), userId);
+        if (updateLoginDtos.Any(dto => dto.VaultId.HasValue))
+        {
+            var vaultIds = updateLoginDtos
+                .Where(dto => dto.VaultId.HasValue)
+                .Select(dto => dto.VaultId!.Value)
+                .Distinct()
+                .ToList();
+            await vaultValidator.EnsureExistsByUserIdAsync(vaultIds, userId);
+        }
         var existingLogins = await loginRepository.GetLoginsByIdsWithTagsAsync(
             updateLoginDtos.Select(l => l.Id));
         var existingLoginsDictionary = existingLogins.ToDictionary(l => l.Id, l => l);

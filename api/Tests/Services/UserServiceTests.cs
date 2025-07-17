@@ -11,7 +11,6 @@ using Api.Services.Interfaces;
 using Api.Services.Validation.Interfaces;
 using FluentAssertions;
 using Moq;
-using MySqlConnector;
 
 namespace Tests.Services;
 
