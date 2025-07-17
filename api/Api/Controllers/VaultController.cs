@@ -9,8 +9,7 @@ namespace Api.Controllers;
 [Authorize]
 public class VaultController(
     ILogger<VaultController> logger,
-    IVaultService vaultService,
-    ILoginService loginService
+    IVaultService vaultService
     ): MyControllerV1
 {
     [HttpGet]

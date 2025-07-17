@@ -30,7 +30,7 @@ public class LoginServiceTests
             _vaultValidator.Object,
             _loginMapper);
 
-    private static Login CreateTestLogin(
+    public static Login CreateTestLogin(
         Guid userId = new(),
         Guid vaultId = new(),
         List<Tag>? tags = null,

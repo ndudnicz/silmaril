@@ -15,14 +15,16 @@ public class VaultServiceTests
     private readonly Mock<IVaultRepository> _vaultRepository = new();
     private readonly Mock<IVaultValidator> _vaultValidator = new();
     private readonly Mock<IVaultMapper> _vaultMapper = new();
+    private readonly Mock<ILoginRepository> _loginRepository = new();
 
     private VaultService CreateService() => new VaultService(
         _vaultRepository.Object,
         _vaultValidator.Object,
-        _vaultMapper.Object
+        _vaultMapper.Object,
+        _loginRepository.Object
         );
     
-    private Vault CreateVaultTest(
+    private Vault CreateTestVault(
         Guid id = new(),
         Guid userId = new(),
         string name = "Test Vault"
@@ -37,7 +39,7 @@ public class VaultServiceTests
         };
     }
     
-    private VaultDto CreateVaultDtoTest(
+    private VaultDto CreateTestVaultDto(
         Guid id = new(),
         string name = "Test Vault"
         )
@@ -49,7 +51,7 @@ public class VaultServiceTests
         };
     }
 
-    private VaultDto CreateVaultDtoTest(Vault vault)
+    private VaultDto CreateTestVaultDto(Vault vault)
     {
         return new VaultDto
         {
@@ -65,10 +67,10 @@ public class VaultServiceTests
         var userId = Guid.NewGuid();
         var vaults = new List<Vault>
         {
-            CreateVaultTest(Guid.NewGuid(), userId, "Vault 1"),
-            CreateVaultTest(Guid.NewGuid(), userId, "Vault 2")
+            CreateTestVault(Guid.NewGuid(), userId, "Vault 1"),
+            CreateTestVault(Guid.NewGuid(), userId, "Vault 2")
         };
-        var vaultDtos = vaults.Select(CreateVaultDtoTest).ToList();
+        var vaultDtos = vaults.Select(CreateTestVaultDto).ToList();
         
         _vaultRepository.Setup(r => r.GetVaultsByUserIdAsync(userId)).ReturnsAsync(vaults);
         _vaultMapper.Setup(m => m.ToDto(It.IsAny<List<Vault>>())).Returns(vaultDtos);
@@ -76,7 +78,7 @@ public class VaultServiceTests
         var service = CreateService();
         var result = await service.GetVaultsByUserIdAsync(userId);
         
-        result.Should().BeEquivalentTo(vaults.Select(CreateVaultDtoTest));
+        result.Should().BeEquivalentTo(vaults.Select(CreateTestVaultDto));
     }
     
     [Fact]
@@ -84,10 +86,22 @@ public class VaultServiceTests
     {
         var userId = Guid.NewGuid();
         var vaultId = Guid.NewGuid();
+        var logins = new List<Login>
+        {
+            LoginServiceTests.CreateTestLogin(userId, vaultId)
+        };
+        var updatedLogins = logins.Select(l =>
+        {
+            l.Deleted = true;
+            return l;
+        }).ToList();
         
         _vaultValidator.Setup(v => v.EnsureExistsByUserIdAsync(vaultId, userId)).Returns(Task.CompletedTask);
         _vaultValidator.Setup(v => v.EnsureMultipleVaultsExistAsync(userId)).Returns(Task.CompletedTask);
+        _loginRepository.Setup(r => r.GetLoginsByVaultIdWithTagsAsync(vaultId))
+            .ReturnsAsync(logins);
         _vaultRepository.Setup(r => r.DeleteVaultAsync(vaultId)).ReturnsAsync(1);
+        _loginRepository.Setup(r => r.UpdateLoginsAsync(logins)).ReturnsAsync(updatedLogins);
 
         var service = CreateService();
         var result = await service.DeleteVaultAsync(vaultId, userId);

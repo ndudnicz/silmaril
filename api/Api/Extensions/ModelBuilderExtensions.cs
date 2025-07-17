@@ -50,8 +50,7 @@ public static class ModelBuilderExtensions
         modelBuilder.Entity<Login>()
             .HasOne<Vault>()
             .WithMany()
-            .HasForeignKey(l => l.VaultId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .HasForeignKey(l => l.VaultId);
     }
     
     public static void SetupVaultEntity(this ModelBuilder modelBuilder)

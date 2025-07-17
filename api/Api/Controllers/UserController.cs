@@ -11,8 +11,7 @@ namespace Api.Controllers;
 [Authorize]
 public class UserController(
     ILogger<UserController> logger,
-    IUserService userService,
-    IUserMapper userMapper
+    IUserService userService
     ) : MyControllerV1
 {
     [HttpGet]

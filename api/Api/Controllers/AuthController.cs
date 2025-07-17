@@ -82,7 +82,7 @@ public class AuthController(
     [HttpPost("signout")]
     public async Task<IActionResult> Signout()
     {
-        var result = await authService.RevokeRefreshTokenByUserIdAsync(GetUserId());
+        await authService.RevokeRefreshTokenByUserIdAsync(GetUserId());
         Response.Cookies.Delete(jwtConfiguration.RefreshTokenCookieName);
         Response.Cookies.Delete(csrfConfiguration.CookieName);
         Response.Cookies.Delete(csrfConfiguration.SessionCookieName);

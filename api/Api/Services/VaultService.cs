@@ -12,7 +12,8 @@ namespace Api.Services;
 public class VaultService(
     IVaultRepository vaultRepository,
     IVaultValidator vaultValidator,
-    IVaultMapper vaultMapper
+    IVaultMapper vaultMapper,
+    ILoginRepository loginRepository
 ) : IVaultService
 {
     private const string DefaultFirstVaultName = "Default Vault";
@@ -51,6 +52,17 @@ public class VaultService(
         await vaultValidator.EnsureExistsByUserIdAsync(id, userId);
         // Forbid deleting the last vault
         await vaultValidator.EnsureMultipleVaultsExistAsync(userId);
-        return await vaultRepository.DeleteVaultAsync(id);
+        var logins = await loginRepository.GetLoginsByVaultIdWithTagsAsync(id);
+        if (logins.Count > 0)
+        {
+            await loginRepository.UpdateLoginsAsync(logins.Select(l =>
+            {
+                l.Deleted = true;
+                l.VaultId = null;
+                return l;
+            }).ToList());
+        }
+        var result = await vaultRepository.DeleteVaultAsync(id);
+        return result;
     }
 }
