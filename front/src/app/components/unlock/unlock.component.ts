@@ -55,13 +55,10 @@ export class UnlockComponent extends BaseComponent implements OnInit {
   async onSubmit() {
     try {
       this.startLoading();
-      console.log('Form submitted:', this.form.value);
-      await this.vaultService.setKeyAsync(this.masterPasswordFormControl.value!);
+      await this.vaultService.deriveAndSetDerivedKeyAsync(this.masterPasswordFormControl.value!);
       this.loadVaults();
     } catch (error: any) {
       this.displayError('Failed to unlock vault', error);
-    } finally {
-      this.stopLoading();
     }
   }
 
@@ -81,10 +78,6 @@ export class UnlockComponent extends BaseComponent implements OnInit {
       },
       error: (error: any) => {
         this.displayError('Error fetching vaults', error);
-        this.stopLoading();
-      },
-      complete: () => {
-        console.log('Vaults fetched successfully');
         this.stopLoading();
       }
     });

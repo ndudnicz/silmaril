@@ -10,12 +10,18 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../../utils/toast.wrapper';
 import { VaultService } from '../../../services/vault.service';
 import { BaseComponent } from '../../base-component/base-component.component';
-import { Subscription, take } from 'rxjs';
+import { from, Subscription, switchMap, take } from 'rxjs';
 import { DataService } from '../../../services/data.service';
 import { Vault } from '../../../entities/vault';
 import { MatMenuModule } from '@angular/material/menu';
 import { CommonModule } from '@angular/common';
 import { AddVaultModalComponent } from './modals/add-vault-modal/add-vault-modal.component';
+import { ExportModalComponent } from './modals/export-modal/export-modal.component';
+import { ImportExportService } from '../../../services/import-export.service';
+import { LoginService } from '../../../services/login.service';
+import { EncryptionService } from '../../../services/encryption.service';
+import { Login } from '../../../entities/login';
+import { ImportExportFormat, ImportExportJson } from '../../../entities/import-export/import-export';
 
 @Component({
   selector: 'app-navbar',
@@ -41,6 +47,7 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
     private authService: AuthService,
     protected vaultService: VaultService,
     private dataService: DataService,
+    private importExportService: ImportExportService,
     private router: Router
   ) {
     super(inject(NgxSpinnerService));
@@ -79,6 +86,55 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
         this.router.navigate(['/vault', result.id]);
       }
     })
+  }
+
+  openExportModal() {
+    this.dialog.open(ExportModalComponent, {
+      panelClass: 'custom-modal',
+      width: '400px',
+      height: 'auto',
+      disableClose: true,
+      autoFocus: false
+    }).afterClosed().pipe(take(1)).subscribe((result) => {
+      if (result) {
+        this.startLoading();
+        if (result.exportFormat === ImportExportFormat.JSON) {
+          this.exportEncryptedJson(result.encryptionPassword);
+        } else if (result.exportFormat === ImportExportFormat.CSV) {
+          this.exportAsCsv();
+        }
+      }
+    });
+  }
+
+  exportEncryptedJson(encryptionPassword: string): void {
+    this.importExportService.exportEncryptedJson$(encryptionPassword)
+    .pipe(take(1))
+    .subscribe({
+      next: () => {
+        ToastWrapper.success('Logins exported successfully');
+        this.stopLoading();
+      },
+      error: (error) => {
+        this.displayError('Error exporting logins', error);
+        this.stopLoading();
+      },
+    });
+  }
+
+  exportAsCsv() {
+    this.importExportService.exportLoginsAsCsv()
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          ToastWrapper.success('Logins exported successfully');
+          this.stopLoading();
+        },
+        error: (error) => {
+          this.displayError('Error exporting logins', error);
+          this.stopLoading();
+        },
+      });
   }
 
   signout() {

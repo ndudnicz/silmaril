@@ -5,6 +5,9 @@ export interface EncryptionResult {
 }
 
 export class CryptoUtilsV1 {
+  // The NIST recommends a 16-byte salt length for deriving the user's Master Password key using PBKDF2 on the frontend.
+  static readonly SALT_LENGTH_IN_BYTES = 16;
+
   static async deriveKeyFromPasswordAsync(password: string, salt: Uint8Array): Promise<CryptoKey> {
     const enc = new TextEncoder();
     const keyMaterial = await window.crypto.subtle.importKey(
@@ -69,6 +72,16 @@ export class CryptoUtilsV1 {
     );
 
     return { ciphertext: new Uint8Array(buffer), initializationVector, encryptionVersion: 1 };
+  }
+
+  static async encryptDataBulkAsync(key: CryptoKey | null, data: string[]): Promise<EncryptionResult[]> {
+    return await Promise.all(data.map(item => this.encryptDataAsync(key, item)));
+  }
+
+  public static generateRandomBytes(length: number): Uint8Array {
+    const randomBytes = new Uint8Array(length);
+    crypto.getRandomValues(randomBytes);
+    return randomBytes;
   }
 }
 

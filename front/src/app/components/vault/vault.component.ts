@@ -27,6 +27,7 @@ import { UpdateLoginDto } from '../../entities/update/update-login-dto';
 import { EditVaultModalComponent } from './modals/edit-vault-modal/edit-vault-modal.component';
 import { ChangeMasterPasswordModalComponent } from './modals/change-master-password-modal/change-master-password-modal.component';
 import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.component';
+import { EncryptionService } from '../../services/encryption.service';
 
 @Component({
   selector: 'app-vault',
@@ -65,6 +66,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
     private vaultService: VaultService,
     private loginService: LoginService,
     private dataService: DataService,
+    private encryptionService: EncryptionService,
     private activatedRoute: ActivatedRoute,
     private dialog: MatDialog,
     private router: Router
@@ -162,7 +164,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
       .pipe(
         take(1),
         switchMap(logins => {
-          return from(this.vaultService.decryptAllLoginsAsync(logins));
+          return from(this.encryptionService.decryptAllLoginsAsync(logins, this.vaultService.getDerivedKey()));
         })
       );
   }
@@ -219,12 +221,12 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   private async changeMasterPassword(newMasterPassword: string) {
     this.startLoading();
     const deletedLogins = await this.getDeletedLoginsAsync();
-    this.vaultService.clearKey();
-    await this.vaultService.setKeyAsync(newMasterPassword);
+    this.vaultService.clearDerivedKey();
+    await this.vaultService.deriveAndSetDerivedKeyAsync(newMasterPassword);
     this.dataService.setSelectedLogin(null);
-    this.allLogins = await this.vaultService.encryptAllLoginsAsync([
+    this.allLogins = await this.encryptionService.encryptAllLoginsAsync([
       ...this.allLogins, ...deletedLogins
-    ]);
+    ], this.vaultService.getDerivedKey());
     this.loginService.updateLogins$(this.allLogins.map(l => UpdateLoginDto.fromLogin(l))).pipe(take(1)).subscribe({
       next: async (updatedLogins: Login[]) => {
         this.onUpdateLoginsSuccess(updatedLogins);
@@ -241,7 +243,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
       this.startLoading();
       this.loginService.getDeletedLogins$().pipe(
         take(1),
-        switchMap(deletedLogins => from(this.vaultService.decryptAllLoginsAsync(deletedLogins)))
+        switchMap(deletedLogins => from(this.encryptionService.decryptAllLoginsAsync(deletedLogins, this.vaultService.getDerivedKey())))
       ).subscribe({
         next: (deletedLogins: Login[]) => {
           this.stopLoading();
@@ -256,7 +258,7 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   }
 
   private async onUpdateLoginsSuccess(updatedLogins: Login[]) {
-    updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
+    updatedLogins = await this.encryptionService.decryptAllLoginsAsync(updatedLogins, this.vaultService.getDerivedKey());
     this.allLogins = updatedLogins;
     this.setDisplayedLogins();
     this.stopLoading();

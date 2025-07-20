@@ -20,6 +20,7 @@ import { VaultService } from '../../services/vault.service';
 import { Vault } from '../../entities/vault';
 import { RestoreLoginsModalComponent } from './modals/restore-logins/restore-logins-modal.component';
 import { UpdateLoginDto } from '../../entities/update/update-login-dto';
+import { EncryptionService } from '../../services/encryption.service';
 
 @Component({
   selector: 'app-recycle-bin',
@@ -52,8 +53,9 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   constructor(
     private dataService: DataService,
     private loginService: LoginService,
+    private vaultService: VaultService,
+    private encryptionService: EncryptionService,
     private dialog: MatDialog,
-    private vaultService: VaultService
   ) {
     super(inject(NgxSpinnerService));
     this.vaults = this.dataService.getVaults();
@@ -81,9 +83,8 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   getDecryptedDeletedlogins$(): Observable<Login[]> {
     return this.loginService.getDeletedLogins$()
       .pipe(
-        take(1),
         switchMap(logins => {
-          return from(this.vaultService.decryptAllLoginsAsync(logins));
+          return from(this.encryptionService.decryptAllLoginsAsync(logins, this.vaultService.getDerivedKey()));
         })
       )
   }

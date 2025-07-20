@@ -16,9 +16,10 @@ import { ToastWrapper } from '../../../../utils/toast.wrapper';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
 import { from, Observable, switchMap, take } from 'rxjs';
 import { CreateLoginDto } from '../../../../entities/create/create-login-dto';
-import { DecryptedData } from '../../../../entities/decrypted-data';
 import { UpdateLoginDto } from '../../../../entities/update/update-login-dto';
 import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
+import { DecryptedData } from '../../../../entities/decrypt-data/decrypted-data';
+import { EncryptionService } from '../../../../services/encryption.service';
 
 @Component({
 
@@ -66,7 +67,7 @@ export class AddEditLoginModalComponent extends BaseModalComponent {
   constructor(
     private vaultService: VaultService,
     private loginService: LoginService,
-    // private dialogRef: MatDialogRef<AddEditLoginModalComponent>,
+    private encryptionService: EncryptionService,
     private dialog: MatDialog
   ) {
     super(inject(MatDialogRef<AddEditLoginModalComponent>), inject(NgxSpinnerService));
@@ -106,7 +107,7 @@ export class AddEditLoginModalComponent extends BaseModalComponent {
       url: this.urlFormControl.value || '',
       notes: this.notesFormControl.value || ''
     });
-    const encryptionResult = await CryptoUtilsV1.encryptDataAsync(this.vaultService.getKey(), decryptedData.toString());
+    const encryptionResult = await CryptoUtilsV1.encryptDataAsync(this.vaultService.getDerivedKey(), decryptedData.toString());
     if (this.mode === AddEditLoginModalComponent.MODAL_MOD.ADD) {
       this.startLoading();
       this.createLogin$(encryptionResult).pipe(take(1)).subscribe({
@@ -166,7 +167,7 @@ export class AddEditLoginModalComponent extends BaseModalComponent {
 
     return this.loginService.createLogin$(createLoginDto).pipe(
       switchMap((createdLogin: Login) =>
-        from(this.vaultService.decryptLoginDataAsync(createdLogin))
+        from(this.encryptionService.decryptLoginDataAsync(createdLogin, this.vaultService.getDerivedKey()))
       )
     );
   }
@@ -180,7 +181,7 @@ export class AddEditLoginModalComponent extends BaseModalComponent {
     return this.loginService.updateLogin$(updateLoginDto).pipe(
       take(1),
       switchMap((updatedLogin: Login) =>
-        from(this.vaultService.decryptLoginDataAsync(updatedLogin))
+        from(this.encryptionService.decryptLoginDataAsync(updatedLogin, this.vaultService.getDerivedKey()))
       )
     );
   }

@@ -34,7 +34,7 @@ export class RestoreLoginsModalComponent extends BaseModalComponent {
   vaults: Vault[] = [];
   displayVaultSelect = false;
   form = new FormGroup({
-    vaultId: new FormControl('', [])
+    vaultId: new FormControl('', [this.checkVaultRequirement()])
   });
 
   constructor(

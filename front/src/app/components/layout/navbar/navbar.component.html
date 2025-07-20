@@ -1,7 +1,7 @@
 <nav id="navbar-container">
     <div class="navbar-element" [matTooltipDisabled]="vaultService.isUnlocked()" matTooltip="The Vaults are locked"
         matTooltipPosition="right">
-        @if (!vaults || vaults.length === 0) {
+        @if (!vaultService.isUnlocked() || !vaults || vaults.length === 0) {
         <button mat-button class="full-width navbar-button" routerLink="/unlock">
             Unlock
             <mat-icon class="navbar-icon disabled-button disabled">lock</mat-icon>
@@ -24,8 +24,23 @@
         </mat-menu>
 
         }
-
     </div>
+
+    @if (vaultService.isUnlocked()) {
+    <div class="navbar-element">
+        <button mat-button class="full-width navbar-button">
+            Import
+            <mat-icon class="navbar-icon">upload</mat-icon>
+        </button>
+    </div>
+    <div class="navbar-element">
+        <button mat-button class="full-width navbar-button" (click)="openExportModal()">
+            Export
+            <mat-icon class="navbar-icon">download</mat-icon>
+        </button>
+    </div>
+    }
+
     <div class="navbar-element">
         <button mat-button class="full-width navbar-button" routerLink="/settings">
             Settings

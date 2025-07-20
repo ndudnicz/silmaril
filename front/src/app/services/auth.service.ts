@@ -136,7 +136,7 @@ export class AuthService {
       responseType: 'text' as 'json'
     }).pipe(
       tap(() => {
-        this.vaultService.clearKey();
+        this.vaultService.clearDerivedKey();
         this.vaultService.clearSalt();
         this.clearLocalStorage();
       }),

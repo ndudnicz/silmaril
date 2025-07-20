@@ -1,5 +1,5 @@
 import { base64ToUint8Array } from "../utils/crypto.utils";
-import { DecryptedData } from "./decrypted-data";
+import { DecryptedData } from "./decrypt-data/decrypted-data";
 
 export class Login {
     public encryptedData?: Uint8Array | null;
