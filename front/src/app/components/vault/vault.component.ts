@@ -256,7 +256,6 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
   }
 
   private async onUpdateLoginsSuccess(updatedLogins: Login[]) {
-    console.log('All logins updated successfully');
     updatedLogins = await this.vaultService.decryptAllLoginsAsync(updatedLogins);
     this.allLogins = updatedLogins;
     this.setDisplayedLogins();

@@ -97,12 +97,13 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   }
 
   select(login: Login): void {
-    if (this.selectedLogins.includes(login)) {
+    if (login.selected) {
       this.selectedLogins = this.selectedLogins.filter(l => l !== login);
-      console.log(`Login deselected`, login);
+      login.selected = false;
       return;
     } else {
       this.selectedLogins.push(login);
+      login.selected = true;
     }
   }
 
@@ -129,8 +130,6 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     }).afterClosed().pipe(take(1)).subscribe(destinationVaultId => {
       if (destinationVaultId) {
         this.proceedRestoreSelectedLogins(destinationVaultId);
-      } else {
-        console.log('Restore cancelled');
       }
     });
   }
@@ -152,15 +151,12 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     }).afterClosed().pipe(take(1)).subscribe(confirmed => {
       if (confirmed) {
         this.proceedRestoreSelectedLogins(null);
-      } else {
-        console.log('Restore cancelled');
       }
     });
   }
 
   proceedRestoreSelectedLogins(destinationVaultId: string | null): void {
     this.startLoading();
-    console.log(`Restoring logins `, this.selectedLogins);
     this.selectedLogins.forEach(login => {
       login.vaultId = destinationVaultId ?? login.vaultId;
       login.deleted = false;
@@ -170,7 +166,6 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
       .subscribe({
         next: updatedlogins => {
           this.onRestoreLoginSuccess();
-          console.log(`Restored ${updatedlogins.length} logins`);
         },
         error: (error: any) => {
           this.stopLoading();
@@ -198,15 +193,12 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     }).afterClosed().pipe(take(1)).subscribe(confirmed => {
       if (confirmed) {
         this.proceedDeleteSelectedLogins();
-      } else {
-        console.log('Permanent deletion cancelled');
       }
     });
   }
 
   proceedDeleteSelectedLogins(): void {
     this.startLoading();
-    console.log(`Permanently deleting logins `, this.selectedLogins);
     this.loginService.deleteLogins$({ ids: this.selectedLogins.map(login => login.id) }).pipe(take(1)).subscribe({
       next: (deletedCount: number) => {
         this.onDeleteLoginsSuccess(deletedCount);
@@ -220,7 +212,6 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   }
 
   onDeleteLoginsSuccess(deletedCount: number): void {
-    console.log(`Permanently deleted ${deletedCount} logins`);
     this.allDeletedLogins = this.allDeletedLogins.filter(login => !this.selectedLogins.includes(login));
     this.setDisplayedLogins();
     this.clearSelection();

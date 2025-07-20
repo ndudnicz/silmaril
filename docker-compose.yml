@@ -13,13 +13,14 @@ services:
       migrator:
         condition: service_completed_successfully
     environment:
-      - ConnectionStrings__MySql=Server=db;Port=3306;Database=silmaril;User ID=root;Password=root;
+      - ConnectionStrings__MySql=Server=db;Port=3306;Database=silmaril;User ID=dev;Password=dev;
   db:
     image: mariadb:latest
     environment:
       - MARIADB_DATABASE=silmaril
-      - MARIADB_USER=root
-      - MARIADB_PASSWORD=root
+      - MARIADB_USER=dev
+      - MARIADB_PASSWORD=dev
+      - MARIADB_ROOT_PASSWORD=root
     ports:
       - 3306:3306
     healthcheck:
@@ -37,4 +38,4 @@ services:
       db:
         condition: service_healthy
     environment:
-      - ConnectionStrings__MySql=Server=db;Port=3306;Database=silmaril;User ID=root;Password=root;
+      - ConnectionStrings__MySql=Server=db;Port=3306;Database=silmaril;User ID=dev;Password=dev;
