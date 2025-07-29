@@ -22,6 +22,7 @@ import { LoginService } from '../../../services/login.service';
 import { EncryptionService } from '../../../services/encryption.service';
 import { Login } from '../../../entities/login';
 import { ImportExportFormat, ImportExportJson } from '../../../entities/import-export/import-export';
+import { ImportModalComponent } from './modals/import-modal/import-modal.component';
 
 @Component({
   selector: 'app-navbar',
@@ -123,7 +124,7 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
   }
 
   exportAsCsv() {
-    this.importExportService.exportLoginsAsCsv()
+    this.importExportService.exportLoginsAsCsv$()
       .pipe(take(1))
       .subscribe({
         next: () => {
@@ -135,6 +136,24 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
           this.stopLoading();
         },
       });
+  }
+
+  openImportModal() {
+    this.dialog.open(ImportModalComponent, {
+      panelClass: 'custom-modal',
+      width: '400px',
+      height: 'auto',
+      disableClose: true,
+      autoFocus: false
+    }).afterClosed().pipe(take(1)).subscribe((result) => {
+      if (result) {
+        console.log('Import result:', result);
+        
+        this.startLoading();
+        this.stopLoading();
+        // this.handleImport(result);
+      }
+    })
   }
 
   signout() {

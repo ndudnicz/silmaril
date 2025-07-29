@@ -1,0 +1,20 @@
+<div class="modal-body">
+    <h1 mat-dialog-title>Import Logins</h1>
+    <mat-icon class="close-button close-dialog-button" (click)="closeDialog()">close</mat-icon>
+    <mat-dialog-content>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <label for="file-upload" class="mat-label">File to upload : </label>
+            <input id="file-upload" type="file" hidden (change)="onFileSelected($event)" accept=".json, .csv" #fileInput
+                required />
+            <button mat-stroked-button type="button" (click)="fileInput.click()">
+                Choose File
+            </button>
+            @if(fileName) {
+            <span>{{ fileName }}</span>
+            }
+            <div class="buttons">
+                <button mat-raised-button type="submit" matButton [disabled]="form.invalid || loading">Import</button>
+            </div>
+        </form>
+    </mat-dialog-content>
+</div>

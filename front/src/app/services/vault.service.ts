@@ -24,7 +24,7 @@ export class VaultService {
       if (!salt || salt.length === 0) {
         throw new Error('Salt not set.');
       }
-      this.derivedKey = await CryptoUtilsV1.deriveKeyFromPasswordAsync(masterPassword, salt);
+      this.derivedKey = await CryptoUtilsV1.deriveAesKeyFromPasswordAsync(masterPassword, salt);
     }
     catch (error) {
       console.log(error);

@@ -2,12 +2,13 @@ import { Injectable } from "@angular/core";
 import { ImportExportJson } from "../entities/import-export/import-export";
 import { base64ToUint8Array, CryptoUtilsV1, EncryptionResult, uint8ArrayToBase64 } from "../utils/crypto.utils";
 import { Login } from "../entities/login";
-import { from, map, Observable, of, switchMap, take } from "rxjs";
+import { combineLatest, from, map, Observable, of, switchMap, take } from "rxjs";
 import { DecryptedData } from "../entities/decrypt-data/decrypted-data";
 import { LoginService } from "./login.service";
 import { CreateLoginDto } from "../entities/create/create-login-dto";
 import { VaultService } from "./vault.service";
 import { EncryptionService } from "./encryption.service";
+import { SignedData } from "../entities/import-export/signed-data";
 
 @Injectable({ providedIn: 'root' })
 export class ImportExportService {
@@ -18,11 +19,11 @@ export class ImportExportService {
         private encryptionService: EncryptionService
     ) { }
 
-    public exportLoginsAsCsv(): Observable<boolean> {
+    public exportLoginsAsCsv$(): Observable<boolean> {
         return this.loginService.getLogins$().pipe(
             switchMap((logins: Login[]) => from(this.encryptionService.decryptAllLoginsAsync(logins, this.vaultService.getDerivedKey()))),
 
-            switchMap((logins: Login[]) => this.exportLoginsAsCsv$(logins.map(l => l.decryptedData!)))
+            switchMap((logins: Login[]) => this.exportDecryptedDataAsCsv$(logins.map(l => l.decryptedData!)))
         );
     }
 
@@ -42,30 +43,59 @@ export class ImportExportService {
     private exportLoginsAsEncryptedJson$(DecryptedDataArray: DecryptedData[], masterPassword: string): Observable<ImportExportJson> {
         const salt = CryptoUtilsV1.generateRandomBytes(CryptoUtilsV1.SALT_LENGTH_IN_BYTES);
 
-        return this.derivedKeyFromMasterPassword$(
+        return this.getDerivedKeysFromMasterPassword$(
             masterPassword,
             uint8ArrayToBase64(salt))
             .pipe(
-                switchMap((derivedKey: CryptoKey) => this.encryptData$(derivedKey, DecryptedDataArray)),
-                switchMap((encryptionResults: EncryptionResult) => this.mapImportExportJson$(encryptionResults, salt)),
-                take(1)
+                switchMap((derivedKeys) => this.encryptData$(derivedKeys, salt, DecryptedDataArray))
             );
     }
 
-    private encryptData$(derivedKey: CryptoKey, decryptedDataArray: DecryptedData[]): Observable<EncryptionResult> {
-        return from(CryptoUtilsV1.encryptDataAsync(derivedKey, JSON.stringify(decryptedDataArray)));
+    private encryptData$(
+        derivedKeys: { aesKey: CryptoKey; hmacKey: CryptoKey },
+        salt: Uint8Array,
+        decryptedDataArray: DecryptedData[]): Observable<ImportExportJson> {
+        return from(CryptoUtilsV1.encryptDataAsync(derivedKeys.aesKey, JSON.stringify(decryptedDataArray)))
+            .pipe(switchMap((encryptionResult: EncryptionResult) => this.signEncryptedData$(derivedKeys.hmacKey, salt, encryptionResult)));
     }
 
-    private mapImportExportJson$(encryptionResult: EncryptionResult, salt: Uint8Array): Observable<ImportExportJson> {
-        return of({
-            magic: ImportExportJson.MAGIC,
+    private signEncryptedData$(
+        derivedKey: CryptoKey,
+        salt: Uint8Array,
+        encryptionResult: EncryptionResult): Observable<ImportExportJson> {
+        return from(CryptoUtilsV1.signDataAsync(
+            derivedKey,
+            JSON.stringify(this.mapSignedData(encryptionResult, salt)))).pipe(
+            switchMap((signatureBase64: string) => of(this.mapImportExportJson$(
+                encryptionResult,
+                salt,
+                signatureBase64
+            ))));
+    }
+
+    private mapSignedData(
+        encryptionResult: EncryptionResult,
+        salt: Uint8Array
+    ): SignedData {
+        return {
             encryptedDataBase64: uint8ArrayToBase64(encryptionResult.ciphertext),
-            initialicationVectorBase64: uint8ArrayToBase64(encryptionResult.initializationVector),
-            saltBase64: uint8ArrayToBase64(salt)
-        } as ImportExportJson);
+            saltBase64: uint8ArrayToBase64(salt),
+            initialicationVectorBase64: uint8ArrayToBase64(encryptionResult.initializationVector)
+        };
     }
 
-    private exportLoginsAsCsv$(decryptedDataArray: DecryptedData[]): Observable<boolean> {
+    private mapImportExportJson$(
+        encryptionResult: EncryptionResult,
+        salt: Uint8Array,
+        signatureBase64: string
+    ): ImportExportJson {
+        return new ImportExportJson(
+            signatureBase64,
+            this.mapSignedData(encryptionResult, salt)
+        );
+    }
+
+    private exportDecryptedDataAsCsv$(decryptedDataArray: DecryptedData[]): Observable<boolean> {
         return this.downloadCsvFile$(decryptedDataArray, `logins_export_${new Date().toISOString()}`);
     }
 
@@ -77,10 +107,25 @@ export class ImportExportService {
         importExportJson: ImportExportJson,
         masterPassword: string
     ): Observable<Login[]> {
-        return this.derivedKeyFromMasterPassword$(masterPassword, importExportJson.saltBase64).pipe(
-            switchMap((derivedKey: CryptoKey) => this.decryptDataString$(derivedKey,
-                importExportJson.encryptedDataBase64,
-                importExportJson.initialicationVectorBase64)),
+        return this.getDerivedKeysFromMasterPassword$(masterPassword, importExportJson.signedData.saltBase64).pipe(
+            switchMap((derivedKeys) => {
+                return from(CryptoUtilsV1.verifySignatureAsync(
+                    derivedKeys.hmacKey,
+                    JSON.stringify(importExportJson.signedData),
+                    importExportJson.signatureBase64
+                )).pipe(
+                    map((isValid: boolean) => {
+                        if (!isValid) {
+                            throw new Error('Invalid signature. The data may have been tampered with or the wrong password was used.');
+                        }
+                        return derivedKeys;
+                    })
+                );
+            }),
+            
+            switchMap((derivedKeys) => this.decryptDataString$(derivedKeys,
+                importExportJson.signedData.encryptedDataBase64,
+                importExportJson.signedData.initialicationVectorBase64)),
 
             switchMap((decryptedDataString: string) => this.getDecryptedDataArrayString$(decryptedDataString)),
 
@@ -100,20 +145,24 @@ export class ImportExportService {
         );
     }
 
-    private derivedKeyFromMasterPassword$(masterPassword: string, saltBase64: string): Observable<CryptoKey> {
-        return from(CryptoUtilsV1.deriveKeyFromPasswordAsync(
-            masterPassword,
-            base64ToUint8Array(saltBase64)
-        ));
+    private getDerivedKeysFromMasterPassword$(masterPassword: string, saltBase64: string): Observable<{ aesKey: CryptoKey; hmacKey: CryptoKey }> {
+        const salt = base64ToUint8Array(saltBase64);
+
+        const aesKey$ = from(CryptoUtilsV1.deriveAesKeyFromPasswordAsync(masterPassword, salt));
+        const hmacKey$ = from(CryptoUtilsV1.deriveHmacKeyFromPasswordAsync(masterPassword, salt));
+
+        return combineLatest([aesKey$, hmacKey$]).pipe(
+            map(([aesKey, hmacKey]) => ({ aesKey, hmacKey }))
+        );
     }
 
     private decryptDataString$(
-        derivedKey: CryptoKey,
+        derivedKeys: { aesKey: CryptoKey; hmacKey: CryptoKey },
         encryptedDataBase64: string,
         initializationVectorBase64: string
     ): Observable<string> {
         return from(CryptoUtilsV1.decryptDataAsync(
-            derivedKey,
+            derivedKeys.aesKey,
             base64ToUint8Array(encryptedDataBase64),
             base64ToUint8Array(initializationVectorBase64)
         )).pipe(

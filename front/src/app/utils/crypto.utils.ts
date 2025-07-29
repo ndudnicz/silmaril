@@ -8,7 +8,7 @@ export class CryptoUtilsV1 {
   // The NIST recommends a 16-byte salt length for deriving the user's Master Password key using PBKDF2 on the frontend.
   static readonly SALT_LENGTH_IN_BYTES = 16;
 
-  static async deriveKeyFromPasswordAsync(password: string, salt: Uint8Array): Promise<CryptoKey> {
+  static async deriveAesKeyFromPasswordAsync(password: string, salt: Uint8Array): Promise<CryptoKey> {
     const enc = new TextEncoder();
     const keyMaterial = await window.crypto.subtle.importKey(
       'raw',
@@ -32,56 +32,99 @@ export class CryptoUtilsV1 {
     );
   }
 
-  static async exportKeyAsync(key: CryptoKey): Promise<ArrayBuffer> {
-    return crypto.subtle.exportKey('raw', key);
-  }
-
-  static async importKeyAsync(rawKey: ArrayBuffer): Promise<CryptoKey> {
-    return await crypto.subtle.importKey(
+  static async deriveHmacKeyFromPasswordAsync(password: string, salt: Uint8Array): Promise<CryptoKey> {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
       'raw',
-      rawKey,
-      { name: 'AES-GCM' },
-      true,
-      ['encrypt', 'decrypt']
+      enc.encode(password),
+      'PBKDF2',
+      false,
+      ['deriveKey']
+    );
+
+    return crypto.subtle.deriveKey(
+      {
+        name: 'PBKDF2',
+        salt,
+        iterations: 100_000,
+        hash: 'SHA-256',
+      },
+      keyMaterial,
+      {
+        name: 'HMAC',
+        hash: 'SHA-256',
+        length: 256,
+      },
+      false,
+      ['sign', 'verify']
     );
   }
 
-
-  static async decryptDataAsync(key: CryptoKey | null, encryptedData: Uint8Array, initializationVector: Uint8Array): Promise<string> {
-    if (!key) throw new Error('Vault is locked');
+  static async decryptDataAsync(aesDerivedKey: CryptoKey | null, encryptedData: Uint8Array, initializationVector: Uint8Array): Promise<string> {
+    if (!aesDerivedKey) throw new Error('Vault is locked');
 
     const decrypted = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv: initializationVector },
-      key!,
+      aesDerivedKey!,
       encryptedData
     );
 
     return new TextDecoder().decode(decrypted);
   }
 
-  static async encryptDataAsync(key: CryptoKey | null, plaintext: string): Promise<EncryptionResult> {
-    if (!key) throw new Error('Vault is locked');
+  static async encryptDataAsync(aesDerivedKey: CryptoKey | null, plaintext: string): Promise<EncryptionResult> {
+    if (!aesDerivedKey) throw new Error('Vault is locked');
 
     const initializationVector = crypto.getRandomValues(new Uint8Array(12));
     const encoded = new TextEncoder().encode(plaintext);
 
     const buffer = await crypto.subtle.encrypt(
       { name: 'AES-GCM', iv: initializationVector },
-      key!,
+      aesDerivedKey!,
       encoded
     );
 
     return { ciphertext: new Uint8Array(buffer), initializationVector, encryptionVersion: 1 };
   }
 
-  static async encryptDataBulkAsync(key: CryptoKey | null, data: string[]): Promise<EncryptionResult[]> {
-    return await Promise.all(data.map(item => this.encryptDataAsync(key, item)));
+  static async encryptDataBulkAsync(aesDerivedKey: CryptoKey | null, data: string[]): Promise<EncryptionResult[]> {
+    return await Promise.all(data.map(item => this.encryptDataAsync(aesDerivedKey, item)));
   }
 
   public static generateRandomBytes(length: number): Uint8Array {
     const randomBytes = new Uint8Array(length);
     crypto.getRandomValues(randomBytes);
     return randomBytes;
+  }
+
+  public static async signDataAsync(hmacDerivedKey: CryptoKey, data: string): Promise<string> {
+    console.log('Signing data:', data);
+
+    const encoder = new TextEncoder();
+    let signature: ArrayBuffer;
+    try {
+      signature = await crypto.subtle.sign(
+        { name: 'HMAC', hash: 'SHA-256' },
+        hmacDerivedKey,
+        encoder.encode(data)
+      );
+    } catch (error) {
+      console.error('Error signing data:', error);
+      throw new Error('Failed to sign data: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+
+    return uint8ArrayToBase64(new Uint8Array(signature));
+  }
+
+  public static async verifySignatureAsync(hmacDerivedKey: CryptoKey, data: string, signatureBase64: string): Promise<boolean> {
+    const encoder = new TextEncoder();
+    const signatureArray = base64ToUint8Array(signatureBase64);
+    return crypto.subtle.verify(
+      { name: 'HMAC', hash: 'SHA-256' },
+      hmacDerivedKey,
+      signatureArray,
+      encoder.encode(data)
+    );
   }
 }
 

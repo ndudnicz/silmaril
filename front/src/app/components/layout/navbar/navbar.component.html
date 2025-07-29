@@ -28,7 +28,7 @@
 
     @if (vaultService.isUnlocked()) {
     <div class="navbar-element">
-        <button mat-button class="full-width navbar-button">
+        <button mat-button class="full-width navbar-button" (click)="openImportModal()">
             Import
             <mat-icon class="navbar-icon">upload</mat-icon>
         </button>
