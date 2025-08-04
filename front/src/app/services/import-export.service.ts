@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { ImportExportJson } from "../entities/import-export/import-export";
 import { base64ToUint8Array, CryptoUtilsV1, EncryptionResult, uint8ArrayToBase64 } from "../utils/crypto.utils";
 import { Login } from "../entities/login";
-import { combineLatest, from, map, Observable, of, switchMap, take } from "rxjs";
+import { combineLatest, from, map, Observable, of, switchMap } from "rxjs";
 import { DecryptedData } from "../entities/decrypt-data/decrypted-data";
 import { LoginService } from "./login.service";
 import { CreateLoginDto } from "../entities/create/create-login-dto";
@@ -99,13 +99,23 @@ export class ImportExportService {
         return this.downloadCsvFile$(decryptedDataArray, `logins_export_${new Date().toISOString()}`);
     }
 
-    public importLoginsFromCsv() {
+    public importLoginsFromCsv$(decryptedDataArray: DecryptedData[], vaultId: string): Observable<Login[]> {
+        const vaultDerivedKey = this.vaultService.getDerivedKey();
+        if (!vaultDerivedKey) {
+            throw new Error('Vault is not unlocked. Please set the master password.');
+        }
 
+        return this.encryptWithCurrentDerivedKeyData$(vaultDerivedKey, decryptedDataArray.map(data => data.toString()))
+            .pipe(
+                switchMap((encryptionResults: EncryptionResult[]) => this.mapCreateLoginDtos$(encryptionResults, vaultId)),
+                switchMap((createLoginDtos: CreateLoginDto[]) => this.createLogins$(createLoginDtos))
+            );
     }
 
     public importLoginsFromEncryptedJson$(
         importExportJson: ImportExportJson,
-        masterPassword: string
+        masterPassword: string,
+        vaultId: string
     ): Observable<Login[]> {
         return this.getDerivedKeysFromMasterPassword$(masterPassword, importExportJson.signedData.saltBase64).pipe(
             switchMap((derivedKeys) => {
@@ -137,11 +147,9 @@ export class ImportExportService {
                 return this.encryptWithCurrentDerivedKeyData$(vaultDerivedKey, decryptedDataArrayString)
             }),
 
-            switchMap((encryptionResults: EncryptionResult[]) => this.mapCreateLoginDtos$(encryptionResults)),
+            switchMap((encryptionResults: EncryptionResult[]) => this.mapCreateLoginDtos$(encryptionResults, vaultId)),
 
-            switchMap((createLoginDtos: CreateLoginDto[]) => this.createLogins$(createLoginDtos)),
-
-            take(1)
+            switchMap((createLoginDtos: CreateLoginDto[]) => this.createLogins$(createLoginDtos))
         );
     }
 
@@ -182,10 +190,10 @@ export class ImportExportService {
         return from(CryptoUtilsV1.encryptDataBulkAsync(derivedKey, decryptedDataStringArray));
     }
 
-    private mapCreateLoginDtos$(encryptionResults: EncryptionResult[]): Observable<CreateLoginDto[]> {
+    private mapCreateLoginDtos$(encryptionResults: EncryptionResult[], vaultId: string): Observable<CreateLoginDto[]> {
         return of(encryptionResults.map((result: EncryptionResult) => {
             return {
-                vaultId: null,
+                vaultId: vaultId,
                 encryptedDataBase64: uint8ArrayToBase64(result.ciphertext),
                 initializationVectorBase64: uint8ArrayToBase64(result.initializationVector),
                 tagNames: [],

@@ -1,5 +1,11 @@
+.file-upload-container {
+    width: 100%;
+    margin-top: 15px;
+}
+
 .buttons {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    margin-top: 15px;
 }

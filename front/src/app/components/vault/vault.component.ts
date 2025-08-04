@@ -114,6 +114,29 @@ export class VaultComponent extends BaseComponent implements OnInit, OnDestroy {
       }
     }));
 
+    this.subscription.add(this.dataService.addedLogins
+    //   .subscribe((logins: Login[]) => {
+    //   if (logins.length > 0) {
+    //     this.allLogins.push(...logins);
+    //     this.setDisplayedLogins();
+    //   }
+    // })
+    .pipe(
+      switchMap((logins: Login[]) => {
+        return from(this.encryptionService.decryptAllLoginsAsync(logins, this.vaultService.getDerivedKey()));
+      })
+    ).subscribe({
+      next: (decryptedLogins: Login[]) => {
+        this.allLogins.push(...decryptedLogins);
+        this.setDisplayedLogins();
+      },
+      error: (error: any) => {
+        console.error('Error decrypting added logins:', error);
+      }
+    }
+    )
+  );
+
     this.subscription.add(this.activatedRoute.params.subscribe(params => {
       this.setupVault(params);
     }));

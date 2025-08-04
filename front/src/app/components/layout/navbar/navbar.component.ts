@@ -23,6 +23,7 @@ import { EncryptionService } from '../../../services/encryption.service';
 import { Login } from '../../../entities/login';
 import { ImportExportFormat, ImportExportJson } from '../../../entities/import-export/import-export';
 import { ImportModalComponent } from './modals/import-modal/import-modal.component';
+import { DecryptedData } from '../../../entities/decrypt-data/decrypted-data';
 
 @Component({
   selector: 'app-navbar',
@@ -42,6 +43,7 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
 
   subscription: Subscription = new Subscription();
   vaults!: Vault[] | null;
+  selectedVault!: Vault;;
 
   constructor(
     private dialog: MatDialog,
@@ -59,6 +61,7 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
     this.subscription.add(this.dataService.vaults.subscribe(vaults => {
       if (vaults) {
         this.vaults = vaults;
+        this.selectedVault = vaults[0];
       }
     }));
   }
@@ -85,6 +88,7 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
       if (result) {
         this.dataService.addVault(result);
         this.router.navigate(['/vault', result.id]);
+        this.selectedVault = result;
       }
     })
   }
@@ -148,12 +152,37 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
     }).afterClosed().pipe(take(1)).subscribe((result) => {
       if (result) {
         console.log('Import result:', result);
-        
         this.startLoading();
-        this.stopLoading();
-        // this.handleImport(result);
+        if (result.importFormat === ImportExportFormat.JSON) {
+          const parsedData = result.parsedData as ImportExportJson;
+          this.importFromJson(parsedData, result.password!);
+        } else if (result.importFormat === ImportExportFormat.CSV) {
+          const parsedData = result.parsedData as DecryptedData[];
+          this.importFromCsv(parsedData);
+        }
       }
     })
+  }
+
+  importFromJson(parsedData: ImportExportJson, password: string) {
+
+  }
+
+  importFromCsv(parsedData: DecryptedData[]): void {
+    this.startLoading();
+    this.importExportService.importLoginsFromCsv$(parsedData, this.selectedVault.id)
+      .pipe(take(1))
+      .subscribe({
+        next: (logins: Login[]) => {
+          this.dataService.addLogins(logins);
+          ToastWrapper.success('Logins imported successfully');
+          this.stopLoading();
+        },
+        error: (error) => {
+          this.displayError('Error importing logins', error);
+          this.stopLoading();
+        }
+      });
   }
 
   signout() {

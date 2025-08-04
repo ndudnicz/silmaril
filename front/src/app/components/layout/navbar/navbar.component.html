@@ -18,7 +18,7 @@
                 <mat-icon>add</mat-icon>
                 Create New Vault
             </button>
-            <button mat-menu-item *ngFor="let vault of vaults" [routerLink]="['/vault', vault.id]">
+            <button mat-menu-item *ngFor="let vault of vaults" [routerLink]="['/vault', vault.id]" (click)="selectedVault = vault">
                 {{ vault.name }}
             </button>
         </mat-menu>

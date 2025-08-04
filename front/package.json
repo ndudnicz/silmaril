@@ -21,6 +21,7 @@
     "@angular/platform-browser": "^19.0.0",
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@angular/router": "^19.0.0",
+    "csv-parse": "^6.1.0",
     "jwt-decode": "^4.0.0",
     "ngx-sonner": "^3.1.0",
     "ngx-spinner": "^19.0.0",

@@ -31,6 +31,11 @@ export class DataService {
     this._updatedLogin.next(login);
   }
 
+  private _addedLogins: BehaviorSubject<Login[]> = new BehaviorSubject<Login[]>([]);
+  public readonly addedLogins: Observable<Login[]> = this._addedLogins.asObservable();
+  addLogins(logins: Login[]): void {
+    this._addedLogins.next(logins);
+  }
 
   private _vaults: BehaviorSubject<Vault[] | null> = new BehaviorSubject<Vault[] | null>(null);
   public readonly vaults: Observable<Vault[] | null> = this._vaults.asObservable();

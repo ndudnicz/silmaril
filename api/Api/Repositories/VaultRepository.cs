@@ -18,7 +18,7 @@ public class VaultRepository(AppDbContext db): IVaultRepository
     {
         return await db.Vaults
             .AsNoTracking()
-            .AllAsync(v => ids.Contains(v.Id) && v.UserId == userId);
+            .AnyAsync(v => ids.Contains(v.Id) && v.UserId == userId);
     }
 
     public async Task<int> CountVaultsByUserIdAsync(Guid userId)
