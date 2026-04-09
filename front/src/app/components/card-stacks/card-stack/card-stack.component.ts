@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import { Login } from '../../../entities/login';
 import { CardComponent } from "./card/card.component";
-import { CommonModule } from '@angular/common';
+
 import { DataService } from '../../../services/data.service';
 import { MatDividerModule } from '@angular/material/divider';
 
@@ -10,9 +10,8 @@ import { MatDividerModule } from '@angular/material/divider';
   standalone: true,
   imports: [
     CardComponent,
-    CommonModule,
-    MatDividerModule,
-  ],
+    MatDividerModule
+],
   templateUrl: './card-stack.component.html',
 styleUrls: ['./card-stack.component.css']})
 export class CardStackComponent {

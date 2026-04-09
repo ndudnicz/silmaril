@@ -9,6 +9,8 @@
     'height': height,
     'border-radius': borderRadius
     }">
-        <span class="progress-text" *ngIf="displayValue">{{ value }}%</span>
-    </div>
+    @if (displayValue) {
+      <span class="progress-text">{{ value }}%</span>
+    }
+  </div>
 </div>

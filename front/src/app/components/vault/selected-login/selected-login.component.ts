@@ -4,7 +4,7 @@ import { DataService } from '../../../services/data.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,13 +27,12 @@ import { UpdateLoginDto } from '../../../entities/update/update-login-dto';
     MatIconModule,
     ReactiveFormsModule,
     MatFormFieldModule,
-    CommonModule,
     FormsModule,
     MatInputModule,
     MatButtonModule,
     ClipboardModule,
     MatDialogModule
-  ],
+],
   templateUrl: './selected-login.component.html',
   styleUrl: './selected-login.component.css'
 })

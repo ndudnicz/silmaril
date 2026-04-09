@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,14 +17,13 @@ import { take } from 'rxjs';
   selector: 'app-restore-logins-modal',
   imports: [
     MatIconModule,
-    CommonModule,
     MatFormFieldModule,
     MatDialogModule,
     MatFormFieldModule,
     ReactiveFormsModule,
     MatSelectModule,
     MatButtonModule
-  ],
+],
   templateUrl: './restore-logins-modal.component.html',
   styleUrl: './restore-logins-modal.component.css'
 })

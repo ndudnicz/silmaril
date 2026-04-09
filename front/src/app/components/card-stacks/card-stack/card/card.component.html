@@ -2,13 +2,17 @@
   <div class="card-content">
     <h2 class="card-title">{{login.decryptedData?.title ?? '*********' }}</h2>
     <div  class="card-icon-container">
-      <mat-icon *ngIf="!login.decryptedData">lock</mat-icon>
+      @if (!login.decryptedData) {
+        <mat-icon>lock</mat-icon>
+      }
       @if (!login.vaultId) {
         <button class="card-icon" mat-button [disabled]="true"><mat-icon class="card-icon">folder_off</mat-icon>Orphaned</button>
       }
     </div>
   </div>
   <div class="card-footer">
-    <app-chip *ngFor="let tagName of login.tagNames; let i = index" [label]="tagName"></app-chip>
+    @for (tagName of login.tagNames; track tagName; let i = $index) {
+      <app-chip [label]="tagName"></app-chip>
+    }
   </div>
 </div>

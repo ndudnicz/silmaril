@@ -14,7 +14,7 @@ import { Subscription, take } from 'rxjs';
 import { DataService } from '../../../services/data.service';
 import { Vault } from '../../../entities/vault';
 import { MatMenuModule } from '@angular/material/menu';
-import { CommonModule } from '@angular/common';
+
 import { AddVaultModalComponent } from './modals/add-vault-modal/add-vault-modal.component';
 
 @Component({
@@ -25,9 +25,8 @@ import { AddVaultModalComponent } from './modals/add-vault-modal/add-vault-modal
     RouterLink,
     MatTooltipModule,
     MatDialogModule,
-    MatMenuModule,
-    CommonModule
-  ],
+    MatMenuModule
+],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
