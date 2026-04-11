@@ -1,22 +1,13 @@
 <div id="settings-container">
-  <i class="pi pi-cog"></i>
-  <span class="toolbar-title"> Settings</span>
+  <span class="toolbar-title"><i class="pi pi-cog"></i> Settings</span>
   <div id="settings-body">
     <div id="settings-menu-container">
       <div class="settings-button-container">
-        <button mat-raised-button class="settings-button" (click)="openChangeUserNameModal()">
-          Change Username
-          <i class="pi pi-user"></i>
-        </button>
+        <p-button label="Change username" icon="pi pi-user" class="settings-button" (click)="openChangeUserNameModal()" />
 
       </div>
       <div class="settings-button-container">
-        <button mat-raised-button class="settings-button" (click)="openChangePasswordModal()">
-          Change Password
-          <i class="pi pi-lock"></i>
-
-        </button>
-
+        <p-button variant="text" label="Change Password" icon="pi pi-lock" class="settings-button" (click)="openChangePasswordModal()" />
       </div>
     </div>
   </div>

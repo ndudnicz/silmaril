@@ -11,6 +11,7 @@ import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { MessageModule } from 'primeng/message';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   standalone: true,
@@ -21,7 +22,8 @@ import { MessageModule } from 'primeng/message';
     IconFieldModule,
     InputIconModule,
     ButtonModule,
-    MessageModule
+    MessageModule,
+    InputTextModule
   ],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css'

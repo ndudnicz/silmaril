@@ -11,6 +11,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 // TODO
 @Component({
   selector: 'app-change-password-modal',
@@ -18,6 +19,7 @@ import { ButtonModule } from 'primeng/button';
     ReactiveFormsModule,
     IconFieldModule,
     InputIconModule,
+    InputTextModule,
     ButtonModule
   ],
   templateUrl: './change-password-modal.component.html',

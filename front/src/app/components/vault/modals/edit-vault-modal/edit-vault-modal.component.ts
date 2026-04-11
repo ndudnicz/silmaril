@@ -5,12 +5,14 @@ import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angula
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
 import { DialogService, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-edit-vault-modal',
   imports: [
     ReactiveFormsModule,
-    ButtonModule
+    ButtonModule,
+    InputTextModule
   ],
   templateUrl: './edit-vault-modal.component.html',
   styleUrl: './edit-vault-modal.component.css'

@@ -8,6 +8,7 @@ import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { MessageModule } from 'primeng/message';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-change-master-password-modal',
@@ -16,6 +17,7 @@ import { MessageModule } from 'primeng/message';
     ButtonModule,
     IconFieldModule,
     InputIconModule,
+    InputTextModule,
     MessageModule,
   ],
   templateUrl: './change-master-password-modal.component.html',

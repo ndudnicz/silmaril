@@ -17,6 +17,7 @@ import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { MessageModule } from 'primeng/message';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-add-credential-modal',
@@ -25,6 +26,7 @@ import { MessageModule } from 'primeng/message';
     ButtonModule,
     IconFieldModule,
     InputIconModule,
+    InputTextModule,
     MessageModule
   ],
   templateUrl: './add-edit-credential-modal.component.html',

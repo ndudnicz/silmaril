@@ -11,6 +11,7 @@ import { DataService } from '../../services/data.service';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   standalone: true,
@@ -21,6 +22,7 @@ import { InputIconModule } from 'primeng/inputicon';
     ButtonModule,
     IconFieldModule,
     InputIconModule,
+    InputTextModule,
   ],
   templateUrl: './unlock.component.html',
   styleUrl: './unlock.component.css'

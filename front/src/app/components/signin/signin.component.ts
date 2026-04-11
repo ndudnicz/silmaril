@@ -12,6 +12,7 @@ import { take } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   standalone: true,
@@ -21,6 +22,7 @@ import { InputIconModule } from 'primeng/inputicon';
     RouterLink,
     IconFieldModule,
     InputIconModule,
+    InputTextModule,
     ButtonModule
   ],
   templateUrl: './signin.component.html',

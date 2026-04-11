@@ -11,6 +11,7 @@ import { AddVaultModalComponent } from './modals/add-vault-modal/add-vault-modal
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-navbar',
@@ -29,7 +30,7 @@ export class NavbarComponent extends BaseComponent {
   protected readonly vaultService = inject(VaultService);
   private readonly router = inject(Router);
   private readonly subscription: Subscription = new Subscription();
-  protected readonly vaults = computed(() => this.dataService.getVaults());
+  protected readonly vaults = toSignal(this.dataService.vaults$(), { initialValue: [] });
 
   // constructor() {
   //   super();

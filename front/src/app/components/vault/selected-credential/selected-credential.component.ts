@@ -12,6 +12,9 @@ import { VaultService } from '../../../services/vault.service';
 import { UpdateCredentialDto } from '../../../entities/update/update-credential-dto';
 import { DialogService } from 'primeng/dynamicdialog';
 import { AddEditCredentialModalComponent } from '../modals/add-edit-credential/add-edit-credential-modal.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { Button, ButtonIcon, ButtonModule } from "primeng/button";
 
 @Component({
   selector: 'app-selected-credential',
@@ -19,6 +22,9 @@ import { AddEditCredentialModalComponent } from '../modals/add-edit-credential/a
     ReactiveFormsModule,
     FormsModule,
     ClipboardModule,
+    InputTextModule,
+    IftaLabelModule,
+    ButtonModule
 ],
   templateUrl: './selected-credential.component.html',
   styleUrl: './selected-credential.component.css'

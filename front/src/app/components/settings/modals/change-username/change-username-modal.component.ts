@@ -9,6 +9,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-change-username-modal',
@@ -16,6 +17,7 @@ import { InputIconModule } from 'primeng/inputicon';
     ReactiveFormsModule,
     IconFieldModule,
     InputIconModule,
+    InputTextModule,
     ButtonModule
   ],
   templateUrl: './change-username-modal.component.html',

@@ -13,6 +13,8 @@ import { RestoreLoginsModalComponent } from './modals/restore-logins/restore-log
 import { UpdateCredentialDto } from '../../entities/update/update-credential-dto';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-recycle-bin',
@@ -21,8 +23,10 @@ import { ButtonModule } from 'primeng/button';
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    ButtonModule
-  ],
+    ButtonModule,
+    InputTextModule,
+    TooltipModule
+],
   templateUrl: './recycle-bin.component.html',
   styleUrl: './recycle-bin.component.css'
 })

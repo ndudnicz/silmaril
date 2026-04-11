@@ -10,6 +10,7 @@ import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { CheckboxModule } from 'primeng/checkbox';
+import { InputTextModule } from 'primeng/inputtext';
 
 interface PasswordOptions {
   minLength?: number;
@@ -38,7 +39,8 @@ enum PasswordStrength {
     DividerModule,
     ButtonModule,
     RadioButtonModule,
-    CheckboxModule
+    CheckboxModule,
+    InputTextModule
   ],
   templateUrl: './generate-password-modal.component.html',
   styleUrl: './generate-password-modal.component.css'

@@ -2,36 +2,28 @@
     <div class="toolbar-button">
     </div>
     <div id="searchbar-container">
-        <input matInput type="text" [(ngModel)]="searchValue" [placeholder]="searchBarPlaceholder"
+        <input pInputText type="text" [(ngModel)]="searchValue" [placeholder]="searchBarPlaceholder"
           [ngModelOptions]="{standalone: true}">
-        @if (searchValue() != '') {
+        <!-- @if (searchValue() != '') {
         <p-button variant="text" aria-label="Clear" (click)="clearSearch()">
           <i class="pi pi-times"></i>
         </p-button>
-        }
+        } -->
     </div>
     <span class="spacer"></span>
     @if (selected().length > 0) {
     <div class="toolbar-button">
-      <button mat-icon-button matTooltip="Clear Selection" (click)="clearSelection()">
-        <mat-icon [ngClass]="{'disabled': selected().length == 0}">cancel</mat-icon>
-      </button>
+      <p-button icon="pi pi-undo" pTooltip="Clear Selection" tooltipPosition="bottom" (click)="clearSelection()" [disabled]="selected().length == 0" />
     </div>
     }
     <span id="selected-logins-counter">
       <i>({{ selected().length }} selected)</i>
     </span>
     <div class="toolbar-button">
-      <button mat-icon-button matTooltip="Restore Selected Logins" [disabled]="selected().length == 0"
-        (click)="restoreSelectedLogins()">
-        <mat-icon [ngClass]="{'disabled': selected().length == 0}">restore_from_trash</mat-icon>
-      </button>
+      <p-button icon="pi pi-replay" pTooltip="Restore Selected Logins" tooltipPosition="bottom" (click)="restoreSelectedLogins()" [disabled]="selected().length == 0" />
     </div>
     <div class="toolbar-button">
-      <button mat-icon-button matTooltip="Permanently Delete Selected Logins" [disabled]="selected().length == 0"
-        (click)="confirmDeleteSelectedLogins()">
-        <mat-icon [ngClass]="{'disabled': selected().length == 0}">delete_forever</mat-icon>
-      </button>
+      <p-button icon="pi pi-times-circle" pTooltip="Permanently Delete Selected Logins" tooltipPosition="bottom" (click)="confirmDeleteSelectedLogins()" [disabled]="selected().length == 0" />
     </div>
 
   <div id="recycle-bin-grid-container">

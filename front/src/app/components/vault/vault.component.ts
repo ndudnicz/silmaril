@@ -20,6 +20,9 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { DrawerModule } from 'primeng/drawer';
 import { AddEditCredentialModalComponent } from './modals/add-edit-credential/add-edit-credential-modal.component';
 import { SelectedCredentialComponent } from './selected-credential/selected-credential.component';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-vault',
@@ -29,8 +32,11 @@ import { SelectedCredentialComponent } from './selected-credential/selected-cred
     ReactiveFormsModule,
     CardStacksComponent,
     DrawerModule,
-    SelectedCredentialComponent
-  ],
+    SelectedCredentialComponent,
+    ButtonModule,
+    TooltipModule,
+    InputTextModule
+],
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css'
 })

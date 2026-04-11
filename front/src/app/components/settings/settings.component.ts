@@ -4,10 +4,12 @@ import { ChangePasswordModalComponent } from './modals/change-password/change-pa
 import { ChangeUsernameModalComponent } from './modals/change-username/change-username-modal.component';
 import { take } from 'rxjs';
 import { DialogService } from 'primeng/dynamicdialog';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-settings',
   imports: [
+    ButtonModule
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'

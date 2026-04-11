@@ -62,4 +62,8 @@ export class DataService {
   getVaults(): Vault[] {
     return this._vaults.getValue() ?? [];
   }
+
+  vaults$(): Observable<Vault[] | null> {
+    return this.vaults;
+  }
 }
