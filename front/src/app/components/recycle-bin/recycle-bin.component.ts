@@ -1,114 +1,87 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { BaseComponent } from '../base-component/base-component.component';
-import { MatIconModule } from '@angular/material/icon';
-import { Login } from '../../entities/login';
-import { catchError, from, Observable, Subscription, switchMap, take, throwError } from 'rxjs';
+import { Credential } from '../../entities/credential';
+import { catchError, from, Observable, Subscription, switchMap, take } from 'rxjs';
 import { DataService } from '../../services/data.service';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
 import { CommonModule } from '@angular/common';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { LoginService } from '../../services/login.service';
-import { MatDialog } from '@angular/material/dialog';
+import { CredentialService } from '../../services/credential.service';
 import { ConfirmModalComponent } from '../modals/confirm-modal/confirm-modal.component';
 import { VaultService } from '../../services/vault.service';
-import { Vault } from '../../entities/vault';
 import { RestoreLoginsModalComponent } from './modals/restore-logins/restore-logins-modal.component';
-import { UpdateLoginDto } from '../../entities/update/update-login-dto';
+import { UpdateCredentialDto } from '../../entities/update/update-credential-dto';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-recycle-bin',
   imports: [
-    MatIconModule,
     CardStacksComponent,
     CommonModule,
-    MatToolbarModule,
-    MatFormFieldModule,
     ReactiveFormsModule,
-    MatInputModule,
     FormsModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTooltipModule
+    ButtonModule
   ],
   templateUrl: './recycle-bin.component.html',
   styleUrl: './recycle-bin.component.css'
 })
 export class RecycleBinComponent extends BaseComponent implements OnInit {
-
-  searchValue: string = '';
-  searchBarPlaceholder = 'Search in Recycle Bin';
-  allDeletedLogins: Login[] = [];
-  displayedLogins: Login[] = [];
-  selectedLogins: Login[] = [];
-  subscription: Subscription = new Subscription();
-  vaults: Vault[] = [];
-
-  constructor(
-    private dataService: DataService,
-    private loginService: LoginService,
-    private dialog: MatDialog,
-    private vaultService: VaultService
-  ) {
-    super(inject(NgxSpinnerService));
-    this.vaults = this.dataService.getVaults();
-  }
+  private readonly dataService = inject(DataService);
+  private readonly loginService = inject(CredentialService);
+  private readonly vaultService = inject(VaultService);
+  private readonly dialogService = inject(DialogService);
+  protected readonly searchValue = signal('');
+  protected readonly searchBarPlaceholder = 'Search in Recycle Bin';
+  protected readonly allDeletedCredentials = signal<Credential[]>([]);
+  protected readonly displayedCredentials = computed(() => this.allDeletedCredentials().filter(
+    login => login.deleted && (login.decryptedData?.title.toLowerCase().includes(this.searchValue().toLowerCase()) || this.searchValue().trim() === '')
+  ));
+  protected readonly selected = signal([] as Credential[]);
+  protected readonly vaults = computed(() => this.dataService.getVaults());
 
   ngOnInit(): void {
-    this.loadDeletedLogins();
+    this.loadDeletedCredentials();
   }
 
-  loadDeletedLogins() {
+  private loadDeletedCredentials(): void {
+    this.getDecryptedDeletedCredentials$()
+      .pipe(take(1))
+      .subscribe(deletedCredentials => {
+        this.allDeletedCredentials.set(deletedCredentials);
+      })
+  }
+
+  getDecryptedDeletedCredentials$(): Observable<Credential[]> {
     this.startLoading();
-    this.getDecryptedDeletedlogins$().pipe(take(1)).subscribe({
-      next: (logins: Login[]) => {
-        this.allDeletedLogins = logins;
-        this.setDisplayedLogins();
-        this.stopLoading();
-      },
-      error: (error: any) => {
-        this.stopLoading();
-        this.displayError('Failed to load deleted logins', error);
-      }
-    })
-  }
-
-  getDecryptedDeletedlogins$(): Observable<Login[]> {
-    return this.loginService.getDeletedLogins$()
+    return this.loginService.getDeletedCredentials$()
       .pipe(
         take(1),
-        switchMap(logins => {
-          return from(this.vaultService.decryptAllLoginsAsync(logins));
+        switchMap(logins => from(this.vaultService.decryptAllCredentialsAsync(logins))),
+        switchMap(decryptedLogins => {
+          this.stopLoading();
+          return from([decryptedLogins.filter(login => login.deleted)])
+        }),
+        catchError(error => {
+          this.stopLoading();
+          this.displayError('Failed to load deleted logins', error);
+          return from([[] as Credential[]]);
         })
       )
   }
 
-  setDisplayedLogins() {
-    if (this.allDeletedLogins) {
-      this.displayedLogins = this.allDeletedLogins.filter(login => login.deleted);
+  select(login: Credential): void {
+    if (this.selected().includes(login)) {
+      this.selected.set(this.selected().filter(l => l !== login))
     } else {
-      this.displayedLogins = [];
+      this.selected.set([...this.selected(), login])
     }
-  }
-
-  select(login: Login): void {
-    if (login.selected) {
-      this.selectedLogins = this.selectedLogins.filter(l => l !== login);
-      login.selected = false;
-      return;
-    } else {
-      this.selectedLogins.push(login);
-      login.selected = true;
-    }
+    login.selected = !login.selected;
   }
 
   restoreSelectedLogins(): void {
-    const orphanedLogins = this.selectedLogins.filter(login => !this.vaults.some(vault => vault.id === login.vaultId));
+    const orphanedLogins = this.selected()
+      .filter(login => !this.vaults().some(vault => vault.id === login.vaultId));
     if (orphanedLogins.length > 0) {
       this.openRestoreLoginsModal(orphanedLogins);
     } else {
@@ -116,18 +89,15 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     }
   }
 
-  openRestoreLoginsModal(orphanedLogins: Login[]): void {
-    this.dialog.open(RestoreLoginsModalComponent, {
+  openRestoreLoginsModal(orphanedLogins: Credential[]): void {
+    const ref = this.dialogService.open(RestoreLoginsModalComponent, {
       data: {
         orphanedLogins: orphanedLogins
       },
-      panelClass: 'custom-modal',
       width: '450px',
       height: 'auto',
-      disableClose: true,
-      autoFocus: false,
-      restoreFocus: false
-    }).afterClosed().pipe(take(1)).subscribe(destinationVaultId => {
+    });
+    ref?.onClose.pipe(take(1)).subscribe(destinationVaultId => {
       if (destinationVaultId) {
         this.proceedRestoreSelectedLogins(destinationVaultId);
       }
@@ -135,20 +105,17 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   }
 
   openConfirmRestoreLoginsModal(): void {
-    this.dialog.open(ConfirmModalComponent, {
+    const ref = this.dialogService.open(ConfirmModalComponent, {
       data: {
         title: 'Confirm Restore Logins',
-        message: `Are you sure you want to restore ${this.selectedLogins.length} logins?`,
+        message: `Are you sure you want to restore ${this.selected.length} logins?`,
         confirmText: 'Restore',
         cancelText: 'Cancel',
       },
-      panelClass: 'custom-modal',
       width: '400px',
       height: 'auto',
-      disableClose: true,
-      autoFocus: false,
-      restoreFocus: false
-    }).afterClosed().pipe(take(1)).subscribe(confirmed => {
+    });
+    ref?.onClose.pipe(take(1)).subscribe(confirmed => {
       if (confirmed) {
         this.proceedRestoreSelectedLogins(null);
       }
@@ -157,11 +124,12 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
 
   proceedRestoreSelectedLogins(destinationVaultId: string | null): void {
     this.startLoading();
-    this.selectedLogins.forEach(login => {
+    this.selected.set(this.selected().map(login => {
       login.vaultId = destinationVaultId ?? login.vaultId;
       login.deleted = false;
-    });
-    this.loginService.updateLogins$(this.selectedLogins.map(login => UpdateLoginDto.fromLogin(login)))
+      return login;
+    }));
+    this.loginService.updateCredentials$(this.selected().map(login => UpdateCredentialDto.fromCredential(login)))
       .pipe(take(1))
       .subscribe({
         next: updatedlogins => {
@@ -175,22 +143,21 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   }
 
   onRestoreLoginSuccess(): void {
-    this.allDeletedLogins = this.allDeletedLogins.filter(login => !this.selectedLogins.includes(login));
-    this.setDisplayedLogins();
+    this.allDeletedCredentials.set(this.allDeletedCredentials().filter(login => !this.selected().includes(login)));
     this.clearSelection();
     this.stopLoading();
   }
 
   confirmDeleteSelectedLogins(): void {
-    this.dialog.open(ConfirmModalComponent, {
+    const ref = this.dialogService.open(ConfirmModalComponent, {
       data: {
         title: 'Confirm Permanent Deletion',
-        message: `Are you sure you want to permanently delete ${this.selectedLogins.length} logins? This action cannot be undone.`,
+        message: `Are you sure you want to permanently delete ${this.selected.length} logins? This action cannot be undone.`,
         confirmText: 'Permanently Delete',
         cancelText: 'Cancel'
       },
-      panelClass: 'custom-modal'
-    }).afterClosed().pipe(take(1)).subscribe(confirmed => {
+    });
+    ref?.onClose.pipe(take(1)).subscribe(confirmed => {
       if (confirmed) {
         this.proceedDeleteSelectedLogins();
       }
@@ -199,9 +166,10 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
 
   proceedDeleteSelectedLogins(): void {
     this.startLoading();
-    this.loginService.deleteLogins$({ ids: this.selectedLogins.map(login => login.id) }).pipe(take(1)).subscribe({
-      next: (deletedCount: number) => {
-        this.onDeleteLoginsSuccess(deletedCount);
+    this.loginService.deleteCredentials$({ ids: this.selected().map(login => login.id) }).pipe(take(1)).subscribe({
+      next: (_: number) => {
+        this.stopLoading();
+        this.onDeleteLoginsSuccess();
       },
       error: (error: any) => {
         this.stopLoading();
@@ -211,32 +179,17 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     });
   }
 
-  onDeleteLoginsSuccess(deletedCount: number): void {
-    this.allDeletedLogins = this.allDeletedLogins.filter(login => !this.selectedLogins.includes(login));
-    this.setDisplayedLogins();
+  onDeleteLoginsSuccess(): void {
+    this.allDeletedCredentials.set(this.allDeletedCredentials().filter(login => !this.selected().includes(login)));
     this.clearSelection();
-    this.stopLoading();
-  }
-
-  search(value: string) {
-    this.searchValue = value;
-    if (this.searchValue.trim() === '') {
-      this.setDisplayedLogins();
-    } else {
-      this.displayedLogins = this.allDeletedLogins.filter(login => {
-        const title = login.decryptedData?.title || '';
-        return title.toLowerCase().includes(this.searchValue.toLowerCase());
-      });
-    }
   }
 
   clearSearch() {
-    this.searchValue = '';
-    this.setDisplayedLogins();
+    this.searchValue.set('');
   }
 
   clearSelection() {
-    this.selectedLogins.forEach(login => login.selected = false);
-    this.selectedLogins = [];
+    this.selected().forEach(login => login.selected = false);
+    this.selected.set([]);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, Input } from '@angular/core';
 
 @Component({
   selector: 'app-chip',
@@ -6,5 +6,5 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./chip.component.css']
 })
 export class ChipComponent {
-  @Input() label: string = '';
+  public readonly label = input.required<string>();
 }

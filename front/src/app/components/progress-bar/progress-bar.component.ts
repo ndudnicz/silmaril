@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 @Component({
   standalone: true,
@@ -8,14 +8,10 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./progress-bar.component.css'],
   imports: [CommonModule]
 })
-export class ProgressBarComponent implements OnInit {
-  @Input() color: string = '#007bff';
-  @Input() value: number = 0;
-  @Input() height: string = '20px';
-  @Input() displayValue: boolean = true;
-  @Input() borderRadius: string = '4px';
-  
-  ngOnInit(): void {
-    
-  }
+export class ProgressBarComponent {
+  public readonly color = input<string>('#007bff');
+  public readonly value = input<number>(0);
+  public readonly height = input<string>('20px');
+  public readonly displayValue = input<boolean>(true);
+  public readonly borderRadius = input<string>('4px');
 }

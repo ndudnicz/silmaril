@@ -1,76 +1,75 @@
 <div id="vault-container">
-    <mat-toolbar id="toolbar">
-        <div class="toolbar-button">
-            <mat-icon>diamond</mat-icon>
-        </div>
-        <div id="searchbar-container">
-            <mat-form-field id="search-field" appearance="outline" floatLabel="always">
-                <input matInput type="text" [(ngModel)]="searchValue" [placeholder]="searchBarPlaceholder"
-                    (ngModelChange)="search($event)" [ngModelOptions]="{standalone: true}">
-                @if (searchValue) {
-                <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
-                    <mat-icon>close</mat-icon>
-                </button>
-                }
-            </mat-form-field>
-        </div>
-        <span class="spacer"></span>
-        <div class="toolbar-button">
-            <button mat-icon-button (click)="openAddLoginModal()" matTooltip="Add Login">
-                <mat-icon>add</mat-icon>
-            </button>
-        </div>
-        <div class="toolbar-button">
-            <button mat-icon-button (click)="openEditVaultModal()" matTooltip="Edit Vault">
-                <mat-icon>edit</mat-icon>
-            </button>
-        </div>
-        <div class="toolbar-button">
-            <button mat-icon-button (click)="openChangeMasterPasswordModal()" matTooltip="Change Master Password">
-                <mat-icon>vpn_key</mat-icon>
-            </button>
-        </div>
-        <div>
-            <button mat-icon-button (click)="openDeleteVaultModal()" matTooltip="Delete Vault">
-                <mat-icon>delete</mat-icon>
-            </button>
-        </div>
-    </mat-toolbar>
-
-    <div id="vault-grid-container">
-        <div [ngClass]="{
-            'left-container': true,
-            'left-container-fullscreen': selectedLogin == null
-            }">
-            <div id="stacks-container">
-                @if (displayedLogins.length == 0 && loading == false && searchValue == '') {
-                <div id="no-data">
-                    <span>No data yet</span>
-                    <br>
-                    <span>Add your first login</span>
-                    <br>
-                    <button mat-icon-button (click)="openAddLoginModal()" class="example-icon favorite-icon"
-                        aria-label="Example icon-button with heart icon">
-                        <mat-icon id="no-data-icon">add</mat-icon>
-                    </button>
-                </div>
-                }
-                @if (displayedLogins.length == 0 && loading == false && searchValue != '') {
-                <div id="no-data">
-                    <span>No results found</span>
-                    <mat-icon id="no-data-icon" class="margin-top-10">search_off</mat-icon>
-                    <br>
-                </div>
-                }
-                @if (displayedLogins.length > 0) {
-                <app-card-stacks class="card-stacks"
-                (clickEvent)="setSelectedLogin($event)"
-                [displayedLogins]="displayedLogins"></app-card-stacks>
-                }
-            </div>
-        </div>
-        <div [hidden]="selectedLogin == null" class="right-container">
-            <app-selected-login></app-selected-login>
-        </div>
+  <mat-toolbar id="toolbar">
+    <div class="toolbar-button">
+      <mat-icon>diamond</mat-icon>
     </div>
+    <div id="searchbar-container">
+      <mat-form-field id="search-field" appearance="outline" floatLabel="always">
+        <input matInput type="text" [(ngModel)]="searchValue" [placeholder]="searchBarPlaceholder()"
+          (ngModelChange)="searchValue.set($event.trim())" [ngModelOptions]="{standalone: true}">
+        @if (searchValue) {
+        <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
+          <mat-icon>close</mat-icon>
+        </button>
+        }
+      </mat-form-field>
+    </div>
+    <span class="spacer"></span>
+    <div class="toolbar-button">
+      <button mat-icon-button (click)="openAddCredentialModal()" matTooltip="Add Credential">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+    <div class="toolbar-button">
+      <button mat-icon-button (click)="openEditVaultModal()" matTooltip="Edit Vault">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </div>
+    <div class="toolbar-button">
+      <button mat-icon-button (click)="openChangeMasterPasswordModal()" matTooltip="Change Master Password">
+        <mat-icon>vpn_key</mat-icon>
+      </button>
+    </div>
+    <div>
+      <button mat-icon-button (click)="openDeleteVaultModal()" matTooltip="Delete Vault">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </mat-toolbar>
+
+  <div id="vault-grid-container">
+    <div [ngClass]="{
+            'left-container': true,
+            'left-container-fullscreen': selectedCredential == null
+            }">
+      <div id="stacks-container">
+        @if (displayedCredentials.length == 0 && loading == false && searchValue() == '') {
+        <div id="no-data">
+          <span>No data yet</span>
+          <br>
+          <span>Add your first credential</span>
+          <br>
+          <button mat-icon-button (click)="openAddCredentialModal()" class="example-icon favorite-icon"
+            aria-label="Example icon-button with heart icon">
+            <mat-icon id="no-data-icon">add</mat-icon>
+          </button>
+        </div>
+        }
+        @if (displayedCredentials.length == 0 && loading == false && searchValue() != '') {
+        <div id="no-data">
+          <span>No results found</span>
+          <mat-icon id="no-data-icon" class="margin-top-10">search_off</mat-icon>
+          <br>
+        </div>
+        }
+        @if (displayedCredentials.length > 0) {
+        <app-card-stacks class="card-stacks" (clickEvent)="selectedCredential.set($event)"
+          [displayedCredentials]="displayedCredentials()"></app-card-stacks>
+        }
+      </div>
+    </div>
+    <p-drawer header="Drawer" [visible]="showDrawer()" [style]="{ width: '400px' }" [modal]="false" [closable]="false" (onHide)="selectedCredential.set(null)">
+      <app-selected-credential [(credential)]="selectedCredential" (updateCredential)="onCredentialUpdated($event)"></app-selected-credential>
+    </p-drawer>
+  </div>
 </div>

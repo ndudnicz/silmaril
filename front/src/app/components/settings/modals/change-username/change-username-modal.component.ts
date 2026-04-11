@@ -1,61 +1,51 @@
 import { Component, inject } from '@angular/core';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
-import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { UserService } from '../../../../services/user.service';
 import { ToastWrapper } from '../../../../utils/toast.wrapper';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { take } from 'rxjs';
 import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ButtonModule } from 'primeng/button';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 
 @Component({
   selector: 'app-change-username-modal',
   imports: [
-    MatDialogModule,
     ReactiveFormsModule,
-    MatInputModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
+    IconFieldModule,
+    InputIconModule,
+    ButtonModule
   ],
   templateUrl: './change-username-modal.component.html',
   styleUrl: './change-username-modal.component.css'
 })
 export class ChangeUsernameModalComponent extends BaseModalComponent {
-  userNameFormControl = new FormControl('', [Validators.required]);
-  form: FormGroup = new FormGroup({
+  private readonly dialogService = inject(DialogService);
+  private readonly userService = inject(UserService);
+  protected readonly userNameFormControl = new FormControl('', [Validators.required]);
+  protected readonly form: FormGroup = new FormGroup({
     username: this.userNameFormControl
   });
 
-  constructor(
-    private dialog: MatDialog,
-    private userService: UserService
-  ) {
-    super(inject(MatDialogRef<ChangeUsernameModalComponent>), inject(NgxSpinnerService));
-  }
-
   async onSubmit() {
-    this.dialog.open(ConfirmModalComponent, {
-      panelClass: 'custom-modal',
+    const ref = this.dialogService.open(ConfirmModalComponent, {
       data: {
         title: 'Confirm Username Change',
         message: 'Are you sure you want to change username?',
         confirmText: 'Confirm',
         cancelText: 'Cancel'
       }
-    }).afterClosed().pipe(take(1)).subscribe(async (confirmed: boolean) => {
+    });
+    ref?.onClose.pipe(take(1)).subscribe(async (confirmed: boolean) => {
       console.log('Confirm modal closed with confirmation:', confirmed);
       if (confirmed) {
-        await this.saveSettings();
+        this.saveSettings();
       } else {
         this.closeDialog();
       }
     });
-
   }
 
   saveSettings() {

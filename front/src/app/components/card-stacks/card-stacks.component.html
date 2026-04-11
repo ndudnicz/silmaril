@@ -1,6 +1,7 @@
-@for (entry of displayedLoginStackEntries; track $index) {
+@for (entry of displayedCredentialStackEntries(); track $index) {
 @if (entry.value.length > 0) {
-<app-card-stack class="card-stack" (clickEvent)="clickEvent.emit($event)" [logins]="entry.value" [title]="entry.key">
+<app-card-stack class="card-stack" (clickEvent)="clickEvent.emit($event)" [credentials]="entry.value"
+  [title]="entry.key">
 </app-card-stack>
 }
 }

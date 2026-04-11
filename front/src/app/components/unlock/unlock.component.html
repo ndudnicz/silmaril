@@ -1,22 +1,19 @@
 <div class="home-container">
-    <div>
-        <h3>Enter your master password</h3>
-        <div style="display: flex; justify-content: center;">
-            <a routerLink="/what-is-master-password" id="what-is-master-password-link" class="link" target="_blank">
-                What is a Master Password?
-            </a>
-        </div>
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
-            <mat-form-field appearance="fill" floatLabel="always">
-                <mat-label>Master Password</mat-label>
-                <input matInput placeholder="" type="password" formControlName="password" required>
-                <mat-icon matSuffix>lock</mat-icon>
-            </mat-form-field>
-            <br>
-            <div class="unlock-footer">
-                <button type="submit" mat-raised-button
-                    [disabled]="masterPasswordFormControl.invalid || loading">Unlock</button>
-            </div>
-        </form>
+  <div>
+    <h3>Enter your master password</h3>
+    <div style="display: flex; justify-content: center;">
+      <a routerLink="/what-is-master-password" id="what-is-master-password-link" class="link" target="_blank">
+        What is a Master Password?
+      </a>
     </div>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+      <p-iconfield>
+        <input type="password" pInputText placeholder="Master Password" formControlName="password" required />
+        <p-inputicon class="pi pi-lock" />
+      </p-iconfield>
+      <div class="unlock-footer">
+        <p-button label="Unlock" type="submit" [disabled]="masterPasswordFormControl.invalid || loading" />
+      </div>
+    </form>
+  </div>
 </div>

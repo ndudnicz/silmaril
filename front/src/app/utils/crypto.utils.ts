@@ -5,6 +5,10 @@ export interface EncryptionResult {
 }
 
 export class CryptoUtilsV1 {
+  private static toArrayBufferView(data: Uint8Array): Uint8Array<ArrayBuffer> {
+    return new Uint8Array(data);
+  }
+
   static async deriveKeyFromPasswordAsync(password: string, salt: Uint8Array): Promise<CryptoKey> {
     const enc = new TextEncoder();
     const keyMaterial = await window.crypto.subtle.importKey(
@@ -18,7 +22,7 @@ export class CryptoUtilsV1 {
     return crypto.subtle.deriveKey(
       {
         name: 'PBKDF2',
-        salt,
+        salt: CryptoUtilsV1.toArrayBufferView(salt),
         iterations: 100_000,
         hash: 'SHA-256',
       },
@@ -48,9 +52,9 @@ export class CryptoUtilsV1 {
     if (!key) throw new Error('Vault is locked');
 
     const decrypted = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv: initializationVector },
+      { name: 'AES-GCM', iv: CryptoUtilsV1.toArrayBufferView(initializationVector) },
       key!,
-      encryptedData
+      CryptoUtilsV1.toArrayBufferView(encryptedData)
     );
 
     return new TextDecoder().decode(decrypted);

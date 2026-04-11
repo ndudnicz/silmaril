@@ -1,65 +1,46 @@
 <nav id="navbar-container">
-  <div class="navbar-element" [matTooltipDisabled]="vaultService.isUnlocked()" matTooltip="The Vaults are locked"
-    matTooltipPosition="right">
-    @if (!vaults || vaults.length === 0) {
-      <button mat-button class="full-width navbar-button" routerLink="/unlock">
-        Unlock
-        <mat-icon class="navbar-icon disabled-button disabled">lock</mat-icon>
-      </button>
-
+  <div class="navbar-element" pTooltip="The Vaults are locked" tooltipPosition="right"
+    [tooltipDisabled]="!vaultService.isUnlocked()">
+    @if (!vaults() || vaults().length === 0) {
+    <p-button label="Unlock" icon="pi pi-lock" class="full-width navbar-button" routerLink="/unlock" />
     }
     @else {
-    <button mat-button [matMenuTriggerFor]="menu" class="full-width navbar-button">
-      Vaults
-      <mat-icon class="navbar-icon">diamond</mat-icon>
-    </button>
-    <mat-menu [xPosition]="'after'" #menu="matMenu">
+    <p-button label="Vaults" (click)="displayMenu()" class="full-width navbar-button" />
+    <!-- <mat-menu [xPosition]="'after'" #menu="matMenu">
       <button mat-menu-item (click)="openCreateVaultModal()">
         <mat-icon>add</mat-icon>
         Create New Vault
       </button>
-      @for (vault of vaults; track vault) {
+      @for (vault of vaults(); track vault) {
         <button mat-menu-item [routerLink]="['/vault', vault.id]">
           {{ vault.name }}
         </button>
       }
-    </mat-menu>
+    </mat-menu> -->
 
-  }
+    }
 
-</div>
-<div class="navbar-element">
-  <button mat-button class="full-width navbar-button" routerLink="/settings">
-    Settings
-    <mat-icon class="navbar-icon">settings</mat-icon>
-  </button>
-</div>
-@if (vaultService.isUnlocked()) {
-  <div class="navbar-element">
-    <button mat-button class="full-width navbar-button" routerLink="/recycle-bin">
-      Recycle Bin
-      <mat-icon class="navbar-icon">recycling</mat-icon>
-    </button>
   </div>
-}
-<div class="navbar-element">
-  <button mat-button class="full-width navbar-button" (click)="openInNewTab('/faq')">
-    FAQ
-    <mat-icon class="navbar-icon">info</mat-icon>
-  </button>
-</div>
-<span class="spacer"></span>
-<div class="navbar-element">
-  <button mat-button class="full-width navbar-button" (click)="signout()">
-    Signout
-    <mat-icon class="navbar-icon">logout</mat-icon>
-  </button>
-</div>
-<div class="navbar-element navbar-text-element" matTooltip="https://github.com/ndudnicz/silmaril"
-  matTooltipPosition="right">
-  <a href="https://github.com/ndudnicz/silmaril" class="link" target="_blank">
-    <img src="assets/images/github.svg" width="17" height="17">
-    Silmaril
-  </a>
-</div>
+  <div class="navbar-element">
+    <p-button aria-label="Settings" class="full-width navbar-button" icon="pi pi-cog" routerLink="/settings" />
+  </div>
+  @if (vaultService.isUnlocked()) {
+  <div class="navbar-element">
+    <p-button class="full-width navbar-button" icon="pi pi-trash" routerLink="/recycle-bin" />
+  </div>
+  }
+  <div class="navbar-element">
+    <p-button class="full-width navbar-button" icon="pi pi-info" aria-label="FAQ" (click)="openInNewTab('/faq')" />
+  </div>
+  <span class="spacer"></span>
+  <div class="navbar-element">
+    <p-button class="full-width navbar-button" icon="pi pi-sign-out" aria-label="Signout" (click)="signout()" />
+  </div>
+  <div class="navbar-element navbar-text-element" matTooltip="https://github.com/ndudnicz/silmaril"
+    matTooltipPosition="right">
+    <a href="https://github.com/ndudnicz/silmaril" class="link" target="_blank">
+      <img src="assets/images/github.svg" width="17" height="17">
+      Silmaril
+    </a>
+  </div>
 </nav>

@@ -1,54 +1,41 @@
-import { Component, inject } from '@angular/core';
-import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { Component, inject, signal } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { UserService } from '../../../../services/user.service';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { AuthHelper } from '../../../helpers/auth.helper';
-import { MatCardModule } from '@angular/material/card';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../../../utils/toast.wrapper';
-import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../../services/auth.service';
 import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-modal.component';
 import { take } from 'rxjs';
 import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
-
+import { DialogService } from 'primeng/dynamicdialog';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { ButtonModule } from 'primeng/button';
+// TODO
 @Component({
   selector: 'app-change-password-modal',
   imports: [
-    MatDialogModule,
     ReactiveFormsModule,
-    MatInputModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatCardModule,
-    MatDividerModule
+    IconFieldModule,
+    InputIconModule,
+    ButtonModule
   ],
   templateUrl: './change-password-modal.component.html',
   styleUrl: './change-password-modal.component.css'
 })
 export class ChangePasswordModalComponent extends BaseModalComponent {
-  displayPasswordRequirements = false;
-  oldPasswordFormControl = new FormControl('', [Validators.required]);
-  newPasswordFormControl = new FormControl('', this.passwordValidator());
-  confirmNewPasswordFormControl = new FormControl('', this.confirmPasswordValidator());
-  form: FormGroup = new FormGroup({
+  private readonly userService = inject(UserService);
+  private readonly authService = inject(AuthService);
+  private readonly dialogService = inject(DialogService);
+  protected readonly displayPasswordRequirements = signal(false);
+  protected readonly oldPasswordFormControl = new FormControl('', [Validators.required]);
+  protected readonly newPasswordFormControl = new FormControl('', this.passwordValidator());
+  protected readonly confirmNewPasswordFormControl = new FormControl('', this.confirmPasswordValidator());
+  protected readonly form: FormGroup = new FormGroup({
     oldPassword: this.oldPasswordFormControl,
     newPassword: this.newPasswordFormControl,
     confirmNewPassword: this.confirmNewPasswordFormControl
   });
-
-  constructor(
-    private userService: UserService,
-    private authService: AuthService,
-    private dialog: MatDialog
-  ) {
-    super(inject(MatDialogRef<ChangePasswordModalComponent>), inject(NgxSpinnerService));
-  }
 
   passwordValidator(): ValidatorFn {
     return (control: AbstractControl<string>): { [key: string]: any } | null => {
@@ -68,15 +55,15 @@ export class ChangePasswordModalComponent extends BaseModalComponent {
   }
 
   async onSubmit() {
-    this.dialog.open(ConfirmModalComponent, {
-      panelClass: 'custom-modal',
+    const ref = this.dialogService.open(ConfirmModalComponent, {
       data: {
         title: 'Confirm Password Change',
         message: 'Are you sure you want to change your password? This is not your master password.',
         confirmText: 'Confirm',
         cancelText: 'Cancel'
       }
-    }).afterClosed().pipe(take(1)).subscribe(async (confirmed: boolean) => {
+    });
+    ref?.onClose.pipe(take(1)).subscribe(async (confirmed: boolean) => {
       console.log('Confirm modal closed with confirmation:', confirmed);
       if (confirmed) {
         this.saveSettings();
@@ -129,7 +116,7 @@ export class ChangePasswordModalComponent extends BaseModalComponent {
   }
 
   inputFocusOut() {
-    this.displayPasswordRequirements = this.newPasswordFormControl.invalid;
+    this.displayPasswordRequirements.set(this.newPasswordFormControl.invalid)
   }
 
   keypress(event: KeyboardEvent) {

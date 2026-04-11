@@ -1,56 +1,45 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatCardModule } from '@angular/material/card';
 import { FormGroup, FormControl, ReactiveFormsModule, ValidatorFn, AbstractControl } from '@angular/forms';
 import { AuthHelper } from '../helpers/auth.helper';
 import { Router, RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
-import { toast } from 'ngx-sonner';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { BaseComponent } from '../base-component/base-component.component';
 import { take } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { ButtonModule } from 'primeng/button';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { MessageModule } from 'primeng/message';
 
 @Component({
   standalone: true,
   selector: 'app-login',
   imports: [
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
     ReactiveFormsModule,
-    MatButtonModule,
-    MatTooltipModule,
-    MatCardModule,
-    RouterLink
+    RouterLink,
+    IconFieldModule,
+    InputIconModule,
+    ButtonModule,
+    MessageModule
   ],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css'
 })
 export class SignupComponent extends BaseComponent implements OnInit {
-  usernameFormControl = new FormControl('');
-  passwordFormControl = new FormControl('', this.passwordValidator());
-  confirmPasswordFormControl = new FormControl('', this.confirmPasswordValidator());
-  form: FormGroup = new FormGroup({
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly userService = inject(UserService);
+  protected readonly usernameFormControl = new FormControl('');
+  protected readonly passwordFormControl = new FormControl('', this.passwordValidator());
+  protected readonly confirmPasswordFormControl = new FormControl('', this.confirmPasswordValidator());
+  protected readonly form: FormGroup = new FormGroup({
     username: this.usernameFormControl,
     password: this.passwordFormControl,
     confirmPassword: this.confirmPasswordFormControl
   });
 
-  displayPasswordRequirements = false;
-
-  constructor(
-    private userService: UserService,
-    private router: Router,
-    private authService: AuthService,
-  ) {
-    super(inject(NgxSpinnerService));
-  }
+  // displayPasswordRequirements = false;
 
   ngOnInit(): void {
     this.authService.getCsrfCookie();
@@ -95,9 +84,9 @@ export class SignupComponent extends BaseComponent implements OnInit {
     };
   }
 
-  inputFocusOut() {
-    this.displayPasswordRequirements = this.passwordFormControl.invalid;
-  }
+  // inputFocusOut() {
+  //   this.displayPasswordRequirements = this.passwordFormControl.invalid;
+  // }
 
   keypress(event: KeyboardEvent) {
     if (this.form.valid && event.key === 'Enter') {

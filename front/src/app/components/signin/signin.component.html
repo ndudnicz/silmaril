@@ -1,25 +1,23 @@
 <div id="signin-container">
-    <div>
-        <h1>Sign in</h1>
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
-            <mat-form-field appearance="fill" floatLabel="always">
-                <mat-label>Username</mat-label>
-                <input matInput placeholder="" type="text" formControlName="username" required>
-                <mat-icon matSuffix>account_box</mat-icon>
-            </mat-form-field>
-            <br>
-            <mat-form-field appearance="fill" floatLabel="always">
-                <mat-label>Password</mat-label>
-                <input matInput placeholder="" type="password" formControlName="password" required>
-                <mat-icon matSuffix>lock</mat-icon>
-            </mat-form-field>
-            <br>
-            <div class="buttons">
-                <a class="a-button" style="margin-right: 10px;" mat-button routerLink="/signup">Signup</a>
-                <button type="submit" mat-raised-button
-                    [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || loading">Sign
-                    in</button>
-            </div>
-        </form>
-    </div>
+  <div>
+    <h1>Sign in</h1>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+
+      <p-iconfield>
+        <input type="text" pInputText placeholder="Username" formControlName="username" required />
+        <p-inputicon class="pi pi-user" />
+      </p-iconfield>
+
+      <p-iconfield>
+        <input type="password" pInputText placeholder="Password" formControlName="username" required />
+        <p-inputicon class="pi pi-lock" />
+      </p-iconfield>
+
+      <div class="buttons">
+        <a class="a-button" style="margin-right: 10px;" mat-button routerLink="/signup">Signup</a>
+        <p-button label="Sign in" type="submit"
+          [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || loading" />
+      </div>
+    </form>
+  </div>
 </div>

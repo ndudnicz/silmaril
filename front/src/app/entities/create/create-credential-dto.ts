@@ -1,4 +1,4 @@
-export interface CreateLoginDto {
+export interface CreateCredentialDto {
     vaultId: string | null;
     encryptedDataBase64: string;
     initializationVectorBase64: string;

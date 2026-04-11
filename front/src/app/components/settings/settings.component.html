@@ -1,24 +1,23 @@
 <div id="settings-container">
-    <mat-toolbar id="toolbar">
-        <mat-icon>settings</mat-icon>
-        <span class="toolbar-title"> Settings</span>
-    </mat-toolbar>
-    <div id="settings-body">
-        <div id="settings-menu-container">
-            <div class="settings-button-container">
-                <button mat-raised-button class="settings-button" (click)="openChangeUserNameModal()">
-                    Change Username
-                    <mat-icon class="settings-icon">account_box</mat-icon>
-                </button>
+  <i class="pi pi-cog"></i>
+  <span class="toolbar-title"> Settings</span>
+  <div id="settings-body">
+    <div id="settings-menu-container">
+      <div class="settings-button-container">
+        <button mat-raised-button class="settings-button" (click)="openChangeUserNameModal()">
+          Change Username
+          <i class="pi pi-user"></i>
+        </button>
 
-            </div>
-            <div class="settings-button-container">
-                <button mat-raised-button class="settings-button" (click)="openChangePasswordModal()">
-                    Change Password
-                    <mat-icon class="settings-icon">password</mat-icon>
-                </button>
+      </div>
+      <div class="settings-button-container">
+        <button mat-raised-button class="settings-button" (click)="openChangePasswordModal()">
+          Change Password
+          <i class="pi pi-lock"></i>
 
-            </div>
-        </div>
+        </button>
+
+      </div>
     </div>
+  </div>
 </div>

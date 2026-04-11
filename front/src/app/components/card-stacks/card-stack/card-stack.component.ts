@@ -1,24 +1,22 @@
-import { Component, EventEmitter, Input, OnChanges, Output, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
-import { Login } from '../../../entities/login';
+import { Component, input, output } from '@angular/core';
+import { Credential } from '../../../entities/credential';
 import { CardComponent } from "./card/card.component";
-
-import { DataService } from '../../../services/data.service';
-import { MatDividerModule } from '@angular/material/divider';
+import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-card-stack',
   standalone: true,
   imports: [
     CardComponent,
-    MatDividerModule
-],
+    DividerModule
+  ],
   templateUrl: './card-stack.component.html',
-styleUrls: ['./card-stack.component.css']})
+  styleUrls: ['./card-stack.component.css']
+})
 export class CardStackComponent {
-  @Input() title!: string;
-  @Input() logins!: Login[];
+  public readonly title = input.required<string>();
+  public readonly credentials = input.required<Credential[]>();
+  protected readonly clickEvent = output<Credential>();
 
-  @Output() clickEvent: EventEmitter<Login> = new EventEmitter<Login>();
-
-  constructor() {}
+  constructor() { }
 }

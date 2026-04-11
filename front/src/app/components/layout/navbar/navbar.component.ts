@@ -1,78 +1,66 @@
-import { Component, inject, OnDestroy } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { Component, computed, inject, OnDestroy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ConfirmModalComponent } from '../../modals/confirm-modal/confirm-modal.component';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AuthService } from '../../../services/auth.service';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastWrapper } from '../../../utils/toast.wrapper';
 import { VaultService } from '../../../services/vault.service';
 import { BaseComponent } from '../../base-component/base-component.component';
 import { Subscription, take } from 'rxjs';
 import { DataService } from '../../../services/data.service';
-import { Vault } from '../../../entities/vault';
-import { MatMenuModule } from '@angular/material/menu';
-
 import { AddVaultModalComponent } from './modals/add-vault-modal/add-vault-modal.component';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-navbar',
   imports: [
-    MatIconModule,
-    MatButtonModule,
     RouterLink,
-    MatTooltipModule,
-    MatDialogModule,
-    MatMenuModule
-],
+    ButtonModule,
+    TooltipModule
+  ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
-export class NavbarComponent extends BaseComponent implements OnDestroy {
+export class NavbarComponent extends BaseComponent {
+  private readonly dialogService = inject(DialogService);
+  private readonly authService = inject(AuthService);
+  private readonly dataService = inject(DataService);
+  protected readonly vaultService = inject(VaultService);
+  private readonly router = inject(Router);
+  private readonly subscription: Subscription = new Subscription();
+  protected readonly vaults = computed(() => this.dataService.getVaults());
 
-  subscription: Subscription = new Subscription();
-  vaults!: Vault[] | null;
+  // constructor() {
+  //   super();
+  //   this.setupSubscriptions();
+  // }
 
-  constructor(
-    private dialog: MatDialog,
-    private authService: AuthService,
-    protected vaultService: VaultService,
-    private dataService: DataService,
-    private router: Router
-  ) {
-    super(inject(NgxSpinnerService));
-    this.setupSubscriptions();
-  }
+  // setupSubscriptions() {
+  //   this.subscription.add(this.dataService.vaults.subscribe(vaults => {
+  //     if (vaults) {
+  //       this.vaults = vaults;
+  //     }
+  //   }));
+  // }
 
-  setupSubscriptions() {
-    this.subscription.add(this.dataService.vaults.subscribe(vaults => {
-      if (vaults) {
-        this.vaults = vaults;
-      }
-    }));
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
+  // ngOnDestroy() {
+  //   this.subscription.unsubscribe();
+  // }
 
   openCreateVaultModal() {
-    this.dialog.open(AddVaultModalComponent, {
-      panelClass: 'custom-modal',
+    const ref = this.dialogService.open(AddVaultModalComponent, {
+      header: 'Create New Vault',
+      width: '400px',
+      height: 'auto',
       data: {
-        title: 'Create New Vault',
         message: 'Please enter the name for the new vault.',
         confirmText: 'Create Vault',
         cancelText: 'Cancel',
-        width: '400px',
-        height: 'auto',
-        closeOnNavigation: false,
-        disableClose: true,
-        autoFocus: true
       }
-    }).afterClosed().pipe(take(1)).subscribe((result) => {
+    });
+
+    ref?.onClose.pipe(take(1)).subscribe((result) => {
       if (result) {
         this.dataService.addVault(result);
         this.router.navigate(['/vault', result.id]);
@@ -81,20 +69,17 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
   }
 
   signout() {
-    this.dialog.open(ConfirmModalComponent, {
-      panelClass: 'custom-modal',
-      data: {
-        title: 'Sign Out',
-        message: 'Are you sure you want to signout?',
-        confirmText: 'Sign Out',
-        cancelText: 'Cancel',
+    const ref = this.dialogService.open(ConfirmModalComponent, {
+        header: 'Sign out',
         width: '400px',
         height: 'auto',
-        closeOnNavigation: false,
-        disableClose: true,
-        autoFocus: true
-      }
-    }).afterClosed().pipe(take(1)).subscribe(async (confirmed: boolean) => {
+        data: {
+          message: 'Are you sure you want to signout?',
+          confirmText: 'Yes',
+          cancelText: 'No',
+        }
+      });
+    ref?.onClose.pipe(take(1)).subscribe(async (confirmed: boolean) => {
       if (confirmed) {
         this.onSignoutConfirmed();
       }
@@ -121,5 +106,9 @@ export class NavbarComponent extends BaseComponent implements OnDestroy {
     setTimeout(() => {
       window.location.reload();
     }, 1500)
+  }
+
+  displayMenu() {
+    console.log('Displaying menu');
   }
 }

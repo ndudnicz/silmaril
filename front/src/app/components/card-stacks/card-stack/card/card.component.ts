@@ -1,10 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, input, Input, OnChanges, output, Output, SimpleChanges } from '@angular/core';
 import { ChipComponent } from '../../../chip/chip.component';
 import { CommonModule } from '@angular/common';
-import { Login } from '../../../../entities/login';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatButtonModule } from '@angular/material/button';
+import { Credential } from '../../../../entities/credential';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-card',
@@ -14,16 +12,14 @@ import { MatButtonModule } from '@angular/material/button';
   imports: [
     CommonModule,
     ChipComponent,
-    MatIconModule,
-    MatTooltipModule,
-    MatButtonModule
+    ButtonModule
   ]
 })
 export class CardComponent {
-  @Input() login!: Login;
-  @Output() clickEvent: EventEmitter<Login> = new EventEmitter<Login>();
+  public readonly credential = input.required<Credential>();
+  protected readonly clickEvent = output<Credential>();
 
   click(): void {
-    this.clickEvent.emit(this.login);
+    this.clickEvent.emit(this.credential());
   }
 }

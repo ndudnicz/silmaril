@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Login } from '../entities/login';
+import { Credential } from '../entities/credential';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Vault } from '../entities/vault';
 
@@ -10,24 +10,24 @@ export class DataService {
 
   constructor() { }
 
-  private _selectedLogin: BehaviorSubject<Login | null> = new BehaviorSubject<Login | null>(null);
-  public readonly selectedLogin: Observable<Login | null> = this._selectedLogin.asObservable();
-  setSelectedLogin(login: Login | null): void {
-    this._selectedLogin.next(login);
-  }
-  clearSelectedLogin(): void {
-    this._selectedLogin.next(null);
-  }
+  // private _selectedLogin: BehaviorSubject<Credential | null> = new BehaviorSubject<Credential | null>(null);
+  // public readonly selectedLogin: Observable<Credential | null> = this._selectedLogin.asObservable();
+  // setSelectedLogin(login: Credential | null): void {
+  //   this._selectedLogin.next(login);
+  // }
+  // clearSelectedLogin(): void {
+  //   this._selectedLogin.next(null);
+  // }
 
-  private _deletedLogin: BehaviorSubject<Login | null> = new BehaviorSubject<Login | null>(null);
-  public readonly deletedLogin: Observable<Login | null> = this._deletedLogin.asObservable();
-  setDeletedLogin(login: Login | null): void {
+  private _deletedLogin: BehaviorSubject<Credential | null> = new BehaviorSubject<Credential | null>(null);
+  public readonly deletedLogin: Observable<Credential | null> = this._deletedLogin.asObservable();
+  setDeletedLogin(login: Credential | null): void {
     this._deletedLogin.next(login);
   }
 
-  private _updatedLogin: BehaviorSubject<Login | null> = new BehaviorSubject<Login | null>(null);
-  public readonly updatedLogin: Observable<Login | null> = this._updatedLogin.asObservable();
-  setUpdatedLogin(login: Login): void {
+  private _updatedLogin: BehaviorSubject<Credential | null> = new BehaviorSubject<Credential | null>(null);
+  public readonly updatedLogin: Observable<Credential | null> = this._updatedLogin.asObservable();
+  setUpdatedLogin(login: Credential): void {
     this._updatedLogin.next(login);
   }
 

@@ -1,9 +1,10 @@
 # docker build --no-cache -t silmaril-front . && docker run -p 4200:80 silmaril-front
-FROM node:24-alpine AS build
+FROM node:24 AS build
 WORKDIR /app
 COPY . /app/
-RUN npm install
-RUN npm run build:dev
+RUN npm install -g pnpm
+RUN pnpm install
+RUN pnpm run build:dev
 
 FROM nginx:latest
 COPY --from=build /app/dist/front/browser /usr/share/nginx/html
