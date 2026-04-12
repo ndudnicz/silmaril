@@ -1,6 +1,5 @@
 #vault-container {
   height: 100vh;
-  width: calc(100vw - 140px);
   display: flex;
   flex-direction: column;
   margin-left: 10px;
