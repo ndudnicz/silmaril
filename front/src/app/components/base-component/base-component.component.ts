@@ -1,19 +1,19 @@
-import { NgxSpinnerService } from "ngx-spinner";
-import { ToastWrapper } from "../../utils/toast.wrapper";
+import { NgxSpinnerService } from 'ngx-spinner';
+import { ToastWrapper } from '../../utils/toast.wrapper';
+import { inject } from '@angular/core';
 
 export class BaseComponent {
   protected loading = false;
-
-  protected constructor(private spinner: NgxSpinnerService) { }
+  private spinnerService = inject(NgxSpinnerService);
 
   protected startLoading(): void {
     this.loading = true;
-    this.spinner.show();
+    this.spinnerService.show();
   }
 
   protected stopLoading(): void {
     this.loading = false;
-    this.spinner.hide();
+    this.spinnerService.hide();
   }
 
   protected openInNewTab(path: string): void {

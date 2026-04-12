@@ -1,5 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* @import url('/node_modules/primeicons/primeicons.css'); */
+
 html,
 body {
   height: 100%;
@@ -32,13 +34,13 @@ body {
   src: url('/assets/fonts/roboto/roboto-v48-latin-500.woff2') format('woff2');
 }
 
-@font-face {
+/* @font-face {
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
   src: url('/assets/fonts/material-icons/material-icons.woff2') format('woff2');
-}
-
+} */
+/*
 .material-icons {
   font-family: 'Material Icons';
   font-weight: normal;
@@ -51,14 +53,16 @@ body {
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
+  font-feature-settings: 'liga';
   -moz-font-feature-settings: 'liga';
   -moz-osx-font-smoothing: grayscale;
 }
+  */
 
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: #faf9fd
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: #faf9fd;
 }
 
 .link {
@@ -66,7 +70,7 @@ body {
 }
 
 mat-icon,
-button,
+button:not(.p-button),
 .a-button,
 .a-button:link,
 .a-button:visited,
@@ -77,7 +81,7 @@ button,
   border-radius: 4px !important;
 }
 
-button:disabled,
+button:not(.p-button):disabled,
 .disabled {
   color: #737373 !important;
   cursor: auto !important;
@@ -140,4 +144,24 @@ button:disabled,
   width: 100%;
   height: 100%;
   background-color: inherit;
+}
+
+/* PrimeNG focus color override: dark gray on click/focus instead of green */
+:root {
+  --p-form-field-focus-border-color: #44474e46;
+  --p-focus-ring-color: #44474e58;
+  /* --p-focus-ring-shadow: 0 0 0 0.2rem rgba(68, 71, 78, 0.2); */
+}
+
+.p-inputtext:enabled:focus,
+.p-inputtext:enabled:focus-visible,
+.p-inputnumber-input:enabled:focus,
+.p-inputnumber-input:enabled:focus-visible,
+.p-password-input:enabled:focus,
+.p-password-input:enabled:focus-visible,
+.p-textarea:enabled:focus,
+.p-textarea:enabled:focus-visible {
+  border-color: #44474ebc !important;
+  outline-color: #44474ebc !important;
+  /* box-shadow: 0 0 0 0.2rem rgba(68, 71, 78, 0.2) !important; */
 }

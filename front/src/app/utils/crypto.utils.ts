@@ -5,6 +5,10 @@ export interface EncryptionResult {
 }
 
 export class CryptoUtilsV1 {
+  private static toArrayBufferView(data: Uint8Array): Uint8Array<ArrayBuffer> {
+    return new Uint8Array(data);
+  }
+
   static async deriveKeyFromPasswordAsync(password: string, salt: Uint8Array): Promise<CryptoKey> {
     const enc = new TextEncoder();
     const keyMaterial = await window.crypto.subtle.importKey(
@@ -12,20 +16,20 @@ export class CryptoUtilsV1 {
       enc.encode(password),
       'PBKDF2',
       false,
-      ['deriveKey']
+      ['deriveKey'],
     );
 
     return crypto.subtle.deriveKey(
       {
         name: 'PBKDF2',
-        salt,
+        salt: CryptoUtilsV1.toArrayBufferView(salt),
         iterations: 100_000,
         hash: 'SHA-256',
       },
       keyMaterial,
       { name: 'AES-GCM', length: 256 },
       true,
-      ['encrypt', 'decrypt']
+      ['encrypt', 'decrypt'],
     );
   }
 
@@ -34,29 +38,32 @@ export class CryptoUtilsV1 {
   }
 
   static async importKeyAsync(rawKey: ArrayBuffer): Promise<CryptoKey> {
-    return await crypto.subtle.importKey(
-      'raw',
-      rawKey,
-      { name: 'AES-GCM' },
-      true,
-      ['encrypt', 'decrypt']
-    );
+    return await crypto.subtle.importKey('raw', rawKey, { name: 'AES-GCM' }, true, [
+      'encrypt',
+      'decrypt',
+    ]);
   }
 
-
-  static async decryptDataAsync(key: CryptoKey | null, encryptedData: Uint8Array, initializationVector: Uint8Array): Promise<string> {
+  static async decryptDataAsync(
+    key: CryptoKey | null,
+    encryptedData: Uint8Array,
+    initializationVector: Uint8Array,
+  ): Promise<string> {
     if (!key) throw new Error('Vault is locked');
 
     const decrypted = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv: initializationVector },
+      { name: 'AES-GCM', iv: CryptoUtilsV1.toArrayBufferView(initializationVector) },
       key!,
-      encryptedData
+      CryptoUtilsV1.toArrayBufferView(encryptedData),
     );
 
     return new TextDecoder().decode(decrypted);
   }
 
-  static async encryptDataAsync(key: CryptoKey | null, plaintext: string): Promise<EncryptionResult> {
+  static async encryptDataAsync(
+    key: CryptoKey | null,
+    plaintext: string,
+  ): Promise<EncryptionResult> {
     if (!key) throw new Error('Vault is locked');
 
     const initializationVector = crypto.getRandomValues(new Uint8Array(12));
@@ -65,7 +72,7 @@ export class CryptoUtilsV1 {
     const buffer = await crypto.subtle.encrypt(
       { name: 'AES-GCM', iv: initializationVector },
       key!,
-      encoded
+      encoded,
     );
 
     return { ciphertext: new Uint8Array(buffer), initializationVector, encryptionVersion: 1 };

@@ -1,39 +1,39 @@
 .stack-container {
-    background-color: #faf9fd;
-    width: 100%;
-    height: auto;
+  background-color: #faf9fd;
+  width: 100%;
+  height: auto;
 }
 
 .stack-header {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-content: center;
-    align-items: center;
-    font-size: 11px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-content: center;
+  align-items: center;
+  font-size: 11px;
 }
 
 .title-container {
-    display: inline-block;
-    margin-left: 40px;
+  display: inline-block;
+  margin-left: 40px;
 }
 
 .stack-content {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: start;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: start;
 }
 
 .divider-container {
-    display: flex;
-    align-items: center;
-    min-width: 200px;
-    width: 100%;
-    padding: 0 40px;
+  display: flex;
+  align-items: center;
+  min-width: 200px;
+  width: 100%;
+  padding: 0 40px;
 }
 
 mat-divider {
-    width: 100%;
+  width: 100%;
 }

@@ -61,7 +61,6 @@
   width: 400px;
   display: flex;
   align-items: center;
-
 }
 
 #search-field {
@@ -76,7 +75,10 @@
 }
 
 /* Hide the subscript wrapper in the search field as we don't need any hint or error message for the search bar */
-:host ::ng-deep #search-field .mat-mdc-form-field-subscript-wrapper.mat-mdc-form-field-bottom-align {
+:host
+  ::ng-deep
+  #search-field
+  .mat-mdc-form-field-subscript-wrapper.mat-mdc-form-field-bottom-align {
   display: none !important;
 }
 

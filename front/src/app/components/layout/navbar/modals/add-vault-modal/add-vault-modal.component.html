@@ -1,17 +1,17 @@
 <div class="modal-body">
-    <h1 mat-dialog-title>Create New Vault</h1>
-    <mat-icon class="close-button close-dialog-button" (click)="closeDialog()">close</mat-icon>
-    <mat-dialog-content>
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
-            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
-                <mat-label>Vault Name</mat-label>
-                <input matInput placeholder="" type="text" formControlName="vaultName" required>
-                <mat-icon matSuffix>diamond</mat-icon>
-            </mat-form-field>
-            <br>
-            <div class="buttons">
-                <button mat-raised-button type="submit" matButton [disabled]="form.invalid || loading">Create</button>
-            </div>
-        </form>
-    </mat-dialog-content>
+  <!-- <h1 mat-dialog-title>Create New Vault</h1> -->
+  <!-- <p-button icon="pi pi-times" (click)="closeDialog()">close</p-button> -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+    <input pInputText placeholder="Vault name" type="text" formControlName="vaultName" required />
+    <br />
+    <div class="buttons">
+      <p-button
+        variant="text"
+        severity="secondary"
+        type="submit"
+        [disabled]="form.invalid || loading"
+        >Create</p-button
+      >
+    </div>
+  </form>
 </div>

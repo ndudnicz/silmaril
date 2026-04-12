@@ -1,9 +1,9 @@
 .button-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 
 .button-container button:last-child {
-    margin-left: 12px;
+  margin-left: 12px;
 }

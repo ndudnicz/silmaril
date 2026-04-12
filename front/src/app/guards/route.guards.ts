@@ -24,7 +24,7 @@ export const authNoAuthGuard: CanActivateFn = () => {
   } else {
     return true;
   }
-}
+};
 
 export const vaultUnlocked: CanActivateFn = () => {
   const router = inject(Router);
@@ -35,4 +35,4 @@ export const vaultUnlocked: CanActivateFn = () => {
   } else {
     return router.createUrlTree(['/unlock']);
   }
-}
+};

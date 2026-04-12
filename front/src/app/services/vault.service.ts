@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
-import { Login } from '../entities/login';
+import { Credential } from '../entities/credential';
 import { Vault } from '../entities/vault';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
@@ -38,7 +38,7 @@ export class VaultService {
   public async setKeyAsync(masterPassword: string): Promise<void> {
     const storedSaltBase64 = localStorage.getItem(this.SALT_KEY_NAME);
     console.log(`Stored salt base64: ${storedSaltBase64}`, typeof storedSaltBase64);
-    
+
     if (!storedSaltBase64) {
       const errorMessage = 'Salt not set. Please set the salt before setting the master password.';
       throw new Error(errorMessage);
@@ -50,10 +50,11 @@ export class VaultService {
       this.key = await CryptoUtilsV1.deriveKeyFromPasswordAsync(masterPassword, saltUint8Array);
       const exportedKey = await CryptoUtilsV1.exportKeyAsync(this.key);
       console.log(`Key set successfully. Exported key: ${exportedKey}`);
-    }
-    catch (error) {
+    } catch (error) {
       console.log(error);
-      throw new Error('Failed to set the key:' + (error instanceof Error ? error.message : 'Unknown error'));
+      throw new Error(
+        'Failed to set the key:' + (error instanceof Error ? error.message : 'Unknown error'),
+      );
     }
   }
 
@@ -64,70 +65,95 @@ export class VaultService {
   public getKey(): CryptoKey | null {
     return this.key;
   }
-  
+
   public clearKey(): void {
     this.key = null;
   }
 
-  async encryptLoginDataAsync(login: Login): Promise<Login> {
-    return new Promise<Login>(async (resolve, reject) => {
+  async encryptCredentialDataAsync(credential: Credential): Promise<Credential> {
+    return new Promise<Credential>(async (resolve, reject) => {
       try {
         if (!this.key) {
           throw new Error('Vault is not unlocked. Please set the master password.');
         }
-        console.log('Encrypting login data:', login);
-        const encryptedData = await CryptoUtilsV1.encryptDataAsync(this.key, login.decryptedData!.toString());
-        console.log('Encrypted data:', login.initializationVector, encryptedData.initializationVector);
-        login.encryptedData = encryptedData.ciphertext;
-        login.initializationVector = encryptedData.initializationVector;
-        login.encryptionVersion = encryptedData.encryptionVersion;
-        console.log('Encrypted data:', login.initializationVector, encryptedData.initializationVector);
-        return resolve(login);
+        console.log('Encrypting login data:', credential);
+        const encryptedData = await CryptoUtilsV1.encryptDataAsync(
+          this.key,
+          credential.decryptedData!.toString(),
+        );
+        console.log(
+          'Encrypted data:',
+          credential.initializationVector,
+          encryptedData.initializationVector,
+        );
+        credential.encryptedData = encryptedData.ciphertext;
+        credential.initializationVector = encryptedData.initializationVector;
+        credential.encryptionVersion = encryptedData.encryptionVersion;
+        console.log(
+          'Encrypted data:',
+          credential.initializationVector,
+          encryptedData.initializationVector,
+        );
+        return resolve(credential);
       } catch (error: any) {
         console.error('Error encrypting login data:', error);
-        reject(new Error('Error encrypting login data:' + error ? error.message : 'Unknown error during encryption'));
+        reject(
+          new Error(
+            'Error encrypting login data:' + error
+              ? error.message
+              : 'Unknown error during encryption',
+          ),
+        );
       }
     });
   }
 
-  async encryptAllLoginsAsync(logins: Login[]): Promise<Login[]> {
-    return new Promise<Login[]>(async (resolve, reject) => {
+  async encryptAllCredentialsAsync(credentials: Credential[]): Promise<Credential[]> {
+    return new Promise<Credential[]>(async (resolve, reject) => {
       try {
         if (!this.key) {
           throw new Error('Vault is not unlocked. Please set the master password.');
         }
-        const encryptedLogins = await Promise.all(logins.map(this.encryptLoginDataAsync.bind(this)));
-        console.log('All logins encrypted successfully');
-        resolve(encryptedLogins);
+        const encryptedCredentials = await Promise.all(
+          credentials.map(this.encryptCredentialDataAsync.bind(this)),
+        );
+        console.log('All credentials encrypted successfully');
+        resolve(encryptedCredentials);
       } catch (error: any) {
         reject(error);
       }
     });
   }
 
-  async decryptLoginDataAsync(login: Login): Promise<Login> {
-    return new Promise<Login>(async (resolve, reject) => {
+  async decryptCredentialDataAsync(credential: Credential): Promise<Credential> {
+    return new Promise<Credential>(async (resolve, reject) => {
       try {
         if (!this.key) {
           throw new Error('Vault is not unlocked. Please set the master password.');
         }
-        const decryptDataString = await CryptoUtilsV1.decryptDataAsync(this.key, login.encryptedData!, login.initializationVector!);
-        login.decryptedData = DecryptedData.fromString(decryptDataString);
-        console.log('Login data decrypted successfully:', login.decryptedData.toString());
-        resolve(login);
+        const decryptDataString = await CryptoUtilsV1.decryptDataAsync(
+          this.key,
+          credential.encryptedData!,
+          credential.initializationVector!,
+        );
+        credential.decryptedData = DecryptedData.fromString(decryptDataString);
+        console.log('Credential data decrypted successfully:', credential.decryptedData.toString());
+        resolve(credential);
       } catch (error: any) {
         reject(error);
       }
     });
   }
 
-  async decryptAllLoginsAsync(logins: Login[]): Promise<Login[]> {
-    return new Promise<Login[]>(async (resolve, reject) => {
+  async decryptAllCredentialsAsync(logins: Credential[]): Promise<Credential[]> {
+    return new Promise<Credential[]>(async (resolve, reject) => {
       try {
         if (!this.key) {
           throw new Error('Vault is not unlocked. Please set the master password.');
         }
-        const decryptedLogins = await Promise.all(logins.map(this.decryptLoginDataAsync.bind(this)));
+        const decryptedLogins = await Promise.all(
+          logins.map(this.decryptCredentialDataAsync.bind(this)),
+        );
         console.log('All logins decrypted successfully');
         resolve(decryptedLogins);
       } catch (error: any) {

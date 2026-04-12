@@ -1,15 +1,15 @@
 <div class="stack-container">
-    <div class="stack-header">
-        <div class="title-container">
-            <h2>{{title}}</h2>
-        </div>
-        <div class="divider-container">
-            <mat-divider></mat-divider>
-        </div>
+  <div class="stack-header">
+    <div class="title-container">
+      <h2>{{ title() }}</h2>
     </div>
-    <div class="stack-content">
-        @for (login of logins; track $index) {
-        <app-card (clickEvent)="clickEvent.emit(login)" [login]="login"></app-card>
-        }
+    <div class="divider-container">
+      <p-divider />
     </div>
+  </div>
+  <div class="stack-content">
+    @for (credential of credentials(); track $index) {
+      <app-card (clickEvent)="clickEvent.emit(credential)" [credential]="credential"></app-card>
+    }
+  </div>
 </div>

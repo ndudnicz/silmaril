@@ -1,16 +1,12 @@
-import { MatDialogRef } from '@angular/material/dialog';
+import { inject } from '@angular/core';
 import { BaseComponent } from '../../base-component.component';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 export class BaseModalComponent extends BaseComponent {
-  constructor(
-    protected dialogRef: MatDialogRef<BaseModalComponent>,
-    protected spinnerService: NgxSpinnerService
-  ) {
-    super(spinnerService);
-  }
+  protected ref = inject(DynamicDialogRef);
 
   protected closeDialog(result: any | null = null): void {
-    this.dialogRef.close(result);
+    this.ref.close(result);
   }
 }

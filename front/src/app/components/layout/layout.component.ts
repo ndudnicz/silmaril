@@ -4,13 +4,8 @@ import { NavbarComponent } from './navbar/navbar.component';
 
 @Component({
   selector: 'app-layout',
-  imports: [
-    RouterOutlet,
-    NavbarComponent
-  ],
+  imports: [RouterOutlet, NavbarComponent],
   templateUrl: './layout.component.html',
-  styleUrl: './layout.component.css'
+  styleUrl: './layout.component.css',
 })
-export class LayoutComponent {
-
-}
+export class LayoutComponent {}

@@ -1,17 +1,24 @@
 <div class="modal-body">
-    <h1 mat-dialog-title>Change Your Username</h1>
-    <mat-icon class="close-button close-dialog-button" (click)="closeDialog()">close</mat-icon>
-    <mat-dialog-content>
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
-            <mat-form-field class="full-width" appearance="fill" floatLabel="always">
-                <mat-label>New Username</mat-label>
-                <input matInput placeholder="" type="text" formControlName="username" required>
-                <mat-icon matSuffix>account_box</mat-icon>
-            </mat-form-field>
-            <br>
-            <div class="buttons">
-                <button mat-raised-button type="submit" matButton [disabled]="form.invalid || loading">Change Username</button>
-            </div>
-        </form>
-    </mat-dialog-content>
+  <h1 mat-dialog-title>Change Your Username</h1>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+    <p-iconfield>
+      <input
+        type="text"
+        pInputText
+        placeholder="New Username"
+        formControlName="username"
+        required
+      />
+      <p-inputicon class="pi pi-user" />
+    </p-iconfield>
+    <div class="buttons">
+      <p-button
+        variant="text"
+        severity="secondary"
+        type="submit"
+        label="Change Username"
+        [disabled]="form.invalid || loading"
+      />
+    </div>
+  </form>
 </div>
