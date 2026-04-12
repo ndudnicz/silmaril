@@ -2,7 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { Router } from '@angular/router';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { UserService } from '../../services/user.service';
@@ -26,7 +25,6 @@ import { InputTextModule } from 'primeng/inputtext';
     ButtonModule,
   ],
   templateUrl: './signin.component.html',
-  styleUrl: './signin.component.css',
 })
 export class SigninComponent extends BaseComponent implements OnInit {
   private readonly router = inject(Router);
@@ -51,7 +49,7 @@ export class SigninComponent extends BaseComponent implements OnInit {
       .pipe(take(1))
       .subscribe({
         next: () => this.onAuthSuccess(),
-        error: (error: any) => {
+        error: (error: Error) => {
           this.displayError('Authentication failed', error);
           this.stopLoading();
         },
@@ -70,7 +68,7 @@ export class SigninComponent extends BaseComponent implements OnInit {
           this.stopLoading();
           this.router.navigate(['/vault']);
         },
-        error: (error: any) => {
+        error: (error: Error) => {
           this.displayError('Error fetching user:', error);
           this.stopLoading();
         },

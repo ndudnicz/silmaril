@@ -1,7 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* @import url('/node_modules/primeicons/primeicons.css'); */
-
 html,
 body {
   height: 100%;
@@ -165,3 +163,5 @@ button:not(.p-button):disabled,
   outline-color: #44474ebc !important;
   /* box-shadow: 0 0 0 0.2rem rgba(68, 71, 78, 0.2) !important; */
 }
+
+@import 'tailwindcss';
