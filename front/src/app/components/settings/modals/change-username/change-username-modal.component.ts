@@ -13,41 +13,38 @@ import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-change-username-modal',
-  imports: [
-    ReactiveFormsModule,
-    IconFieldModule,
-    InputIconModule,
-    InputTextModule,
-    ButtonModule
-  ],
+  imports: [ReactiveFormsModule, IconFieldModule, InputIconModule, InputTextModule, ButtonModule],
   templateUrl: './change-username-modal.component.html',
-  styleUrl: './change-username-modal.component.css'
+  styleUrl: './change-username-modal.component.css',
 })
 export class ChangeUsernameModalComponent extends BaseModalComponent {
   private readonly dialogService = inject(DialogService);
   private readonly userService = inject(UserService);
   protected readonly userNameFormControl = new FormControl('', [Validators.required]);
   protected readonly form: FormGroup = new FormGroup({
-    username: this.userNameFormControl
+    username: this.userNameFormControl,
   });
 
   async onSubmit() {
-    const ref = this.dialogService.open(ConfirmModalComponent, {
-      data: {
-        title: 'Confirm Username Change',
-        message: 'Are you sure you want to change username?',
-        confirmText: 'Confirm',
-        cancelText: 'Cancel'
-      }
-    });
-    ref?.onClose.pipe(take(1)).subscribe(async (confirmed: boolean) => {
-      console.log('Confirm modal closed with confirmation:', confirmed);
-      if (confirmed) {
-        this.saveSettings();
-      } else {
-        this.closeDialog();
-      }
-    });
+    this.dialogService
+      .open(ConfirmModalComponent, {
+        closable: true,
+        data: {
+          title: 'Confirm Username Change',
+          message: 'Are you sure you want to change username?',
+          confirmText: 'Confirm',
+          cancelText: 'Cancel',
+        },
+      })
+      ?.onClose.pipe(take(1))
+      .subscribe(async (confirmed: boolean) => {
+        console.log('Confirm modal closed with confirmation:', confirmed);
+        if (confirmed) {
+          this.saveSettings();
+        } else {
+          this.closeDialog();
+        }
+      });
   }
 
   saveSettings() {
@@ -56,20 +53,23 @@ export class ChangeUsernameModalComponent extends BaseModalComponent {
       return;
     }
     this.startLoading();
-    this.userService.updateUser$({
-      username: this.userNameFormControl.value!
-    }).pipe(take(1)).subscribe({
-      next: async (updatedUser) => {
-        console.log('Username updated successfully:', updatedUser);
-        this.onUsernameChangeSuccess();
-      },
-      error: (error: any) => {
-        console.error('Error updating username:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        ToastWrapper.error('Failed to change username', errorMessage);
-        this.stopLoading();
-      }
-    });
+    this.userService
+      .updateUser$({
+        username: this.userNameFormControl.value!,
+      })
+      .pipe(take(1))
+      .subscribe({
+        next: async (updatedUser) => {
+          console.log('Username updated successfully:', updatedUser);
+          this.onUsernameChangeSuccess();
+        },
+        error: (error: Error) => {
+          console.error('Error updating username:', error);
+          const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+          ToastWrapper.error('Failed to change username', errorMessage);
+          this.stopLoading();
+        },
+      });
   }
 
   onUsernameChangeSuccess() {
@@ -80,8 +80,7 @@ export class ChangeUsernameModalComponent extends BaseModalComponent {
   }
 
   keypress(event: KeyboardEvent) {
-    if (this.form.valid
-      && event.key === 'Enter') {
+    if (this.form.valid && event.key === 'Enter') {
       event.stopImmediatePropagation();
       event.preventDefault();
       this.onSubmit();

@@ -1,3 +1,3 @@
 export interface DeleteCredentialsDto {
-    ids: string[];
+  ids: string[];
 }

@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerService } from 'ngx-spinner';
 import { Router } from '@angular/router';
 import { ToastWrapper } from '../../utils/toast.wrapper';
 import { UserService } from '../../services/user.service';
@@ -23,10 +23,10 @@ import { InputTextModule } from 'primeng/inputtext';
     IconFieldModule,
     InputIconModule,
     InputTextModule,
-    ButtonModule
+    ButtonModule,
   ],
   templateUrl: './signin.component.html',
-  styleUrl: './signin.component.css'
+  styleUrl: './signin.component.css',
 })
 export class SigninComponent extends BaseComponent implements OnInit {
   private readonly router = inject(Router);
@@ -37,7 +37,7 @@ export class SigninComponent extends BaseComponent implements OnInit {
   protected readonly passwordFormControl = new FormControl('');
   protected readonly form: FormGroup = new FormGroup({
     username: this.usernameFormControl,
-    password: this.passwordFormControl
+    password: this.passwordFormControl,
   });
 
   ngOnInit(): void {
@@ -46,31 +46,35 @@ export class SigninComponent extends BaseComponent implements OnInit {
 
   onSubmit() {
     this.startLoading();
-    this.authService.auth$(this.form.value.username, this.form.value.password)
+    this.authService
+      .auth$(this.form.value.username, this.form.value.password)
       .pipe(take(1))
       .subscribe({
         next: () => this.onAuthSuccess(),
         error: (error: any) => {
           this.displayError('Authentication failed', error);
           this.stopLoading();
-        }
+        },
       });
   }
 
   onAuthSuccess() {
     ToastWrapper.success('Authentication successful');
-    this.userService.getUser$().pipe(take(1)).subscribe({
-      next: (user) => {
-        console.log('user:', user);
-        this.vaultService.setSalt(user.saltBase64);
-        this.stopLoading();
-        this.router.navigate(['/vault']);
-      },
-      error: (error: any) => {
-        this.displayError('Error fetching user:', error);
-        this.stopLoading();
-      }
-    });
+    this.userService
+      .getUser$()
+      .pipe(take(1))
+      .subscribe({
+        next: (user) => {
+          console.log('user:', user);
+          this.vaultService.setSalt(user.saltBase64);
+          this.stopLoading();
+          this.router.navigate(['/vault']);
+        },
+        error: (error: any) => {
+          this.displayError('Error fetching user:', error);
+          this.stopLoading();
+        },
+      });
   }
 
   keypress(event: KeyboardEvent) {

@@ -1,18 +1,25 @@
-<div class="card" (click)="click()" [ngClass]="{'card-selected': credential().selected}">
+<div class="card" (click)="click()" [ngClass]="{ 'card-selected': credential().selected }">
   <div class="card-content">
-    <h2 class="card-title">{{credential().decryptedData?.title ?? '*********' }}</h2>
+    <h2 class="card-title">{{ credential().decryptedData?.title ?? '*********' }}</h2>
     <div class="card-icon-container">
       @if (!credential().decryptedData) {
-      <i class="pi pi-lock"></i>
+        <i class="pi pi-lock"></i>
       }
       @if (!credential().vaultId) {
-      <p-button icon="pi pi-question" [disabled]="true" variant="text">Orphaned</p-button>
+        <p-button
+          variant="text"
+          severity="secondary"
+          icon="pi pi-question"
+          [disabled]="true"
+          variant="text"
+          >Orphaned</p-button
+        >
       }
     </div>
   </div>
   <div class="card-footer">
     @for (tagName of credential().tagNames; track tagName; let i = $index) {
-    <app-chip [label]="tagName"></app-chip>
+      <app-chip [label]="tagName"></app-chip>
     }
   </div>
 </div>

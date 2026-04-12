@@ -50,10 +50,11 @@ export class VaultService {
       this.key = await CryptoUtilsV1.deriveKeyFromPasswordAsync(masterPassword, saltUint8Array);
       const exportedKey = await CryptoUtilsV1.exportKeyAsync(this.key);
       console.log(`Key set successfully. Exported key: ${exportedKey}`);
-    }
-    catch (error) {
+    } catch (error) {
       console.log(error);
-      throw new Error('Failed to set the key:' + (error instanceof Error ? error.message : 'Unknown error'));
+      throw new Error(
+        'Failed to set the key:' + (error instanceof Error ? error.message : 'Unknown error'),
+      );
     }
   }
 
@@ -76,16 +77,33 @@ export class VaultService {
           throw new Error('Vault is not unlocked. Please set the master password.');
         }
         console.log('Encrypting login data:', credential);
-        const encryptedData = await CryptoUtilsV1.encryptDataAsync(this.key, credential.decryptedData!.toString());
-        console.log('Encrypted data:', credential.initializationVector, encryptedData.initializationVector);
+        const encryptedData = await CryptoUtilsV1.encryptDataAsync(
+          this.key,
+          credential.decryptedData!.toString(),
+        );
+        console.log(
+          'Encrypted data:',
+          credential.initializationVector,
+          encryptedData.initializationVector,
+        );
         credential.encryptedData = encryptedData.ciphertext;
         credential.initializationVector = encryptedData.initializationVector;
         credential.encryptionVersion = encryptedData.encryptionVersion;
-        console.log('Encrypted data:', credential.initializationVector, encryptedData.initializationVector);
+        console.log(
+          'Encrypted data:',
+          credential.initializationVector,
+          encryptedData.initializationVector,
+        );
         return resolve(credential);
       } catch (error: any) {
         console.error('Error encrypting login data:', error);
-        reject(new Error('Error encrypting login data:' + error ? error.message : 'Unknown error during encryption'));
+        reject(
+          new Error(
+            'Error encrypting login data:' + error
+              ? error.message
+              : 'Unknown error during encryption',
+          ),
+        );
       }
     });
   }
@@ -96,7 +114,9 @@ export class VaultService {
         if (!this.key) {
           throw new Error('Vault is not unlocked. Please set the master password.');
         }
-        const encryptedCredentials = await Promise.all(credentials.map(this.encryptCredentialDataAsync.bind(this)));
+        const encryptedCredentials = await Promise.all(
+          credentials.map(this.encryptCredentialDataAsync.bind(this)),
+        );
         console.log('All credentials encrypted successfully');
         resolve(encryptedCredentials);
       } catch (error: any) {
@@ -111,7 +131,11 @@ export class VaultService {
         if (!this.key) {
           throw new Error('Vault is not unlocked. Please set the master password.');
         }
-        const decryptDataString = await CryptoUtilsV1.decryptDataAsync(this.key, credential.encryptedData!, credential.initializationVector!);
+        const decryptDataString = await CryptoUtilsV1.decryptDataAsync(
+          this.key,
+          credential.encryptedData!,
+          credential.initializationVector!,
+        );
         credential.decryptedData = DecryptedData.fromString(decryptDataString);
         console.log('Credential data decrypted successfully:', credential.decryptedData.toString());
         resolve(credential);
@@ -127,7 +151,9 @@ export class VaultService {
         if (!this.key) {
           throw new Error('Vault is not unlocked. Please set the master password.');
         }
-        const decryptedLogins = await Promise.all(logins.map(this.decryptCredentialDataAsync.bind(this)));
+        const decryptedLogins = await Promise.all(
+          logins.map(this.decryptCredentialDataAsync.bind(this)),
+        );
         console.log('All logins decrypted successfully');
         resolve(decryptedLogins);
       } catch (error: any) {

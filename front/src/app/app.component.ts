@@ -7,7 +7,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
   selector: 'app-root',
   imports: [RouterOutlet, NgxSpinnerModule, NgxSonnerToaster],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
 })
 export class AppComponent {
   title = 'front';

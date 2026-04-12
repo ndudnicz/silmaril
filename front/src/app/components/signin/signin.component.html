@@ -2,21 +2,31 @@
   <div>
     <h1>Sign in</h1>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
-
       <p-iconfield>
         <input type="text" pInputText placeholder="Username" formControlName="username" required />
         <p-inputicon class="pi pi-user" />
       </p-iconfield>
 
       <p-iconfield>
-        <input type="password" pInputText placeholder="Password" formControlName="password" required />
+        <input
+          type="password"
+          pInputText
+          placeholder="Password"
+          formControlName="password"
+          required
+        />
         <p-inputicon class="pi pi-lock" />
       </p-iconfield>
 
       <div class="buttons">
-        <a class="a-button" style="margin-right: 10px;" mat-button routerLink="/signup">Signup</a>
-        <p-button variant="text" severity="secondary" label="Sign in" type="submit"
-          [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || loading" />
+        <a class="a-button" style="margin-right: 10px" mat-button routerLink="/signup">Signup</a>
+        <p-button
+          variant="text"
+          severity="secondary"
+          label="Sign in"
+          type="submit"
+          [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || loading"
+        />
       </div>
     </form>
   </div>

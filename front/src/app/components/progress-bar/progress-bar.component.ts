@@ -6,7 +6,7 @@ import { Component, input } from '@angular/core';
   selector: 'app-progress-bar',
   templateUrl: './progress-bar.component.html',
   styleUrls: ['./progress-bar.component.css'],
-  imports: [CommonModule]
+  imports: [CommonModule],
 })
 export class ProgressBarComponent {
   public readonly color = input<string>('#007bff');

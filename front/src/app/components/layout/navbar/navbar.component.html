@@ -1,10 +1,19 @@
 <nav id="navbar-container">
-  <div class="navbar-element" pTooltip="The Vaults are locked" tooltipPosition="right"
-    [tooltipDisabled]="vaultService.isUnlocked()">
+  <div
+    class="navbar-element"
+    pTooltip="The Vaults are locked"
+    tooltipPosition="right"
+    [tooltipDisabled]="vaultService.isUnlocked()"
+  >
     @if (vaults() !== null && vaults()!.length === 0) {
-
-    <p-button variant="text" severity="secondary" label="Vaults" (click)="displayMenu()" class="full-width navbar-button" />
-    <!-- <mat-menu [xPosition]="'after'" #menu="matMenu">
+      <p-button
+        variant="text"
+        severity="secondary"
+        label="Vaults"
+        (click)="displayMenu()"
+        class="full-width navbar-button"
+      />
+      <!-- <mat-menu [xPosition]="'after'" #menu="matMenu">
       <button mat-menu-item (click)="openCreateVaultModal()">
         <mat-icon>add</mat-icon>
         Create New Vault
@@ -15,32 +24,70 @@
         </button>
       }
     </mat-menu> -->
+    } @else {
+      <p-button
+        variant="text"
+        severity="secondary"
+        label="Unlock"
+        icon="pi pi-lock"
+        class="full-width navbar-button"
+        routerLink="/unlock"
+      />
     }
-    @else {
-
-    <p-button  variant="text" severity="secondary" label="Unlock" icon="pi pi-lock" class="full-width navbar-button" routerLink="/unlock" />
-    }
-
   </div>
   <div class="navbar-element">
-    <p-button label="Settings" variant="text" severity="secondary" aria-label="Settings" class="full-width navbar-button" icon="pi pi-cog" routerLink="/settings" />
+    <p-button
+      label="Settings"
+      variant="text"
+      severity="secondary"
+      aria-label="Settings"
+      class="full-width navbar-button"
+      icon="pi pi-cog"
+      routerLink="/settings"
+    />
   </div>
   @if (vaultService.isUnlocked()) {
-  <div class="navbar-element">
-    <p-button label="Recycle bin" variant="text" severity="secondary" class="full-width navbar-button" icon="pi pi-trash" routerLink="/recycle-bin" />
-  </div>
+    <div class="navbar-element">
+      <p-button
+        label="Recycle bin"
+        variant="text"
+        severity="secondary"
+        class="full-width navbar-button"
+        icon="pi pi-trash"
+        routerLink="/recycle-bin"
+      />
+    </div>
   }
   <div class="navbar-element">
-    <p-button label="FAQ" variant="text" severity="secondary" class="full-width navbar-button" icon="pi pi-question-circle" aria-label="FAQ" (click)="openInNewTab('/faq')" />
+    <p-button
+      label="FAQ"
+      variant="text"
+      severity="secondary"
+      class="full-width navbar-button"
+      icon="pi pi-question-circle"
+      aria-label="FAQ"
+      (click)="openInNewTab('/faq')"
+    />
   </div>
   <span class="spacer"></span>
   <div class="navbar-element">
-    <p-button label="Signout" variant="text" severity="secondary" class="full-width navbar-button" icon="pi pi-sign-out" aria-label="Signout" (click)="signout()" />
+    <p-button
+      label="Signout"
+      variant="text"
+      severity="secondary"
+      class="full-width navbar-button"
+      icon="pi pi-sign-out"
+      aria-label="Signout"
+      (click)="signout()"
+    />
   </div>
-  <div class="navbar-element navbar-text-element" matTooltip="https://github.com/ndudnicz/silmaril"
-    matTooltipPosition="right">
+  <div
+    class="navbar-element navbar-text-element"
+    matTooltip="https://github.com/ndudnicz/silmaril"
+    matTooltipPosition="right"
+  >
     <a href="https://github.com/ndudnicz/silmaril" class="link" target="_blank">
-      <img src="assets/images/github.svg" width="17" height="17">
+      <img src="assets/images/github.svg" width="17" height="17" alt="github-logo" />
       Silmaril
     </a>
   </div>

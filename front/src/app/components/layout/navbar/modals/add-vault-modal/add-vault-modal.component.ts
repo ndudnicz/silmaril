@@ -1,5 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { VaultService } from '../../../../../services/vault.service';
 import { ToastWrapper } from '../../../../../utils/toast.wrapper';
 import { BaseModalComponent } from '../../../../base-component/modal/base-modal/base-modal.component';
@@ -9,14 +15,9 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-add-vault-modal',
-  imports: [
-    ReactiveFormsModule,
-    FormsModule,
-    ButtonModule,
-    InputTextModule
-  ],
+  imports: [ReactiveFormsModule, FormsModule, ButtonModule, InputTextModule],
   templateUrl: './add-vault-modal.component.html',
-  styleUrl: './add-vault-modal.component.css'
+  styleUrl: './add-vault-modal.component.css',
 })
 export class AddVaultModalComponent extends BaseModalComponent {
   private readonly vaultNameMaxLength = 128;
@@ -25,10 +26,10 @@ export class AddVaultModalComponent extends BaseModalComponent {
 
   vaultNameFormControl = new FormControl('', [
     Validators.required,
-    Validators.maxLength(this.vaultNameMaxLength)
+    Validators.maxLength(this.vaultNameMaxLength),
   ]);
   form: FormGroup = new FormGroup({
-    vaultName: this.vaultNameFormControl
+    vaultName: this.vaultNameFormControl,
   });
 
   onSubmit() {
@@ -36,28 +37,29 @@ export class AddVaultModalComponent extends BaseModalComponent {
       const vaultName = this.vaultNameFormControl.value;
       console.log('Creating vault with name:', vaultName);
       this.startLoading();
-      this.vaultService.createVault$({
-        name: vaultName!
-      }).subscribe({
-        next: (vault) => {
-          console.log('Vault created successfully:', vault);
-          ToastWrapper.success('Vault created successfully');
-          this.stopLoading();
-          this.dialogRef.close(vault);
-        },
-        error: (error) => {
-          this.displayError('Error creating vault', error);
-          this.stopLoading();
-        }
-      });
+      this.vaultService
+        .createVault$({
+          name: vaultName!,
+        })
+        .subscribe({
+          next: (vault) => {
+            console.log('Vault created successfully:', vault);
+            ToastWrapper.success('Vault created successfully');
+            this.stopLoading();
+            this.dialogRef.close(vault);
+          },
+          error: (error) => {
+            this.displayError('Error creating vault', error);
+            this.stopLoading();
+          },
+        });
     } else {
       console.error('Form is invalid:', this.form.errors);
     }
   }
 
   keypress(event: KeyboardEvent) {
-    if (this.form.valid
-      && event.key === 'Enter') {
+    if (this.form.valid && event.key === 'Enter') {
       event.stopImmediatePropagation();
       event.preventDefault();
       this.onSubmit();

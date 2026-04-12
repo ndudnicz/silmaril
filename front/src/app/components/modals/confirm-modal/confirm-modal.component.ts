@@ -11,11 +11,9 @@ export interface ConfirmModalData {
 
 @Component({
   selector: 'app-confirm-modal',
-  imports: [
-    ButtonModule
-  ],
+  imports: [ButtonModule],
   templateUrl: './confirm-modal.component.html',
-  styleUrl: './confirm-modal.component.css'
+  styleUrl: './confirm-modal.component.css',
 })
 export class ConfirmModalComponent {
   private readonly dialogRef = inject(DynamicDialogRef);

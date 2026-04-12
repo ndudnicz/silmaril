@@ -7,10 +7,15 @@
   </div>
   <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
     <p-select formControlName="vaultId" [options]="vaults()" optionValue="id" optionLabel="name" />
-    <br>
+    <br />
     <div class="buttons">
-      <p-button type="submit" [disabled]="form.invalid || loading">Restore
-        Logins</p-button>
+      <p-button
+        variant="text"
+        severity="secondary"
+        type="submit"
+        [disabled]="form.invalid || loading"
+        >Restore Logins</p-button
+      >
     </div>
   </form>
 </div>

@@ -3,7 +3,13 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
     <input type="text" pInputText placeholder="Vault Name" formControlName="vaultName" required />
     <div class="buttons">
-      <p-button label="Edit" type="submit" [disabled]="form.invalid || loading" />
+      <p-button
+        variant="text"
+        severity="secondary"
+        label="Edit"
+        type="submit"
+        [disabled]="form.invalid || loading"
+      />
     </div>
   </form>
 </div>

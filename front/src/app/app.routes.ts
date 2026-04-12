@@ -12,18 +12,55 @@ import { RecycleBinComponent } from './components/recycle-bin/recycle-bin.compon
 
 const title = 'Silmaril - Password Manager';
 export const routes: Routes = [
-    { path: 'what-is-master-password', title: title + ': What is a master password', component: WhatIsMasterPasswordComponent },
-    { path: 'faq', title: title + ': FAQ', component: FaqComponent },
-    { path: 'signin', title: title + ': Sign in', component: SigninComponent, canActivate: [authNoAuthGuard] },
-    { path: 'signup', title: title + ': Sign up', component: SignupComponent, canActivate: [authNoAuthGuard] },
-    {
-        path: '', title: title, component: LayoutComponent, children: [
-            { path: 'unlock', title: title + ': Unlock', component: UnlockComponent, canActivate: [authGuard] },
-            { path: 'vault/:id', title: title + ': Vault', component: VaultComponent, canActivate: [authGuard, vaultUnlocked] },
-            { path: 'recycle-bin', title: title + ': Recycle Bin', component: RecycleBinComponent, canActivate: [authGuard, vaultUnlocked] },
-            { path: 'settings', title: title + ': Settings', component: SettingsComponent, canActivate: [authGuard] },
-            { path: '', redirectTo: 'unlock', pathMatch: 'full' },
-            { path: '**', redirectTo: 'unlock', pathMatch: 'full' }
-        ]
-    }
+  {
+    path: 'what-is-master-password',
+    title: title + ': What is a master password',
+    component: WhatIsMasterPasswordComponent,
+  },
+  { path: 'faq', title: title + ': FAQ', component: FaqComponent },
+  {
+    path: 'signin',
+    title: title + ': Sign in',
+    component: SigninComponent,
+    canActivate: [authNoAuthGuard],
+  },
+  {
+    path: 'signup',
+    title: title + ': Sign up',
+    component: SignupComponent,
+    canActivate: [authNoAuthGuard],
+  },
+  {
+    path: '',
+    title: title,
+    component: LayoutComponent,
+    children: [
+      {
+        path: 'unlock',
+        title: title + ': Unlock',
+        component: UnlockComponent,
+        canActivate: [authGuard],
+      },
+      {
+        path: 'vault/:id',
+        title: title + ': Vault',
+        component: VaultComponent,
+        canActivate: [authGuard, vaultUnlocked],
+      },
+      {
+        path: 'recycle-bin',
+        title: title + ': Recycle Bin',
+        component: RecycleBinComponent,
+        canActivate: [authGuard, vaultUnlocked],
+      },
+      {
+        path: 'settings',
+        title: title + ': Settings',
+        component: SettingsComponent,
+        canActivate: [authGuard],
+      },
+      { path: '', redirectTo: 'unlock', pathMatch: 'full' },
+      { path: '**', redirectTo: 'unlock', pathMatch: 'full' },
+    ],
+  },
 ];

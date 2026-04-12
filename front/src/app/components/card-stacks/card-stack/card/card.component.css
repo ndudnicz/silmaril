@@ -18,7 +18,9 @@
 .card-selected {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
   background-color: #273a84;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .card-content {

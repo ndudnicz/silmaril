@@ -22,9 +22,9 @@ export const appConfig: ApplicationConfig = {
         preset: Material,
         options: {
           cssLayer: false,
-          darkModeSelector: false
-        }
-      }
-    })
-  ]
+          darkModeSelector: false,
+        },
+      },
+    }),
+  ],
 };

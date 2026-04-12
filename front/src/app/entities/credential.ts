@@ -1,5 +1,5 @@
-import { base64ToUint8Array } from "../utils/crypto.utils";
-import { DecryptedData } from "./decrypted-data";
+import { base64ToUint8Array } from '../utils/crypto.utils';
+import { DecryptedData } from './decrypted-data';
 
 export class Credential {
   public encryptedData?: Uint8Array | null;
@@ -18,10 +18,12 @@ export class Credential {
     public initializationVectorBase64?: string | null,
     public tagNames: string[] = [],
     public updated?: Date,
-    public encryptionVersion?: number | null
+    public encryptionVersion?: number | null,
   ) {
     this.encryptedData = encryptedDataBase64 ? base64ToUint8Array(encryptedDataBase64) : null;
-    this.initializationVector = initializationVectorBase64 ? base64ToUint8Array(initializationVectorBase64) : null;
+    this.initializationVector = initializationVectorBase64
+      ? base64ToUint8Array(initializationVectorBase64)
+      : null;
   }
 
   public static fromObject(obj: any): Credential {
@@ -41,7 +43,7 @@ export class Credential {
       obj.initializationVectorBase64 || undefined,
       Array.isArray(obj.tagNames) ? obj.tagNames : [],
       obj.updated ? new Date(obj.updated) : undefined,
-      typeof obj.encryptionVersion === 'number' ? obj.encryptionVersion : undefined
+      typeof obj.encryptionVersion === 'number' ? obj.encryptionVersion : undefined,
     );
   }
 
@@ -56,7 +58,7 @@ export class Credential {
       this.initializationVectorBase64,
       [...this.tagNames],
       this.updated ? new Date(this.updated) : undefined,
-      this.encryptionVersion
+      this.encryptionVersion,
     );
   }
 

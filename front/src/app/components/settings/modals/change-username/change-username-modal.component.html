@@ -2,11 +2,23 @@
   <h1 mat-dialog-title>Change Your Username</h1>
   <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
     <p-iconfield>
-      <input type="text" pInputText placeholder="New Username" formControlName="username" required />
+      <input
+        type="text"
+        pInputText
+        placeholder="New Username"
+        formControlName="username"
+        required
+      />
       <p-inputicon class="pi pi-user" />
     </p-iconfield>
     <div class="buttons">
-      <p-button type="submit" label="Change Username" [disabled]="form.invalid || loading" />
+      <p-button
+        variant="text"
+        severity="secondary"
+        type="submit"
+        label="Change Username"
+        [disabled]="form.invalid || loading"
+      />
     </div>
   </form>
 </div>

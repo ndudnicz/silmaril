@@ -3,11 +3,24 @@
   <div id="settings-body">
     <div id="settings-menu-container">
       <div class="settings-button-container">
-        <p-button label="Change username" icon="pi pi-user" class="settings-button" (click)="openChangeUserNameModal()" />
-
+        <p-button
+          variant="text"
+          severity="secondary"
+          label="Change username"
+          icon="pi pi-user"
+          class="settings-button"
+          (click)="openChangeUserNameModal()"
+        />
       </div>
       <div class="settings-button-container">
-        <p-button variant="text" label="Change Password" icon="pi pi-lock" class="settings-button" (click)="openChangePasswordModal()" />
+        <p-button
+          variant="text"
+          severity="secondary"
+          label="Change Password"
+          icon="pi pi-lock"
+          class="settings-button"
+          (click)="openChangePasswordModal()"
+        />
       </div>
     </div>
   </div>

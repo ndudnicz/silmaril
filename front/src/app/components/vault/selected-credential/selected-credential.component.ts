@@ -8,13 +8,12 @@ import { ConfirmModalComponent } from '../../modals/confirm-modal/confirm-modal.
 import { CredentialService } from '../../../services/credential.service';
 import { BaseComponent } from '../../base-component/base-component.component';
 import { take } from 'rxjs';
-import { VaultService } from '../../../services/vault.service';
 import { UpdateCredentialDto } from '../../../entities/update/update-credential-dto';
 import { DialogService } from 'primeng/dynamicdialog';
 import { AddEditCredentialModalComponent } from '../modals/add-edit-credential/add-edit-credential-modal.component';
 import { InputTextModule } from 'primeng/inputtext';
 import { IftaLabelModule } from 'primeng/iftalabel';
-import { Button, ButtonIcon, ButtonModule } from "primeng/button";
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-selected-credential',
@@ -24,19 +23,21 @@ import { Button, ButtonIcon, ButtonModule } from "primeng/button";
     ClipboardModule,
     InputTextModule,
     IftaLabelModule,
-    ButtonModule
-],
+    ButtonModule,
+  ],
   templateUrl: './selected-credential.component.html',
-  styleUrl: './selected-credential.component.css'
+  styleUrl: './selected-credential.component.css',
 })
 export class SelectedCredentialComponent extends BaseComponent {
   readonly credential = model<Credential | null>();
   protected readonly updateCredential = output<Credential>();
-  private readonly credentialService = inject(CredentialService)
+  private readonly credentialService = inject(CredentialService);
   private readonly dialogService = inject(DialogService);
   protected readonly showPassword = signal(false);
   protected readonly title = computed(() => this.credential()?.decryptedData?.title || '');
-  protected readonly identifier = computed(() => this.credential()?.decryptedData?.identifier || '');
+  protected readonly identifier = computed(
+    () => this.credential()?.decryptedData?.identifier || '',
+  );
   protected readonly password = computed(() => this.credential()?.decryptedData?.password || '');
   protected readonly url = computed(() => this.credential()?.decryptedData?.url || '');
   protected readonly notes = computed(() => this.credential()?.decryptedData?.notes || '');
@@ -59,22 +60,25 @@ export class SelectedCredentialComponent extends BaseComponent {
       this.displayError('No credential selected', null);
       return;
     }
-    this.dialogService.open(AddEditCredentialModalComponent,
-      {
+    this.dialogService
+      .open(AddEditCredentialModalComponent, {
+        closable: true,
+
         width: '600px',
         height: 'auto',
         data: {
           mode: AddEditCredentialModalComponent.MODAL_MOD.EDIT,
           login: credential,
-          vaultId: credential.vaultId
+          vaultId: credential.vaultId,
+        },
+      })
+      ?.onClose.pipe(take(1))
+      .subscribe((result: Credential) => {
+        if (result) {
+          this.credential.set(result);
+          this.updateCredential.emit(result);
         }
-      }
-    )?.onClose.pipe(take(1)).subscribe((result: Credential) => {
-      if (result) {
-        this.credential.set(result);
-        this.updateCredential.emit(result);
-      }
-    });
+      });
   }
 
   openSoftDeleteModal(): void {
@@ -83,30 +87,36 @@ export class SelectedCredentialComponent extends BaseComponent {
       this.displayError('No credential selected', null);
       return;
     }
-    this.dialogService.open(ConfirmModalComponent, {
-      width: '400px',
-      height: 'auto',
-      data: {
-        title: `Delete Login ${credential.decryptedData?.title}`,
-        message: `Are you sure you want to delete the login "${credential.decryptedData?.title}"? It will be sent to the recycle bin and can be restored later.`,
-        confirmText: 'Confirm',
-        cancelText: 'Cancel'
-      }
-    })?.onClose.pipe(take(1)).subscribe((confirmed: boolean): void => {
-      if (confirmed) {
-        this.startLoading();
-        this.credential.set({ ...this.credential(), deleted: true } as Credential);
-        this.credentialService.updateCredential$(UpdateCredentialDto.fromCredential(this.credential()!))
-          .pipe(take(1))
-          .subscribe({
-            next: (updatedLogin: Credential) => this.onSoftDeleteLoginSuccess(updatedLogin),
-            error: (error: any) => {
-              this.displayError('Error deleting login', error);
-              this.stopLoading();
-            }
-          });
-      }
-    })
+    this.dialogService
+      .open(ConfirmModalComponent, {
+        closable: true,
+
+        width: '400px',
+        height: 'auto',
+        data: {
+          title: `Delete Login ${credential.decryptedData?.title}`,
+          message: `Are you sure you want to delete the login "${credential.decryptedData?.title}"? It will be sent to the recycle bin and can be restored later.`,
+          confirmText: 'Confirm',
+          cancelText: 'Cancel',
+        },
+      })
+      ?.onClose.pipe(take(1))
+      .subscribe((confirmed: boolean): void => {
+        if (confirmed) {
+          this.startLoading();
+          this.credential.set({ ...this.credential(), deleted: true } as Credential);
+          this.credentialService
+            .updateCredential$(UpdateCredentialDto.fromCredential(this.credential()!))
+            .pipe(take(1))
+            .subscribe({
+              next: (updatedLogin: Credential) => this.onSoftDeleteLoginSuccess(updatedLogin),
+              error: (error: Error) => {
+                this.displayError('Error deleting login', error);
+                this.stopLoading();
+              },
+            });
+        }
+      });
   }
 
   onSoftDeleteLoginSuccess(updatedLogin: Credential): void {

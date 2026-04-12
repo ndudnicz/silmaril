@@ -25,15 +25,18 @@ import { InputTextModule } from 'primeng/inputtext';
     InputTextModule,
   ],
   templateUrl: './unlock.component.html',
-  styleUrl: './unlock.component.css'
+  styleUrl: './unlock.component.css',
 })
 export class UnlockComponent extends BaseComponent implements OnInit {
   private readonly dataService = inject(DataService);
   private readonly router = inject(Router);
   private readonly vaultService = inject(VaultService);
-  protected readonly masterPasswordFormControl = new FormControl('', [Validators.required, Validators.minLength(8)]);
+  protected readonly masterPasswordFormControl = new FormControl('', [
+    Validators.required,
+    Validators.minLength(8),
+  ]);
   protected readonly form: FormGroup = new FormGroup({
-    password: this.masterPasswordFormControl
+    password: this.masterPasswordFormControl,
   });
 
   ngOnInit() {
@@ -56,8 +59,7 @@ export class UnlockComponent extends BaseComponent implements OnInit {
   }
 
   keypress(event: KeyboardEvent) {
-    if (this.masterPasswordFormControl.valid
-      && event.key === 'Enter') {
+    if (this.masterPasswordFormControl.valid && event.key === 'Enter') {
       event.stopImmediatePropagation();
       event.preventDefault();
       this.onSubmit();
@@ -65,19 +67,22 @@ export class UnlockComponent extends BaseComponent implements OnInit {
   }
 
   loadVaults(): void {
-    this.vaultService.getVaults$().pipe(take(1)).subscribe({
-      next: (vaults: Vault[]) => {
-        this.onVaultsLoaded(vaults);
-      },
-      error: (error: any) => {
-        this.displayError('Error fetching vaults', error);
-        this.stopLoading();
-      },
-      complete: () => {
-        console.log('Vaults fetched successfully');
-        this.stopLoading();
-      }
-    });
+    this.vaultService
+      .getVaults$()
+      .pipe(take(1))
+      .subscribe({
+        next: (vaults: Vault[]) => {
+          this.onVaultsLoaded(vaults);
+        },
+        error: (error: any) => {
+          this.displayError('Error fetching vaults', error);
+          this.stopLoading();
+        },
+        complete: () => {
+          console.log('Vaults fetched successfully');
+          this.stopLoading();
+        },
+      });
   }
 
   onVaultsLoaded(vaults: Vault[]): void {

@@ -25,7 +25,7 @@ enum PasswordStrength {
   WEAK = 'weak',
   MEDIUM = 'medium',
   GOOD = 'good',
-  STRONG = 'strong'
+  STRONG = 'strong',
 }
 
 @Component({
@@ -40,57 +40,65 @@ enum PasswordStrength {
     ButtonModule,
     RadioButtonModule,
     CheckboxModule,
-    InputTextModule
+    InputTextModule,
   ],
   templateUrl: './generate-password-modal.component.html',
-  styleUrl: './generate-password-modal.component.css'
+  styleUrl: './generate-password-modal.component.css',
 })
 export class GeneratePasswordModalComponent extends BaseModalComponent implements OnInit {
-
   private readonly defaultMinLength = 32;
   protected readonly minLength = 8;
   protected readonly specialChars = '!@#$%^&*()-_=+[]{}|;:,.<>?';
-  private readonly minLengthFormControl = new FormControl(this.defaultMinLength, { nonNullable: true, validators: [Validators.min(this.minLength)] });
+  private readonly minLengthFormControl = new FormControl(this.defaultMinLength, {
+    nonNullable: true,
+    validators: [Validators.min(this.minLength)],
+  });
   private readonly readableFormControl = new FormControl(false, { nonNullable: true });
   private readonly lettersFormControl = new FormControl(true, { nonNullable: true });
   private readonly numbersFormControl = new FormControl(true, { nonNullable: true });
   private readonly specialCharFormControl = new FormControl(true, { nonNullable: true });
-  private readonly useWordsFormControl = new FormControl("true", { nonNullable: true });
-  protected generatedPassword = signal(this.generatePassword({
-    minLength: this.minLengthFormControl.value || this.defaultMinLength,
-    readable: this.readableFormControl.value,
-    letters: this.lettersFormControl.value,
-    numbers: this.numbersFormControl.value,
-    specialChar: this.specialCharFormControl.value,
-    useWords: this.useWordsFormControl.value === 'true'
-  }));
+  private readonly useWordsFormControl = new FormControl('true', { nonNullable: true });
+  protected generatedPassword = signal(
+    this.generatePassword({
+      minLength: this.minLengthFormControl.value || this.defaultMinLength,
+      readable: this.readableFormControl.value,
+      letters: this.lettersFormControl.value,
+      numbers: this.numbersFormControl.value,
+      specialChar: this.specialCharFormControl.value,
+      useWords: this.useWordsFormControl.value === 'true',
+    }),
+  );
   protected readonly formGeneratePassword: FormGroup = new FormGroup({
     minLengthFormControl: this.minLengthFormControl,
     readableFormControl: this.readableFormControl,
     lettersFormControl: this.lettersFormControl,
     numbersFormControl: this.numbersFormControl,
     specialCharFormControl: this.specialCharFormControl,
-    useWordsFormControl: this.useWordsFormControl
+    useWordsFormControl: this.useWordsFormControl,
   });
 
   private readonly progressBarColors = {
     [PasswordStrength.WEAK]: '#ed6161',
     [PasswordStrength.MEDIUM]: '#e8b53c',
     [PasswordStrength.GOOD]: '#60b582',
-    [PasswordStrength.STRONG]: '#00966f'
-  }
+    [PasswordStrength.STRONG]: '#00966f',
+  };
   // private readonly progressBarValue = 0;
   // private readonly progressBarColor = this.progressBarColors[PasswordStrength.WEAK];
   // private readonly passwordStrengthStr = PasswordStrength.WEAK.toString();
 
-  protected readonly passwordStrength = computed(() => this.getPasswordStrength(this.generatedPassword()));
+  protected readonly passwordStrength = computed(() =>
+    this.getPasswordStrength(this.generatedPassword()),
+  );
   protected readonly passwordStrengthStr = computed(() => this.passwordStrength().str);
-  protected readonly progressBarValue = computed(() => this.passwordStrength().score > 100 ? 100 : this.passwordStrength().score);
+  protected readonly progressBarValue = computed(() =>
+    this.passwordStrength().score > 100 ? 100 : this.passwordStrength().score,
+  );
   protected readonly progressBarColor = computed(() => this.passwordStrength().color);
 
   protected readonly useWordsOptions = [
     { label: 'Yes', value: 'true' },
-    { label: 'No', value: 'false' }
+    { label: 'No', value: 'false' },
   ];
 
   ngOnInit(): void {
@@ -101,7 +109,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
   minLengthValidator(control: FormControl): { [key: string]: boolean } | null {
     const value = control.value;
     if (value < 8) {
-      return { 'minLength': true };
+      return { minLength: true };
     }
     return null;
   }
@@ -112,27 +120,31 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
 
   setNewPassword(): void {
     if (this.formGeneratePassword.valid) {
-      this.generatedPassword.set(this.generatePassword({
-        minLength: this.minLengthFormControl.value || this.defaultMinLength,
-        readable: this.readableFormControl.value,
-        letters: this.lettersFormControl.value,
-        numbers: this.numbersFormControl.value,
-        specialChar: this.specialCharFormControl.value,
-        useWords: this.useWordsFormControl.value === 'true'
-      }));
+      this.generatedPassword.set(
+        this.generatePassword({
+          minLength: this.minLengthFormControl.value || this.defaultMinLength,
+          readable: this.readableFormControl.value,
+          letters: this.lettersFormControl.value,
+          numbers: this.numbersFormControl.value,
+          specialChar: this.specialCharFormControl.value,
+          useWords: this.useWordsFormControl.value === 'true',
+        }),
+      );
       this.formGeneratePassword.markAsPristine();
       // this.setProgressPasswordStrengthValues();
     }
   }
 
-  generatePassword(options: PasswordOptions = {
-    minLength: this.defaultMinLength,
-    readable: false,
-    letters: true,
-    numbers: true,
-    specialChar: true,
-    useWords: true
-  }): string {
+  generatePassword(
+    options: PasswordOptions = {
+      minLength: this.defaultMinLength,
+      readable: false,
+      letters: true,
+      numbers: true,
+      specialChar: true,
+      useWords: true,
+    },
+  ): string {
     const length = options.minLength || this.defaultMinLength;
     const readable = options.readable;
     const letters = options.letters;
@@ -141,7 +153,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
     const useWords = options.useWords;
 
     const allLettersSet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const readableLettersSet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ';  // without i, l, o
+    const readableLettersSet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ'; // without i, l, o
     const unReadableLetterSet = ['i', 'l', 'o', '0', '1', 'I', 'L', 'O'];
     const numbersChars = '0123456789';
     const readableNumbers = '23456789'; // without 0,1
@@ -162,9 +174,9 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
     }
 
     if (useWords) {
-      const words = readable ? simpleWords.filter(word =>
-        !unReadableLetterSet.some(char => word.includes(char))
-      ) : simpleWords;
+      const words = readable
+        ? simpleWords.filter((word) => !unReadableLetterSet.some((char) => word.includes(char)))
+        : simpleWords;
 
       let password = '';
       while (password.length < length) {
@@ -216,9 +228,9 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
   }
 
   getPasswordStrength(password: string): {
-    str: string,
-    color: string,
-    score: number
+    str: string;
+    color: string;
+    score: number;
   } {
     const hasLetters = /[a-zA-Z]/.test(password);
 
@@ -250,18 +262,32 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
     if (hasNumbers) score += 2;
     if (hasSpecial) score += 10;
 
-    score += upperCaseMatches.length
-      + numbersMatches.length
-      + specialMatches.length * 3
+    score += upperCaseMatches.length + numbersMatches.length + specialMatches.length * 3;
 
     if (score >= 100) {
-      return { str: PasswordStrength.STRONG, color: this.progressBarColors[PasswordStrength.STRONG], score: score };
+      return {
+        str: PasswordStrength.STRONG,
+        color: this.progressBarColors[PasswordStrength.STRONG],
+        score: score,
+      };
     } else if (score >= 80) {
-      return { str: PasswordStrength.GOOD, color: this.progressBarColors[PasswordStrength.GOOD], score: score };
+      return {
+        str: PasswordStrength.GOOD,
+        color: this.progressBarColors[PasswordStrength.GOOD],
+        score: score,
+      };
     } else if (score >= 50) {
-      return { str: PasswordStrength.MEDIUM, color: this.progressBarColors[PasswordStrength.MEDIUM], score: score };
+      return {
+        str: PasswordStrength.MEDIUM,
+        color: this.progressBarColors[PasswordStrength.MEDIUM],
+        score: score,
+      };
     } else {
-      return { str: PasswordStrength.WEAK, color: this.progressBarColors[PasswordStrength.WEAK], score: score };
+      return {
+        str: PasswordStrength.WEAK,
+        color: this.progressBarColors[PasswordStrength.WEAK],
+        score: score,
+      };
     }
   }
 

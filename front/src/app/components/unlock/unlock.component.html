@@ -1,18 +1,35 @@
 <div class="home-container">
   <div>
     <h3>Enter your master password</h3>
-    <div style="display: flex; justify-content: center;">
-      <a routerLink="/what-is-master-password" id="what-is-master-password-link" class="link" target="_blank">
+    <div style="display: flex; justify-content: center">
+      <a
+        routerLink="/what-is-master-password"
+        id="what-is-master-password-link"
+        class="link"
+        target="_blank"
+      >
         What is a Master Password?
       </a>
     </div>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
       <p-iconfield>
-        <input type="password" pInputText placeholder="Master Password" formControlName="password" required />
+        <input
+          type="password"
+          pInputText
+          placeholder="Master Password"
+          formControlName="password"
+          required
+        />
         <p-inputicon class="pi pi-lock" />
       </p-iconfield>
       <div class="unlock-footer">
-        <p-button variant="text" severity="secondary" label="Unlock" type="submit" [disabled]="masterPasswordFormControl.invalid || loading" />
+        <p-button
+          variant="text"
+          severity="secondary"
+          label="Unlock"
+          type="submit"
+          [disabled]="masterPasswordFormControl.invalid || loading"
+        />
       </div>
     </form>
   </div>

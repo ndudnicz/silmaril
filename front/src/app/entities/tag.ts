@@ -1,6 +1,6 @@
 export interface Tag {
-    id: string;
-    name: string;
-    created: Date;
-    updated?: Date;
+  id: string;
+  name: string;
+  created: Date;
+  updated?: Date;
 }

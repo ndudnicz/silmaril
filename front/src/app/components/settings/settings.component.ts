@@ -8,32 +8,32 @@ import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-settings',
-  imports: [
-    ButtonModule
-  ],
+  imports: [ButtonModule],
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.css'
+  styleUrl: './settings.component.css',
 })
 export class SettingsComponent extends BaseComponent {
   private readonly dialogService = inject(DialogService);
 
   openChangePasswordModal() {
-    const ref = this.dialogService.open(ChangePasswordModalComponent,
-      {
+    this.dialogService
+      .open(ChangePasswordModalComponent, {
         width: '400px',
         height: 'auto',
-      }
-    );
-    ref?.onClose.pipe(take(1)).subscribe(_ => { });
+        closable: true,
+      })
+      ?.onClose.pipe(take(1))
+      .subscribe();
   }
 
   openChangeUserNameModal() {
-    const ref = this.dialogService.open(ChangeUsernameModalComponent,
-      {
+    this.dialogService
+      .open(ChangeUsernameModalComponent, {
         width: '400px',
         height: 'auto',
-      }
-    );
-    ref?.onClose.pipe(take(1)).subscribe(_ => { });
+        closable: true,
+      })
+      ?.onClose.pipe(take(1))
+      .subscribe();
   }
 }

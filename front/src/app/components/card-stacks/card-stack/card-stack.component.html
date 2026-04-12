@@ -1,7 +1,7 @@
 <div class="stack-container">
   <div class="stack-header">
     <div class="title-container">
-      <h2>{{title()}}</h2>
+      <h2>{{ title() }}</h2>
     </div>
     <div class="divider-container">
       <p-divider />
@@ -9,7 +9,7 @@
   </div>
   <div class="stack-content">
     @for (credential of credentials(); track $index) {
-    <app-card (clickEvent)="clickEvent.emit(credential)" [credential]="credential"></app-card>
+      <app-card (clickEvent)="clickEvent.emit(credential)" [credential]="credential"></app-card>
     }
   </div>
 </div>

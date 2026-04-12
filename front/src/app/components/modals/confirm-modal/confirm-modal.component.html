@@ -1,8 +1,10 @@
 <div class="modal-body">
-  <h1>{{data.title}}</h1>
-  <p>{{data.message}}</p>
+  <h1>{{ data.title }}</h1>
+  <p>{{ data.message }}</p>
   <div class="button-container">
-    <p-button variant="text" severity="danger" (click)="onCancel()">{{data.cancelText}}</p-button>
-    <p-button variant="text" severity="secondary" (click)="onConfirm()">{{data.confirmText}}</p-button>
+    <p-button variant="text" severity="danger" (click)="onCancel()">{{ data.cancelText }}</p-button>
+    <p-button variant="text" severity="secondary" (click)="onConfirm()">{{
+      data.confirmText
+    }}</p-button>
   </div>
 </div>

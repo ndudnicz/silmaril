@@ -1,6 +1,6 @@
-import { NgxSpinnerService } from "ngx-spinner";
-import { ToastWrapper } from "../../utils/toast.wrapper";
-import { inject } from "@angular/core";
+import { NgxSpinnerService } from 'ngx-spinner';
+import { ToastWrapper } from '../../utils/toast.wrapper';
+import { inject } from '@angular/core';
 
 export class BaseComponent {
   protected loading = false;

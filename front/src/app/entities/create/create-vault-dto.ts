@@ -1,3 +1,3 @@
 export interface CreateVaultDto {
-    name: string;
+  name: string;
 }

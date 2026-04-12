@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from 'jwt-decode';
 import { AuthResponse } from '../entities/authentication/authResponse';
 import { VaultService } from './vault.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map, Observable, take, tap, throwError } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly apiEndpointV1 = environment.apiEndpoint + '/v1';
@@ -23,8 +23,8 @@ export class AuthService {
 
   constructor(
     private vaultService: VaultService,
-    private http: HttpClient
-  ) { }
+    private http: HttpClient,
+  ) {}
 
   private setLocalStorage(authResponse: AuthResponse): void {
     const parsedToken = jwtDecode(authResponse.jwtToken);
@@ -53,7 +53,7 @@ export class AuthService {
       clearTimeout(this.timeoutRefreshToken);
       this.timeoutRefreshToken = null;
     }
-    var jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES))
+    var jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES));
     if (jwtExpires) {
       const now = Math.floor(Date.now() / 1000);
       const refreshTime = jwtExpires - now - this.refreshTokenDelayInSeconds;
@@ -63,8 +63,8 @@ export class AuthService {
           .pipe(take(1))
           .subscribe({
             next: () => console.log('Token refreshed successfully'),
-            error: (error) => console.error('Error refreshing token:', error)
-        });
+            error: (error) => console.error('Error refreshing token:', error),
+          });
       }, refreshTime * 1000);
     }
   }
@@ -73,75 +73,92 @@ export class AuthService {
     const url = `${this.apiEndpointV1}/auth`;
     const body = { username, password };
 
-    return this.http.post<AuthResponse>(url, body, {
-      withCredentials: true,
-      headers: this.addCsrfHeader()
-    }).pipe(
-      tap(response => {
-        this.setLocalStorage(response);
-        this.setRefreshTokenTimeout();
-        this.setCsrfToken(this.getCookie(this.CSRF_COOKIE_NAME) ?? '');
-      }),
-      map(() => true)
-    );
+    return this.http
+      .post<AuthResponse>(url, body, {
+        withCredentials: true,
+        headers: this.addCsrfHeader(),
+      })
+      .pipe(
+        tap((response) => {
+          this.setLocalStorage(response);
+          this.setRefreshTokenTimeout();
+          this.setCsrfToken(this.getCookie(this.CSRF_COOKIE_NAME) ?? '');
+        }),
+        map(() => true),
+      );
   }
 
   public getCsrfCookie(): void {
     const url = `${this.apiEndpointV1}/auth/csrf-cookie`;
 
-    this.http.get(url, {
-      withCredentials: true 
-    }).pipe(
-      take(1),
-      tap(() => {
-        const csrfToken = this.getCookie(this.CSRF_COOKIE_NAME);
-        if (csrfToken) {
-          this.setCsrfToken(csrfToken);
-          console.log('CSRF token set successfully');
-        } else {
-          console.warn('CSRF token not found in cookies');
-        }
+    this.http
+      .get(url, {
+        withCredentials: true,
       })
-    ).subscribe({
-      next: () => console.log('CSRF cookie fetched successfully'),
-      error: (error) => console.error('Error in CSRF cookie subscription:', error)
-    });
+      .pipe(
+        take(1),
+        tap(() => {
+          const csrfToken = this.getCookie(this.CSRF_COOKIE_NAME);
+          if (csrfToken) {
+            this.setCsrfToken(csrfToken);
+            console.log('CSRF token set successfully');
+          } else {
+            console.warn('CSRF token not found in cookies');
+          }
+        }),
+      )
+      .subscribe({
+        next: () => console.log('CSRF cookie fetched successfully'),
+        error: (error) => console.error('Error in CSRF cookie subscription:', error),
+      });
   }
 
   public refreshToken$(): Observable<boolean> {
     const url = `${this.apiEndpointV1}/auth/refresh-token`;
 
-    return this.http.post<AuthResponse>(url, {}, {
-      headers: this.addCsrfHeader(),
-      withCredentials: true
-    }).pipe(
-      tap(response => {
-        this.setLocalStorage(response);
-        console.log('Token refreshed successfully');
-        this.setRefreshTokenTimeout();
-      }),
-      map(() => true),
-      catchError(error => {
-        let message = error.error.message || 'Token refresh failed';
-        return throwError(() => new Error(message));
-      })
-    );
+    return this.http
+      .post<AuthResponse>(
+        url,
+        {},
+        {
+          headers: this.addCsrfHeader(),
+          withCredentials: true,
+        },
+      )
+      .pipe(
+        tap((response) => {
+          this.setLocalStorage(response);
+          console.log('Token refreshed successfully');
+          this.setRefreshTokenTimeout();
+        }),
+        map(() => true),
+        catchError((error) => {
+          let message = error.error.message || 'Token refresh failed';
+          return throwError(() => new Error(message));
+        }),
+      );
   }
 
   public signout$(): Observable<boolean> {
     const url = `${this.apiEndpointV1}/auth/signout`;
 
-    return this.http.post<string>(url, {}, {
-      withCredentials: true,
-      responseType: 'text' as 'json'
-    }).pipe(
-      tap(() => {
-        this.vaultService.clearKey();
-        this.vaultService.clearSalt();
-        this.clearLocalStorage();
-      }),
-      map(() => true)
-    );
+    return this.http
+      .post<string>(
+        url,
+        {},
+        {
+          withCredentials: true,
+          responseType: 'text' as 'json',
+        },
+      )
+      .pipe(
+        tap(() => {
+          this.vaultService.clearKey();
+          this.vaultService.clearSalt();
+          this.clearLocalStorage();
+        }),
+        map(() => true),
+      );
   }
   public getJwtToken(): string | null {
     return localStorage.getItem(this.JWT_TOKEN_KEY);

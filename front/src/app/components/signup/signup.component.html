@@ -8,23 +8,45 @@
       </p-iconfield>
 
       <p-iconfield>
-        <input type="password" pInputText placeholder="Password" formControlName="password" required />
+        <input
+          type="password"
+          pInputText
+          placeholder="Password"
+          formControlName="password"
+          required
+        />
         <p-inputicon class="pi pi-lock" />
       </p-iconfield>
 
       <p-iconfield>
-        <input type="password" pInputText placeholder="Confirm Password" formControlName="confirmPassword" required />
+        <input
+          type="password"
+          pInputText
+          placeholder="Confirm Password"
+          formControlName="confirmPassword"
+          required
+        />
         <p-inputicon class="pi pi-lock" />
       </p-iconfield>
 
       <div class="buttons">
-        <a class="a-button" style="margin-right: 10px;" mat-button routerLink="/signin">Signin</a>
-        <p-button label="Sign up" type="submit"
-          [disabled]="usernameFormControl.invalid || passwordFormControl.invalid || confirmPasswordFormControl.invalid || loading" />
+        <a class="a-button" style="margin-right: 10px" mat-button routerLink="/signin">Signin</a>
+        <p-button
+          variant="text"
+          severity="secondary"
+          label="Sign up"
+          type="submit"
+          [disabled]="
+            usernameFormControl.invalid ||
+            passwordFormControl.invalid ||
+            confirmPasswordFormControl.invalid ||
+            loading
+          "
+        />
       </div>
     </form>
 
-      @if (passwordFormControl.dirty && passwordFormControl.invalid) {
+    @if (passwordFormControl.dirty && passwordFormControl.invalid) {
       <p-message severity="error">
         Password Requirements :
         <ul>
@@ -36,6 +58,6 @@
           <li>At least one special character</li>
         </ul>
       </p-message>
-      }
+    }
   </div>
 </div>

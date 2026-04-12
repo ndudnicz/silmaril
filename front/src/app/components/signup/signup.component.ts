@@ -1,5 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormGroup, FormControl, ReactiveFormsModule, ValidatorFn, AbstractControl } from '@angular/forms';
+import {
+  FormGroup,
+  FormControl,
+  ReactiveFormsModule,
+  ValidatorFn,
+  AbstractControl,
+} from '@angular/forms';
 import { AuthHelper } from '../helpers/auth.helper';
 import { Router, RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
@@ -23,10 +29,10 @@ import { InputTextModule } from 'primeng/inputtext';
     InputIconModule,
     ButtonModule,
     MessageModule,
-    InputTextModule
+    InputTextModule,
   ],
   templateUrl: './signup.component.html',
-  styleUrl: './signup.component.css'
+  styleUrl: './signup.component.css',
 })
 export class SignupComponent extends BaseComponent implements OnInit {
   private readonly router = inject(Router);
@@ -34,11 +40,14 @@ export class SignupComponent extends BaseComponent implements OnInit {
   private readonly userService = inject(UserService);
   protected readonly usernameFormControl = new FormControl('');
   protected readonly passwordFormControl = new FormControl('', this.passwordValidator());
-  protected readonly confirmPasswordFormControl = new FormControl('', this.confirmPasswordValidator());
+  protected readonly confirmPasswordFormControl = new FormControl(
+    '',
+    this.confirmPasswordValidator(),
+  );
   protected readonly form: FormGroup = new FormGroup({
     username: this.usernameFormControl,
     password: this.passwordFormControl,
-    confirmPassword: this.confirmPasswordFormControl
+    confirmPassword: this.confirmPasswordFormControl,
   });
 
   // displayPasswordRequirements = false;
@@ -49,17 +58,20 @@ export class SignupComponent extends BaseComponent implements OnInit {
 
   async onSubmit() {
     this.startLoading();
-    this.userService.createUser$(
-      this.form.value.username,
-      this.form.value.password,
-      this.form.value.confirmPassword
-    ).pipe(take(1)).subscribe({
-      next: () => this.onUserCreationSuccess(),
-      error: (error: any) => {
-        this.displayError('Error during user creation:', error);
-        this.stopLoading();
-      }
-    });
+    this.userService
+      .createUser$(
+        this.form.value.username,
+        this.form.value.password,
+        this.form.value.confirmPassword,
+      )
+      .pipe(take(1))
+      .subscribe({
+        next: () => this.onUserCreationSuccess(),
+        error: (error: any) => {
+          this.displayError('Error during user creation:', error);
+          this.stopLoading();
+        },
+      });
   }
 
   onUserCreationSuccess() {
@@ -72,7 +84,7 @@ export class SignupComponent extends BaseComponent implements OnInit {
   passwordValidator(): ValidatorFn {
     return (control: AbstractControl<string>): { [key: string]: any } | null => {
       const isValid = AuthHelper.checkPasswordFormat(control.value);
-      return isValid ? null : { 'invalidPassword': { value: control.value } };
+      return isValid ? null : { invalidPassword: { value: control.value } };
     };
   }
 
@@ -80,7 +92,7 @@ export class SignupComponent extends BaseComponent implements OnInit {
     return (control: AbstractControl<string>): { [key: string]: any } | null => {
       let password = control.root?.get('password')?.value;
       if (password && control.value && control.value !== password) {
-        return { 'passwordMismatch': { value: control.value } };
+        return { passwordMismatch: { value: control.value } };
       }
       return null;
     };
