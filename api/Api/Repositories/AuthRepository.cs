@@ -5,19 +5,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories;
 
-public class AuthRepository(AppDbContext db): IAuthRepository
+public class AuthRepository(AppDbContext db) : IAuthRepository
 {
     public async Task<RefreshToken?> GetAsync(string refreshTokenHash)
     {
         return await db.RefreshTokens.AsNoTracking()
             .FirstOrDefaultAsync(x => x.TokenHash == refreshTokenHash);
     }
-    
+
     public async Task<RefreshToken> UpsertAsync(RefreshToken refreshToken)
     {
         var existing = await db.RefreshTokens
             .FirstOrDefaultAsync(x => x.UserId == refreshToken.UserId);
-        
+
         if (existing != null)
         {
             existing.TokenHash = refreshToken.TokenHash;

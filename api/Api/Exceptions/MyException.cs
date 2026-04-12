@@ -1,9 +1,9 @@
 using System.Net;
 
-namespace  Api.Exceptions;
+namespace Api.Exceptions;
 
 [Serializable]
-public abstract class MyException: Exception, IMyException
+public abstract class MyException : Exception, IMyException
 {
     public static readonly HttpStatusCode DefaultStatusCode = HttpStatusCode.InternalServerError;
     public static readonly string DefaultMessage = "An unexpected error occurred.";

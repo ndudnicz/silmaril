@@ -16,7 +16,7 @@ public class UserService(
     IUserValidator userValidator,
     IUserMapper userMapper,
     IVaultService vaultService
-    ): IUserService
+    ) : IUserService
 {
     // The NIST recommends a 16-byte salt length for deriving the user's Master Password key using PBKDF2 on the frontend.
     public static readonly int UserSaltLengthInBytes = 16;
@@ -31,7 +31,7 @@ public class UserService(
 
         return userMapper.ToDto(user);
     }
-    
+
     public async Task<UserDto> GetUserByUserNameAsync(string username)
     {
         var user = await userRepository.GetUserByUserNameHashAsync(CryptoHelper.Sha512(username));
@@ -57,7 +57,7 @@ public class UserService(
         await vaultService.CreateUserDefaultFirstVaultAsync(userDto.Id);
         return userDto;
     }
-    
+
     public async Task<UserDto> UpdateUserAsync(Guid userId, UpdateUserDto updateUserDto)
     {
         await userValidator.EnsureExistsAsync(userId);

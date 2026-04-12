@@ -11,7 +11,7 @@ public static class CryptoHelper
         var hashBytes = SHA512.HashData(Encoding.UTF8.GetBytes(str));
         return BitConverter.ToString(hashBytes).Replace("-", "");
     }
-    
+
     public static string Argon2idHash(string password)
     {
         var config = new Argon2Config
@@ -30,7 +30,7 @@ public static class CryptoHelper
         var hash = Argon2.Hash(config);
         return hash;
     }
-    
+
     public static bool Argon2idVerify(string password, string hash) =>
         Argon2.Verify(hash, password);
 
@@ -44,9 +44,9 @@ public static class CryptoHelper
 
     public static string GenerateRandomBase64Str(int length) =>
         Convert.ToBase64String(GenerateRandomByte(length));
-    
+
     public static byte[] DecodeBase64(string? base64) =>
         string.IsNullOrWhiteSpace(base64) ? [] : Convert.FromBase64String(base64);
-    
+
     public static Guid GenerateSecureGuid() => new(GenerateRandomByte(16));
 }

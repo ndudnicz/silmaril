@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Entities;
 
-public class RefreshToken: MyEntity
+public class RefreshToken : MyEntity
 {
     [Column("user_id")]
     public required Guid UserId { get; set; }

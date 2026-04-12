@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Api.Entities;
 
 [Table("logins")]
-public class Login: MyEntity
+public class Login : MyEntity
 {
     [Column("user_id")]
     public Guid UserId { get; set; }

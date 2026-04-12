@@ -29,7 +29,7 @@ public class LoginService(
         await userValidator.EnsureExistsAsync(userId);
         return loginMapper.ToDto(await loginRepository.GetLoginsByUserIdWithTagsAsync(userId, deleted: true));
     }
-    
+
     public async Task<LoginDto> CreateLoginAsync(CreateLoginDto createLoginDto, Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
@@ -57,7 +57,7 @@ public class LoginService(
         logins.ForEach(login => AssignUserAndTagsToLogin(login, userId, tags));
         return loginMapper.ToDto(await loginRepository.CreateLoginsAsync(logins));
     }
-    
+
     private void AssignUserAndTagsToLogin(Login login, Guid userId, List<Tag> availableTags)
     {
         tagService.EnsureAllTagNamesExist(login.TagNames, availableTags);
@@ -81,8 +81,8 @@ public class LoginService(
         var updatedLogin = await loginRepository.UpdateLoginAsync(login!);
         return loginMapper.ToDto(updatedLogin);
     }
-    
-    
+
+
     public async Task<List<LoginDto>> UpdateLoginsAsync(List<UpdateLoginDto> updateLoginDtos, Guid userId)
     {
         if (updateLoginDtos.Count == 0)
@@ -106,7 +106,7 @@ public class LoginService(
         await ApplyDtosToLoginsAsync(updateLoginDtos, existingLoginsDictionary);
         return loginMapper.ToDto(await loginRepository.UpdateLoginsAsync(existingLoginsDictionary.Values.ToList()));
     }
-    
+
     private async Task ApplyDtosToLoginsAsync(List<UpdateLoginDto> updateLoginDtos, Dictionary<Guid, Login> existingLoginsDictionary)
     {
         var allTags = await tagService.GetTagsAsync();
@@ -128,7 +128,7 @@ public class LoginService(
         await loginValidator.EnsureExistsByUserIdAsync(id, userId);
         return await loginRepository.DeleteLoginAsync(id);
     }
-    
+
     public async Task<int> DeleteLoginsByUserIdAsync(List<Guid> ids, Guid userId)
     {
         if (ids.Count == 0)

@@ -13,7 +13,7 @@ public class UserValidator(IUserRepository userRepository) : IUserValidator
             throw new UserNotFound("id", id.ToString());
         }
     }
-    
+
     public async Task EnsureExistsByUsernameHashAsync(string usernameHash)
     {
         if (!await userRepository.UserExistsByUsernameHashAsync(usernameHash))
@@ -21,7 +21,7 @@ public class UserValidator(IUserRepository userRepository) : IUserValidator
             throw new UserNotFound("usernameHash", usernameHash);
         }
     }
-    
+
     public async Task EnsureDoesNotExistByUsernameHashAsync(string usernameHash)
     {
         if (await userRepository.UserExistsByUsernameHashAsync(usernameHash))

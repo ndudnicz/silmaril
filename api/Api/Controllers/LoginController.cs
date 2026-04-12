@@ -24,14 +24,14 @@ public class LoginController(
     {
         return Ok(await loginService.GetDeletedLoginsByUserIdAsync(GetUserId()));
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] CreateLoginDto createLoginDto)
     {
         var createdLogin = await loginService.CreateLoginAsync(createLoginDto, GetUserId());
         return Created($"api/logins", createdLogin);
     }
-    
+
     [HttpPost("bulk")]
     public async Task<IActionResult> CreateBulkAsync([FromBody] List<CreateLoginDto> createLoginDtos)
     {
@@ -44,7 +44,7 @@ public class LoginController(
     {
         return Ok(await loginService.UpdateLoginAsync(updateLoginDto, GetUserId()));
     }
-    
+
     [HttpPut("bulk")]
     public async Task<IActionResult> UpdateBulkAsync([FromBody] List<UpdateLoginDto> updateLoginDtos)
     {
@@ -56,7 +56,7 @@ public class LoginController(
     {
         return Ok(await loginService.DeleteLoginByUserIdAsync(id, GetUserId()));
     }
-    
+
     [HttpDelete("bulk")]
     public async Task<IActionResult> DeleteBulkAsync([FromBody] DeleteLoginsDto deleteLoginsDto)
     {

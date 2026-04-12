@@ -11,7 +11,7 @@ public class AuthController(
     IAuthService authService,
     JwtConfiguration jwtConfiguration,
     CsrfConfiguration csrfConfiguration,
-    ILogger<AuthController> logger): MyControllerV1
+    ILogger<AuthController> logger) : MyControllerV1
 {
     [HttpPost]
     [AllowAnonymous]
@@ -24,7 +24,8 @@ public class AuthController(
         {
             await antiforgery.ValidateRequestAsync(HttpContext);
             var authResponse = await authService.AuthAsync(authDto);
-            Response.Cookies.Append("refreshToken", authResponse.RefreshToken, new CookieOptions{
+            Response.Cookies.Append("refreshToken", authResponse.RefreshToken, new CookieOptions
+            {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Lax,
@@ -52,7 +53,7 @@ public class AuthController(
             });
         return Ok();
     }
-    
+
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromServices] IAntiforgery antiforgery)
     {

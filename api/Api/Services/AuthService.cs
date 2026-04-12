@@ -17,11 +17,11 @@ public class AuthService(
     IAuthRepository authRepository,
     IUserValidator userValidator,
     JwtConfiguration jwtConfiguration
-    ): IAuthService
+    ) : IAuthService
 {
     private readonly int _jwtTokenExpirationTimeInMinutes = jwtConfiguration.AccessTokenExpirationMinutes;
-    private readonly int _jwtRefreshTokenExpirationTimeInHours = jwtConfiguration.RefreshTokenExpirationMinutes; 
-    
+    private readonly int _jwtRefreshTokenExpirationTimeInHours = jwtConfiguration.RefreshTokenExpirationMinutes;
+
     public static void EnsurePasswordFormatIsValid(string password)
     {
         if (!PasswordFormatIsValid(password))
@@ -29,7 +29,7 @@ public class AuthService(
             throw new InvalidPasswordFormat();
         }
     }
-    
+
     private static bool PasswordFormatIsValid(string password)
     {
         // The password must be at least 8 characters long, contain at least one letter, one digit,
@@ -43,7 +43,7 @@ public class AuthService(
                && password.Any(char.IsUpper)
                && password.Any(c => specialCharacters.Contains(c));
     }
-    
+
     public static void EnsurePasswordIsValid(string password, string passwordHash)
     {
         if (!CryptoHelper.Argon2idVerify(password, passwordHash))
@@ -51,7 +51,7 @@ public class AuthService(
             throw new InvalidPassword();
         }
     }
-    
+
     public async Task<AuthResponseDto> AuthAsync(AuthDto authDto)
     {
         var usernameHash = CryptoHelper.Sha512(authDto.Username);
@@ -85,7 +85,7 @@ public class AuthService(
             RefreshTokenExpiration = refreshTokenExpiration
         };
     }
-    
+
     private async Task EnsureRefreshTokenExistsNotExpiredAndUserExistsAsync(RefreshToken? refreshToken)
     {
         if (refreshToken == null)
@@ -98,7 +98,7 @@ public class AuthService(
         }
         await userValidator.EnsureExistsAsync(refreshToken!.UserId);
     }
-    
+
     public async Task<int> RevokeRefreshTokenByUserIdAsync(Guid userId)
     {
         return await authRepository.DeleteRefreshTokenByUserIdAsync(userId);
@@ -123,7 +123,7 @@ public class AuthService(
         var jwt = tokenHandler.WriteToken(token);
         return jwt;
     }
-    
+
     private (string, RefreshToken, DateTime) GenerateRefreshToken(Guid userId)
     {
         var refreshTokenStr = CryptoHelper.GenerateRandomBase64Str(256);

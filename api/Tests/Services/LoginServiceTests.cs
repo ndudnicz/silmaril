@@ -60,14 +60,14 @@ public class LoginServiceTests
         var userId = Guid.NewGuid();
         var createDto = new CreateLoginDto { VaultId = vaultId, TagNames = new[] { tags[0].Name } };
         var login = CreateTestLogin(userId, vaultId, tags);
-        
+
         _tagService.Setup(t => t.GetTagsByNamesAsync(It.IsAny<string[]>()))
             .ReturnsAsync(tags);
         _loginRepository.Setup(r => r.CreateLoginAsync(It.IsAny<Login>()))
             .ReturnsAsync(login);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
-        
+
         var service = CreateService();
         var result = await service.CreateLoginAsync(createDto, Guid.NewGuid());
 
@@ -95,7 +95,7 @@ public class LoginServiceTests
             CreateTestLogin(userId, vaultId, tags: new List<Tag> { tags[0] }),
             CreateTestLogin(userId, vaultId, tags: new List<Tag> { tags[1] })
         };
-        
+
         _tagService.Setup(t => t.GetTagsAsync()).ReturnsAsync(tags);
         _loginRepository.Setup(r => r.CreateLoginsAsync(It.IsAny<List<Login>>()))
             .ReturnsAsync(logins);
@@ -109,7 +109,7 @@ public class LoginServiceTests
         result.Should().HaveCount(2);
         result.Select(l => l.Id).Should().BeEquivalentTo(logins.Select(l => l.Id));
     }
-    
+
     [Fact]
     public async Task CreateLoginAsync_WhenTagsNotFound_ShouldThrow()
     {
@@ -119,7 +119,7 @@ public class LoginServiceTests
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
         var service = CreateService();
-        
+
         Func<Task> act = async () => await service.CreateLoginAsync(createDto, Guid.NewGuid());
 
         await act.Should().ThrowAsync<TagsNotFound>();
@@ -134,18 +134,18 @@ public class LoginServiceTests
             new() { VaultId = vaultId, TagNames = new[] { "inexistant" } },
             new() { VaultId = vaultId, TagNames = new[] { "inexistant2" } }
         };
-        
+
         _tagService.Setup(t => t.GetTagsAsync())
             .ThrowsAsync(new TagsNotFound("Name", "inexistant, inexistant2"));
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
         var service = CreateService();
-        
+
         Func<Task> act = async () => await service.CreateLoginsAsync(createDtos, Guid.NewGuid());
 
         await act.Should().ThrowAsync<TagsNotFound>();
     }
-    
+
     [Fact]
     public async Task UpdateLoginAsync_WhenUserNotFound_ShouldThrow()
     {
@@ -154,7 +154,7 @@ public class LoginServiceTests
         _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
         var service = CreateService();
-        
+
         Func<Task> act = async () => await service.UpdateLoginAsync(new UpdateLoginDto
         {
             Id = Guid.NewGuid()
@@ -173,7 +173,7 @@ public class LoginServiceTests
         _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
         var service = CreateService();
-        
+
         var result = await service.DeleteLoginByUserIdAsync(Guid.NewGuid(), Guid.NewGuid());
 
         result.Should().Be(1);

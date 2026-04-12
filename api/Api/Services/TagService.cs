@@ -7,13 +7,13 @@ namespace Api.Services;
 
 public class TagService(
     ITagRepository tagRepository
-    ): ITagService
+    ) : ITagService
 {
     public async Task<List<Tag>> GetTagsAsync()
     {
         return await tagRepository.GetTagsAsync();
     }
-    
+
     public async Task<List<Tag>> GetTagsByNamesAsync(string[] names)
     {
         var tags = await tagRepository.GetTagsByNamesAsync(names);

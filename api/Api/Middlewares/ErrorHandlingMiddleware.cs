@@ -31,7 +31,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         {
             logger.LogError(exception, "An error occurred while processing the request.");
         }
-        
+
         var result = JsonSerializer.Serialize(new
         {
             message,

@@ -17,7 +17,7 @@ public class VaultService(
 ) : IVaultService
 {
     private const string DefaultFirstVaultName = "Default Vault";
-    
+
     public async Task<List<VaultDto>> GetVaultsByUserIdAsync(Guid userId)
     {
         return vaultMapper.ToDto(await vaultRepository.GetVaultsByUserIdAsync(userId));
@@ -29,7 +29,7 @@ public class VaultService(
         vault.UserId = userId;
         return vaultMapper.ToDto(await vaultRepository.CreateVaultAsync(vault));
     }
-    
+
     public async Task<VaultDto> CreateUserDefaultFirstVaultAsync(Guid userId)
     {
         return vaultMapper.ToDto(await vaultRepository.CreateVaultAsync(new Vault
