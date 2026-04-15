@@ -66,7 +66,7 @@ export class SignupComponent extends BaseComponent implements OnInit {
       .pipe(take(1))
       .subscribe({
         next: () => this.onUserCreationSuccess(),
-        error: (error: Error) => {
+        error: (error: unknown) => {
           this.displayError('Error during user creation:', error);
           this.stopLoading();
         },

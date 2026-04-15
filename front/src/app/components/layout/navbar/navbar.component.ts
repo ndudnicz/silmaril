@@ -73,7 +73,7 @@ export class NavbarComponent extends BaseComponent {
         header: 'Sign out',
         width: '400px',
         height: 'auto',
-        closable: true,
+        closable: false,
         data: {
           message: 'Are you sure you want to signout?',
           confirmText: 'Yes',

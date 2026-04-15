@@ -63,14 +63,14 @@ export class ChangePasswordModalComponent extends BaseModalComponent {
   async onSubmit() {
     this.dialogService
       .open(ConfirmModalComponent, {
+        header: 'Confirm password change',
+        closable: false,
         data: {
-          title: 'Confirm Password Change',
           message:
             'Are you sure you want to change your password? This is not your master password.',
           confirmText: 'Confirm',
           cancelText: 'Cancel',
         },
-        closable: true,
       })
       ?.onClose.pipe(take(1))
       .subscribe(async (confirmed: boolean) => {
@@ -96,7 +96,7 @@ export class ChangePasswordModalComponent extends BaseModalComponent {
         next: () => {
           this.onPasswordChangeSuccess();
         },
-        error: (error: Error) => {
+        error: (error: any) => {
           console.error('Error changing password:', error);
           ToastWrapper.error('Error changing password', error.message ?? error);
           this.stopLoading();
@@ -118,7 +118,7 @@ export class ChangePasswordModalComponent extends BaseModalComponent {
             window.location.reload();
           }, 1500);
         },
-        error: (error: Error) => {
+        error: (error: any) => {
           console.error('Signout error:', error);
           ToastWrapper.error('Signout error', error.message ?? error);
           this.stopLoading();

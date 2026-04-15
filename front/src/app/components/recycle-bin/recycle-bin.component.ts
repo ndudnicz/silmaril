@@ -119,15 +119,15 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   openConfirmRestoreLoginsModal(): void {
     this.dialogService
       .open(ConfirmModalComponent, {
+        header: 'Confirm restore logins',
+        closable: false,
         data: {
-          title: 'Confirm Restore Logins',
           message: `Are you sure you want to restore ${this.selected.length} logins?`,
           confirmText: 'Restore',
           cancelText: 'Cancel',
         },
         width: '400px',
         height: 'auto',
-        closable: true,
       })
       ?.onClose.pipe(take(1))
       .subscribe((confirmed) => {
@@ -171,10 +171,9 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   confirmDeleteSelectedLogins(): void {
     this.dialogService
       .open(ConfirmModalComponent, {
-        closable: true,
-
+        header: 'Confirm permanent deletion',
+        closable: false,
         data: {
-          title: 'Confirm Permanent Deletion',
           message: `Are you sure you want to permanently delete ${this.selected.length} logins? This action cannot be undone.`,
           confirmText: 'Permanently Delete',
           cancelText: 'Cancel',

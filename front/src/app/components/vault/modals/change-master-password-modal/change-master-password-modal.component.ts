@@ -56,13 +56,11 @@ export class ChangeMasterPasswordModalComponent extends BaseModalComponent {
   }
 
   onSubmit() {
-    console.log('Form submitted:', this.form.value);
     this.dialogService
       .open(ConfirmModalComponent, {
-        closable: true,
-
+        header: 'Change master password',
+        closable: false,
         data: {
-          title: 'Change Master Password',
           message:
             'Are you sure you want to change your master password? This will reencrypt all your vaults with the new master password.',
           confirmText: 'Confirm',

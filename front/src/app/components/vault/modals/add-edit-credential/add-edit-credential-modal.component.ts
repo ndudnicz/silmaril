@@ -140,7 +140,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
             this.stopLoading();
             this.closeDialog(credential);
           },
-          error: (error: Error) => {
+          error: (error: unknown) => {
             this.displayError('Error creating credential', error);
             this.stopLoading();
           },
@@ -148,15 +148,14 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
     } else {
       this.dialogService
         .open(ConfirmModalComponent, {
-          closable: true,
-
+          header: `Edit Credential ${this.credential?.decryptedData?.title}`,
+          closable: false,
+          width: 'auto',
+          height: 'auto',
           data: {
-            title: `Edit Credential ${this.credential?.decryptedData?.title}`,
             message: `Are you sure you want to edit the credential "${this.credential?.decryptedData?.title}"?`,
             confirmText: 'Confirm',
             cancelText: 'Cancel',
-            width: '400px',
-            height: 'auto',
           },
         })
         ?.onClose.pipe(take(1))
@@ -174,7 +173,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
                 this.stopLoading();
                 this.closeDialog(updatedCredential);
               },
-              error: (error: Error) => {
+              error: (error: unknown) => {
                 this.displayError('Error updating credential', error);
                 this.stopLoading();
               },

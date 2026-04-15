@@ -49,7 +49,7 @@ export class SigninComponent extends BaseComponent implements OnInit {
       .pipe(take(1))
       .subscribe({
         next: () => this.onAuthSuccess(),
-        error: (error: Error) => {
+        error: (error: any) => {
           this.displayError('Authentication failed', error);
           this.stopLoading();
         },
@@ -68,7 +68,7 @@ export class SigninComponent extends BaseComponent implements OnInit {
           this.stopLoading();
           this.router.navigate(['/vault']);
         },
-        error: (error: Error) => {
+        error: (error: any) => {
           this.displayError('Error fetching user:', error);
           this.stopLoading();
         },

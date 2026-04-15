@@ -47,10 +47,10 @@ export class RestoreLoginsModalComponent extends BaseModalComponent {
   onSubmit() {
     this.dialogService
       .open(ConfirmModalComponent, {
+        header: 'Confirm restore logins',
         closable: true,
-
         data: {
-          title: 'Restore Deleted Logins',
+          title: 'Restore deleted logins',
           message: `Are you sure you want to restore ${this.data.orphanedLogins.length} deleted logins?`,
           confirmText: 'Restore',
           cancelText: 'Cancel',

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { VaultService } from '../../services/vault.service';
 import { CredentialService } from '../../services/credential.service';
 import { ToastWrapper } from '../../utils/toast.wrapper';
@@ -40,7 +40,7 @@ import { InputTextModule } from 'primeng/inputtext';
   templateUrl: './vault.component.html',
   styleUrl: './vault.component.css',
 })
-export class VaultComponent extends BaseComponent {
+export class VaultComponent extends BaseComponent implements OnInit {
   private readonly vaultService = inject(VaultService);
   private readonly credentialService = inject(CredentialService);
   private readonly dataService = inject(DataService);
@@ -67,75 +67,38 @@ export class VaultComponent extends BaseComponent {
   );
 
   private readonly searchBarPlaceholderMaxLength = 30;
+  private readonly vaults = signal<Vault[]>([]);
 
-  // ngOnInit(): void {
-  //   this.startLoading();
-  //   console.log('Activated Route Data:', this.activatedRoute.snapshot);
-  //   // this.setupSubscriptionsAndSetupVault();
-  // }
+  ngOnInit(): void {
+    // console.log('Activated Route Data:', this.activatedRoute.snapshot);
+    // this.setupSubscriptionsAndSetupVault();
+    this.getVaults();
+  }
 
-  // ngOnDestroy(): void {
-  //   this.subscription.unsubscribe();
-  // }
-
-  // setupSubscriptionsAndSetupVault(): void {
-  //   this.subscription.add(this.dataService.selectedCredential.subscribe((credential: Credential | null) => {
-  //     if (this.selectedCredential && this.selectedCredential.id !== credential?.id) {
-  //       this.selectedCredential!.selected = false;
-  //     }
-  //     this.selectedCredential = credential;
-  //     if (this.selectedCredential) {
-  //       this.selectedCredential.selected = true;
-  //     }
-  //   }));
-
-  //   this.subscription.add(this.dataService.deletedCredential.subscribe((credential: Credential | null) => {
-  //     if (credential) {
-  //       this.allCredentials = this.allCredentials.filter(l => l.id !== credential.id);
-  //       this.setDisplayedCredentials();
-  //     }
-  //   }));
-
-  //   this.subscription.add(this.dataService.updatedCredential.subscribe((credential: Credential | null) => {
-  //     if (credential) {
-  //       const index = this.allCredentials.findIndex(l => l.id === credential.id);
-  //       if (index !== -1) {
-  //         this.allCredentials[index] = credential;
-  //         this.setDisplayedCredentials();
-  //       } else {
-  //         console.warn('Updated credential not found in current credentials:', credential);
-  //       }
-  //     }
-  //   }));
-
-  //   this.subscription.add(this.activatedRoute.params.subscribe(params => {
-  //     this.setupVault(params);
-  //   }));
-  // }
-
-  // setupVault(params: Params): void {
-  //   this.startLoading();
-  //   console.log('Route params:', params);
-  //   this.vaultId = params['id'] || null;
-
-  //   if (this.vaultId) {
-  //     this.dataService.setSelectedCredential(null);
-  //     this.selectedVault = this.dataService.getVaults()?.find(v => v.id === this.vaultId()) || null;
-  //     console.log('Selected Vault:', this.selectedVault);
-  //     this.setSearchBarPlaceholder();
-  //     if (this.allCredentials.length > 0) {
-  //       this.setupDataAndDisplay();
-  //       this.stopLoading();
-  //       return;
-  //     }
-  //     this.loadCredentials();
-  //   }
-  //   else {
-  //     this.displayError('Vault ID not found in route data', null);
-  //     this.stopLoading();
-  //     return;
-  //   }
-  // }
+  getVaults(): void {
+    this.startLoading();
+    this.vaultService
+      .getVaults$()
+      .pipe(take(1))
+      .subscribe({
+        next: (vaults: Vault[]) => {
+          this.vaults.set(vaults);
+          // const vaultIdFromRoute = this.activatedRoute.snapshot.paramMap.get('id');
+          // const selectedVault = vaults[0];
+          if (vaults.length > 0 || this.selectedVault() === null) {
+            this.selectedVault.set(vaults[0]);
+            this.loadCredentials();
+          } else {
+            this.stopLoading();
+            this.displayError('Error while fetching vaults', '');
+          }
+        },
+        error: (error: unknown) => {
+          this.stopLoading();
+          this.displayError('Error fetching vaults', error);
+        },
+      });
+  }
 
   loadCredentials(): void {
     this.startLoading();
@@ -148,7 +111,7 @@ export class VaultComponent extends BaseComponent {
           // this.setupDataAndDisplay();
           this.stopLoading();
         },
-        error: (error: Error) => {
+        error: (error: unknown) => {
           this.displayError('Error fetching credentials', error);
           this.stopLoading();
         },
@@ -159,6 +122,7 @@ export class VaultComponent extends BaseComponent {
     return this.credentialService.getCredentials$().pipe(
       take(1),
       switchMap((credentials) => {
+        console.log('Credentials fetched from service:', credentials);
         return from(this.vaultService.decryptAllCredentialsAsync(credentials));
       }),
     );
@@ -172,7 +136,6 @@ export class VaultComponent extends BaseComponent {
     this.dialogService
       .open(AddEditCredentialModalComponent, {
         closable: true,
-
         width: '600px',
         height: 'auto',
         data: {
@@ -192,8 +155,8 @@ export class VaultComponent extends BaseComponent {
   openChangeMasterPasswordModal() {
     this.dialogService
       .open(ChangeMasterPasswordModalComponent, {
+        header: 'Change your master password',
         closable: true,
-
         width: '400px',
         height: 'auto',
       })
@@ -223,7 +186,7 @@ export class VaultComponent extends BaseComponent {
         next: async (updatedCredentials: Credential[]) => {
           this.onUpdateCredentialsSuccess(updatedCredentials);
         },
-        error: (error: Error) => {
+        error: (error: unknown) => {
           this.displayError('Error while changing master password', error);
           this.stopLoading();
         },
@@ -246,7 +209,7 @@ export class VaultComponent extends BaseComponent {
             this.stopLoading();
             resolve(deletedCredentials);
           },
-          error: (error: Error) => {
+          error: (error: unknown) => {
             this.stopLoading();
             reject(error);
           },
@@ -288,17 +251,17 @@ export class VaultComponent extends BaseComponent {
   openEditVaultModal() {
     this.dialogService
       .open(EditVaultModalComponent, {
+        header: 'Edit Vault',
         closable: true,
-
         width: '400px',
         height: 'auto',
         data: {
-          vaultName: this.selectedVault!.name,
+          vaultName: this.selectedVault()!.name,
         },
       })
       ?.onClose.pipe(take(1))
       .subscribe((newVaultName: string | null) => {
-        if (newVaultName !== null && newVaultName !== this.selectedVault?.name) {
+        if (newVaultName && newVaultName !== this.selectedVault?.name) {
           this.updateVaultName(newVaultName);
         }
       });
@@ -321,7 +284,7 @@ export class VaultComponent extends BaseComponent {
         next: (updatedVault: Vault) => {
           this.onVaultUpdateSuccess(updatedVault);
         },
-        error: (error: Error) => {
+        error: (error: unknown) => {
           this.displayError('Error updating vault', error);
         },
         complete: () => {
@@ -341,12 +304,11 @@ export class VaultComponent extends BaseComponent {
   openDeleteVaultModal() {
     this.dialogService
       .open(ConfirmModalComponent, {
-        closable: true,
-
+        header: 'Delete vault',
+        closable: false,
         width: 'auto',
         height: 'auto',
         data: {
-          title: 'Delete Vault',
           message: `Are you sure you want to delete the vault "${this.selectedVault?.name}"? This action cannot be undone. The vault's credentials will be sent to the recycle bin.`,
           confirmText: 'Delete',
           cancelText: 'Cancel',
@@ -374,7 +336,7 @@ export class VaultComponent extends BaseComponent {
         next: () => {
           this.onVaultDeleteSuccess(selectedVault.id);
         },
-        error: (error: Error) => {
+        error: (error: unknown) => {
           this.displayError('Error deleting vault', error);
           this.stopLoading();
         },

@@ -89,12 +89,11 @@ export class SelectedCredentialComponent extends BaseComponent {
     }
     this.dialogService
       .open(ConfirmModalComponent, {
-        closable: true,
-
-        width: '400px',
+        header: `Delete Login ${credential.decryptedData?.title}`,
+        closable: false,
+        width: 'auto',
         height: 'auto',
         data: {
-          title: `Delete Login ${credential.decryptedData?.title}`,
           message: `Are you sure you want to delete the login "${credential.decryptedData?.title}"? It will be sent to the recycle bin and can be restored later.`,
           confirmText: 'Confirm',
           cancelText: 'Cancel',
@@ -110,7 +109,7 @@ export class SelectedCredentialComponent extends BaseComponent {
             .pipe(take(1))
             .subscribe({
               next: (updatedLogin: Credential) => this.onSoftDeleteLoginSuccess(updatedLogin),
-              error: (error: Error) => {
+              error: (error: unknown) => {
                 this.displayError('Error deleting login', error);
                 this.stopLoading();
               },

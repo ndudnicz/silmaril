@@ -1,5 +1,4 @@
 <div class="modal-body">
-  <h1 mat-dialog-title>Edit Vault</h1>
   <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
     <input type="text" pInputText placeholder="Vault Name" formControlName="vaultName" required />
     <div class="buttons">

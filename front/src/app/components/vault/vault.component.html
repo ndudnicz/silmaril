@@ -1,9 +1,9 @@
 <div id="vault-container">
-  <div id="toolbar">
-    <div class="toolbar-button">
+  <div class="flex items-center">
+    <div class="">
       <span>diamond icon</span>
     </div>
-    <div id="searchbar-container">
+    <div class="flex items-center">
       <input
         pInputText
         type="text"
@@ -13,8 +13,7 @@
         [ngModelOptions]="{ standalone: true }"
       />
     </div>
-    <span class="spacer"></span>
-    <div class="toolbar-button">
+    <div class="flex-1 items-end flex justify-end gap-2">
       <p-button
         variant="text"
         severity="secondary"
@@ -23,8 +22,6 @@
         pTooltip="Add Credential"
         tooltipPosition="bottom"
       />
-    </div>
-    <div class="toolbar-button">
       <p-button
         variant="text"
         severity="secondary"
@@ -33,8 +30,6 @@
         pTooltip="Edit Vault"
         tooltipPosition="bottom"
       />
-    </div>
-    <div class="toolbar-button">
       <p-button
         variant="text"
         severity="secondary"
@@ -43,8 +38,6 @@
         pTooltip="Change Master Password"
         tooltipPosition="bottom"
       />
-    </div>
-    <div>
       <p-button
         variant="text"
         severity="secondary"

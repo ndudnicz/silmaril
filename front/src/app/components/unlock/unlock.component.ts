@@ -31,10 +31,7 @@ export class UnlockComponent extends BaseComponent implements OnInit {
   private readonly dataService = inject(DataService);
   private readonly router = inject(Router);
   private readonly vaultService = inject(VaultService);
-  protected readonly masterPasswordFormControl = new FormControl('', [
-    Validators.required,
-    Validators.minLength(8),
-  ]);
+  protected readonly masterPasswordFormControl = new FormControl('', [Validators.required]);
   protected readonly form: FormGroup = new FormGroup({
     password: this.masterPasswordFormControl,
   });
@@ -51,7 +48,7 @@ export class UnlockComponent extends BaseComponent implements OnInit {
       console.log('Form submitted:', this.form.value);
       await this.vaultService.setKeyAsync(this.masterPasswordFormControl.value!);
       this.loadVaults();
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.displayError('Failed to unlock vault', error);
     } finally {
       this.stopLoading();
@@ -74,7 +71,7 @@ export class UnlockComponent extends BaseComponent implements OnInit {
         next: (vaults: Vault[]) => {
           this.onVaultsLoaded(vaults);
         },
-        error: (error: any) => {
+        error: (error: unknown) => {
           this.displayError('Error fetching vaults', error);
           this.stopLoading();
         },
