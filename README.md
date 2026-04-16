@@ -16,8 +16,8 @@
 
 ## ⚙️ Stack
 
-- Front: Angular 19 / RxJS
-- Api: .net 8 / Entity Framework
+- Front: Angular 21 / Tailwindcss
+- Api: .net 8 / EF core
 - Database: MariaDB
 
 ---
@@ -41,8 +41,8 @@ docker-compose up --build
 
 # front
 cd front
-npm install
-npm start
+pnpm install
+pnpm start
 # running on http://localhost:4200
 
 # api
