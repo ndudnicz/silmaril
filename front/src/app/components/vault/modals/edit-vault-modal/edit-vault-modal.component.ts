@@ -10,7 +10,6 @@ import { InputTextModule } from 'primeng/inputtext';
   selector: 'app-edit-vault-modal',
   imports: [ReactiveFormsModule, ButtonModule, InputTextModule],
   templateUrl: './edit-vault-modal.component.html',
-  styleUrl: './edit-vault-modal.component.css',
 })
 export class EditVaultModalComponent extends BaseModalComponent {
   private readonly dialogService = inject(DialogService);

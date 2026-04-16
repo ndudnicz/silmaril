@@ -1,14 +1,19 @@
-<div class="modal-body">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
-    <input type="text" pInputText placeholder="Vault Name" formControlName="vaultName" required />
-    <div class="buttons">
-      <p-button
-        variant="text"
-        severity="secondary"
-        label="Edit"
-        type="submit"
-        [disabled]="form.invalid || loading"
-      />
-    </div>
-  </form>
-</div>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+  <input
+    type="text"
+    class="w-full"
+    pInputText
+    placeholder="Vault Name"
+    formControlName="vaultName"
+    required
+  />
+  <div class="flex justify-end gap-2 mt-4">
+    <p-button
+      variant="text"
+      severity="secondary"
+      label="Edit"
+      type="submit"
+      [disabled]="form.invalid || loading"
+    />
+  </div>
+</form>

@@ -9,7 +9,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BaseComponent } from '../base-component/base-component.component';
 import { from, Observable, Subscription, switchMap, take } from 'rxjs';
 import { Vault } from '../../entities/vault';
-import { ActivatedRoute, Router } from '@angular/router';
 import { truncateString } from '../../utils/string.utils';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
 import { UpdateCredentialDto } from '../../entities/update/update-credential-dto';
@@ -23,6 +22,7 @@ import { SelectedCredentialComponent } from './selected-credential/selected-cred
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-vault',
@@ -44,7 +44,6 @@ export class VaultComponent extends BaseComponent implements OnInit {
   private readonly vaultService = inject(VaultService);
   private readonly credentialService = inject(CredentialService);
   private readonly dataService = inject(DataService);
-  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly dialogService = inject(DialogService);
   private readonly router = inject(Router);
 
@@ -57,7 +56,7 @@ export class VaultComponent extends BaseComponent implements OnInit {
   protected readonly selectedCredential = signal<Credential | null>(null);
   protected readonly showDrawer = computed(() => this.selectedCredential() !== null);
   protected readonly searchValue = signal<string>('');
-  protected vaultId = signal<string | null>(null);
+  protected vaultId = computed(() => this.selectedVault()?.id);
   protected selectedVault = signal<Vault | null>(null);
   protected readonly subscription: Subscription = new Subscription();
   protected readonly searchBarPlaceholder = computed(() =>
@@ -70,8 +69,6 @@ export class VaultComponent extends BaseComponent implements OnInit {
   private readonly vaults = signal<Vault[]>([]);
 
   ngOnInit(): void {
-    // console.log('Activated Route Data:', this.activatedRoute.snapshot);
-    // this.setupSubscriptionsAndSetupVault();
     this.getVaults();
   }
 
@@ -83,8 +80,6 @@ export class VaultComponent extends BaseComponent implements OnInit {
       .subscribe({
         next: (vaults: Vault[]) => {
           this.vaults.set(vaults);
-          // const vaultIdFromRoute = this.activatedRoute.snapshot.paramMap.get('id');
-          // const selectedVault = vaults[0];
           if (vaults.length > 0 || this.selectedVault() === null) {
             this.selectedVault.set(vaults[0]);
             this.loadCredentials();
@@ -108,7 +103,6 @@ export class VaultComponent extends BaseComponent implements OnInit {
         next: async (credentials: Credential[]) => {
           console.log('Credentials fetched successfully:', credentials);
           this.allCredentials.set(credentials);
-          // this.setupDataAndDisplay();
           this.stopLoading();
         },
         error: (error: unknown) => {
@@ -135,13 +129,15 @@ export class VaultComponent extends BaseComponent implements OnInit {
   openAddCredentialModal() {
     this.dialogService
       .open(AddEditCredentialModalComponent, {
+        header: 'Add Credential',
         closable: true,
+        resizable: false,
         width: '600px',
         height: 'auto',
         data: {
           mode: AddEditCredentialModalComponent.MODAL_MOD.ADD,
           credential: null,
-          vaultId: this.vaultId,
+          vaultId: this.vaultId(),
         },
       })
       ?.onClose.pipe(take(1))
@@ -306,10 +302,10 @@ export class VaultComponent extends BaseComponent implements OnInit {
       .open(ConfirmModalComponent, {
         header: 'Delete vault',
         closable: false,
-        width: 'auto',
+        width: '500px',
         height: 'auto',
         data: {
-          message: `Are you sure you want to delete the vault "${this.selectedVault?.name}"? This action cannot be undone. The vault's credentials will be sent to the recycle bin.`,
+          message: `Are you sure you want to delete the vault "${this.selectedVault()?.name}"? This action cannot be undone. The vault's credentials will be sent to the recycle bin.`,
           confirmText: 'Delete',
           cancelText: 'Cancel',
         },

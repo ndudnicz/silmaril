@@ -1,10 +1,9 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, OnInit, signal } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ProgressBarComponent } from '../../../progress-bar/progress-bar.component';
 import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { simpleWords } from '../../../../utils/word-list.utils';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
@@ -46,7 +45,7 @@ enum PasswordStrength {
   styleUrl: './generate-password-modal.component.css',
 })
 export class GeneratePasswordModalComponent extends BaseModalComponent implements OnInit {
-  private readonly defaultMinLength = 32;
+  private readonly defaultMinLength = 40;
   protected readonly minLength = 8;
   protected readonly specialChars = '!@#$%^&*()-_=+[]{}|;:,.<>?';
   private readonly minLengthFormControl = new FormControl(this.defaultMinLength, {
@@ -57,7 +56,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
   private readonly lettersFormControl = new FormControl(true, { nonNullable: true });
   private readonly numbersFormControl = new FormControl(true, { nonNullable: true });
   private readonly specialCharFormControl = new FormControl(true, { nonNullable: true });
-  private readonly useWordsFormControl = new FormControl('true', { nonNullable: true });
+  private readonly useWordsFormControl = new FormControl(true, { nonNullable: true });
   protected generatedPassword = signal(
     this.generatePassword({
       minLength: this.minLengthFormControl.value || this.defaultMinLength,
@@ -65,7 +64,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
       letters: this.lettersFormControl.value,
       numbers: this.numbersFormControl.value,
       specialChar: this.specialCharFormControl.value,
-      useWords: this.useWordsFormControl.value === 'true',
+      useWords: this.useWordsFormControl.value,
     }),
   );
   protected readonly formGeneratePassword: FormGroup = new FormGroup({
@@ -106,7 +105,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
     // this.setProgressPasswordStrengthValues();
   }
 
-  minLengthValidator(control: FormControl): { [key: string]: boolean } | null {
+  minLengthValidator(control: FormControl): Record<string, boolean> | null {
     const value = control.value;
     if (value < 8) {
       return { minLength: true };
@@ -115,7 +114,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
   }
 
   onSubmit(): void {
-    this.closeDialog(this.generatedPassword);
+    this.closeDialog(this.generatedPassword());
   }
 
   setNewPassword(): void {
@@ -127,7 +126,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
           letters: this.lettersFormControl.value,
           numbers: this.numbersFormControl.value,
           specialChar: this.specialCharFormControl.value,
-          useWords: this.useWordsFormControl.value === 'true',
+          useWords: this.useWordsFormControl.value,
         }),
       );
       this.formGeneratePassword.markAsPristine();
@@ -160,13 +159,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
     const specialChars = this.specialChars;
 
     function getLetterCharset() {
-      let lettersSet = '';
-      if (readable) {
-        lettersSet = readableLettersSet;
-      } else {
-        lettersSet = allLettersSet;
-      }
-      return lettersSet;
+      return readable ? readableLettersSet : allLettersSet;
     }
 
     if (!letters && !numbers && !specialChar && !useWords) {
@@ -258,9 +251,9 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
     }
 
     if (hasLetters) score += 1;
-    if (hasUpperCase) score += 2;
-    if (hasNumbers) score += 2;
-    if (hasSpecial) score += 10;
+    if (hasUpperCase) score += 1;
+    if (hasNumbers) score += 1;
+    if (hasSpecial) score += 5;
 
     score += upperCaseMatches.length + numbersMatches.length + specialMatches.length * 3;
 
@@ -299,6 +292,6 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
   // }
 
   disableSubmit(): boolean {
-    return this.generatedPassword.length < this.minLength;
+    return this.generatedPassword().length < this.minLength;
   }
 }

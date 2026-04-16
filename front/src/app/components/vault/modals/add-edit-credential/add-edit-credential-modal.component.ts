@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GeneratePasswordModalComponent } from '../generate-password-modal/generate-password-modal.component';
 import {
@@ -22,6 +22,8 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { MessageModule } from 'primeng/message';
 import { InputTextModule } from 'primeng/inputtext';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-add-credential-modal',
@@ -32,9 +34,10 @@ import { InputTextModule } from 'primeng/inputtext';
     InputIconModule,
     InputTextModule,
     MessageModule,
+    FloatLabelModule,
+    CommonModule,
   ],
   templateUrl: './add-edit-credential-modal.component.html',
-  styleUrl: './add-edit-credential-modal.component.css',
 })
 export class AddEditCredentialModalComponent extends BaseModalComponent {
   private readonly dialogService = inject(DialogService);
@@ -56,9 +59,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
   protected readonly mode = this.data.mode;
   protected readonly characterLimit = 2000;
   protected readonly passwordCharacterLimit = 10000;
-  protected readonly notesCharacterCount = computed(() =>
-    this.credential?.decryptedData?.notes ? this.credential.decryptedData.notes.length : 0,
-  );
+  protected notesCharacterCount = signal(0);
   protected readonly titleFormControl = new FormControl(this.credential?.decryptedData?.title, [
     Validators.required,
     Validators.maxLength(this.characterLimit),
@@ -86,7 +87,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
     notesFormControl: this.notesFormControl,
   });
 
-  showPassword = true;
+  showPassword = signal(false);
 
   constructor() {
     super();
@@ -111,6 +112,8 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
       ToastWrapper.error(msg, null);
       throw new Error(msg);
     }
+
+    this.noteChanged();
   }
 
   async onSubmit() {
@@ -182,6 +185,11 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
     }
   }
 
+  noteChanged() {
+    const notesValue = this.notesFormControl.value ?? '';
+    this.notesCharacterCount.set(notesValue.length);
+  }
+
   createCredential$(encryptionResult: EncryptionResult): Observable<Credential> {
     const createCredentialDto: CreateCredentialDto = {
       vaultId: this.vaultId,
@@ -217,7 +225,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
   }
 
   addEditTogglePasswordVisibility() {
-    this.showPassword = !this.showPassword;
+    this.showPassword.set(!this.showPassword());
     const passwordField = document.querySelector<HTMLInputElement>('#add-edit-password');
     if (passwordField) {
       passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
@@ -228,7 +236,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
     this.dialogService
       .open(GeneratePasswordModalComponent, {
         closable: true,
-
+        header: 'Password Generator',
         width: '800px',
         height: 'auto',
       })

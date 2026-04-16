@@ -67,7 +67,7 @@ body {
   color: #007bff;
 }
 
-mat-icon,
+/* mat-icon,
 button:not(.p-button),
 .a-button,
 .a-button:link,
@@ -102,9 +102,9 @@ button:not(.p-button):disabled,
   position: absolute !important;
   right: 10px;
   top: 10px;
-}
+} */
 
-.margin-top-10 {
+/* .margin-top-10 {
   margin-top: 10px;
 }
 
@@ -114,7 +114,7 @@ button:not(.p-button):disabled,
 
 .spacer {
   flex: 1 1 auto;
-}
+} */
 
 /* .card-stacks {
   width: 100%;
