@@ -26,7 +26,6 @@ import { ButtonModule } from 'primeng/button';
     ButtonModule,
   ],
   templateUrl: './selected-credential.component.html',
-  styleUrl: './selected-credential.component.css',
 })
 export class SelectedCredentialComponent extends BaseComponent {
   readonly credential = model<Credential | null>();
@@ -89,12 +88,12 @@ export class SelectedCredentialComponent extends BaseComponent {
     }
     this.dialogService
       .open(ConfirmModalComponent, {
-        header: `Delete Login ${credential.decryptedData?.title}`,
+        header: `Delete credential '${credential.decryptedData?.title}'`,
         closable: false,
-        width: 'auto',
+        width: '500px',
         height: 'auto',
         data: {
-          message: `Are you sure you want to delete the login "${credential.decryptedData?.title}"? It will be sent to the recycle bin and can be restored later.`,
+          message: `Are you sure you want to delete the credential "${credential.decryptedData?.title}"? It will be sent to the recycle bin and can be restored later.`,
           confirmText: 'Confirm',
           cancelText: 'Cancel',
         },

@@ -122,10 +122,6 @@ export class VaultComponent extends BaseComponent implements OnInit {
     );
   }
 
-  // setupDataAndDisplay() {
-  //   this.setDisplayedCredentials();
-  // }
-
   openAddCredentialModal() {
     this.dialogService
       .open(AddEditCredentialModalComponent, {

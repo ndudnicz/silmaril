@@ -4,7 +4,7 @@ import { Credential } from '../entities/credential';
 import { Vault } from '../entities/vault';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, switchMap, take, throwError } from 'rxjs';
 import { CreateVaultDto } from '../entities/create/create-vault-dto';
 import { DecryptedData } from '../entities/decrypted-data';
 import { UpdateVaultDto } from '../entities/update/update-vault-dto';
@@ -54,8 +54,36 @@ export class VaultService {
       console.log(error);
       throw new Error(
         'Failed to set the key:' + (error instanceof Error ? error.message : 'Unknown error'),
+        { cause: error },
       );
     }
+  }
+
+  public setKey$(masterPassword: string): Observable<ArrayBuffer> {
+    const storedSaltBase64 = localStorage.getItem(this.SALT_KEY_NAME);
+    if (!storedSaltBase64) {
+      const errorMessage = 'Salt not set. Please set the salt before setting the master password.';
+      throw new Error(errorMessage);
+    }
+    const saltUint8Array = base64ToUint8Array(storedSaltBase64);
+    return CryptoUtilsV1.deriveKeyFromPassword$(masterPassword, saltUint8Array).pipe(
+      take(1),
+      map((derivedKey) => {
+        this.key = derivedKey;
+        return derivedKey;
+      }),
+      switchMap((derivedKey) => CryptoUtilsV1.exportKey$(derivedKey)),
+      catchError((error) => {
+        console.error('Failed to set the key:', error);
+        return throwError(
+          () =>
+            new Error(
+              'Failed to set the key:' + (error instanceof Error ? error.message : 'Unknown error'),
+              { cause: error },
+            ),
+        );
+      }),
+    );
   }
 
   public isUnlocked(): boolean {

@@ -51,7 +51,7 @@
 
   <div id="vault-grid-container">
     <div id="stacks-container">
-      @if (displayedCredentials.length === 0 && loading === false && searchValue() === '') {
+      @if (displayedCredentials().length === 0 && loading === false && searchValue() === '') {
         <div id="no-data">
           <span>No data yet</span>
           <br />
@@ -65,14 +65,14 @@
           />
         </div>
       }
-      @if (displayedCredentials.length === 0 && loading === false && searchValue() !== '') {
+      @if (displayedCredentials().length === 0 && loading === false && searchValue() !== '') {
         <div id="no-data">
           <span>No results found</span>
           <i class="pi pi-search"></i>
           <br />
         </div>
       }
-      @if (displayedCredentials.length > 0) {
+      @if (displayedCredentials().length > 0) {
         <app-card-stacks
           class="card-stacks"
           (clickEvent)="selectedCredential.set($event)"
@@ -83,12 +83,15 @@
     <p-drawer
       header="Drawer"
       [visible]="showDrawer()"
-      [style]="{ width: '400px' }"
-      [modal]="false"
-      [closable]="false"
+      [style]="{ width: '500px' }"
+      position="right"
+      [modal]="true"
+      [closable]="true"
       (onHide)="selectedCredential.set(null)"
+      closable="true"
     >
       <app-selected-credential
+        class="w-full"
         [(credential)]="selectedCredential"
         (updateCredential)="onCredentialUpdated($event)"
       ></app-selected-credential>
