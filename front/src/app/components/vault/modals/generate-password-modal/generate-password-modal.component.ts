@@ -42,7 +42,6 @@ enum PasswordStrength {
     InputTextModule,
   ],
   templateUrl: './generate-password-modal.component.html',
-  styleUrl: './generate-password-modal.component.css',
 })
 export class GeneratePasswordModalComponent extends BaseModalComponent implements OnInit {
   private readonly defaultMinLength = 40;

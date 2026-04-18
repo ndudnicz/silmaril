@@ -15,7 +15,6 @@ import { InputTextModule } from 'primeng/inputtext';
   selector: 'app-change-username-modal',
   imports: [ReactiveFormsModule, IconFieldModule, InputIconModule, InputTextModule, ButtonModule],
   templateUrl: './change-username-modal.component.html',
-  styleUrl: './change-username-modal.component.css',
 })
 export class ChangeUsernameModalComponent extends BaseModalComponent {
   private readonly dialogService = inject(DialogService);
@@ -63,7 +62,7 @@ export class ChangeUsernameModalComponent extends BaseModalComponent {
           console.log('Username updated successfully:', updatedUser);
           this.onUsernameChangeSuccess();
         },
-        error: (error: any) => {
+        error: (error: unknown) => {
           console.error('Error updating username:', error);
           const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
           ToastWrapper.error('Failed to change username', errorMessage);

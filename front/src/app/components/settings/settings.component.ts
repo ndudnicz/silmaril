@@ -10,7 +10,6 @@ import { ButtonModule } from 'primeng/button';
   selector: 'app-settings',
   imports: [ButtonModule],
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.css',
 })
 export class SettingsComponent extends BaseComponent {
   private readonly dialogService = inject(DialogService);
@@ -18,6 +17,7 @@ export class SettingsComponent extends BaseComponent {
   openChangePasswordModal() {
     this.dialogService
       .open(ChangePasswordModalComponent, {
+        header: 'Change your password',
         width: '400px',
         height: 'auto',
         closable: true,
@@ -29,6 +29,7 @@ export class SettingsComponent extends BaseComponent {
   openChangeUserNameModal() {
     this.dialogService
       .open(ChangeUsernameModalComponent, {
+        header: 'Change your username',
         width: '400px',
         height: 'auto',
         closable: true,

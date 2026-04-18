@@ -25,7 +25,6 @@ import { InputTextModule } from 'primeng/inputtext';
     InputTextModule,
   ],
   templateUrl: './unlock.component.html',
-  styleUrl: './unlock.component.css',
 })
 export class UnlockComponent extends BaseComponent implements OnInit {
   private readonly dataService = inject(DataService);
@@ -91,7 +90,7 @@ export class UnlockComponent extends BaseComponent implements OnInit {
     } else {
       ToastWrapper.success('Vault unlocked successfully');
       this.stopLoading();
-      this.router.navigate(['/vault', vaults[0].id]);
+      this.router.navigate(['/vault']);
     }
   }
 }

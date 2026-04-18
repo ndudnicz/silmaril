@@ -24,7 +24,6 @@ import { InputTextModule } from 'primeng/inputtext';
   selector: 'app-change-password-modal',
   imports: [ReactiveFormsModule, IconFieldModule, InputIconModule, InputTextModule, ButtonModule],
   templateUrl: './change-password-modal.component.html',
-  styleUrl: './change-password-modal.component.css',
 })
 export class ChangePasswordModalComponent extends BaseModalComponent {
   private readonly userService = inject(UserService);
@@ -96,9 +95,9 @@ export class ChangePasswordModalComponent extends BaseModalComponent {
         next: () => {
           this.onPasswordChangeSuccess();
         },
-        error: (error: any) => {
+        error: (error: unknown) => {
           console.error('Error changing password:', error);
-          ToastWrapper.error('Error changing password', error.message ?? error);
+          ToastWrapper.error('Error changing password', (error as Error).message ?? error);
           this.stopLoading();
           throw error;
         },
@@ -118,9 +117,9 @@ export class ChangePasswordModalComponent extends BaseModalComponent {
             window.location.reload();
           }, 1500);
         },
-        error: (error: any) => {
+        error: (error: unknown) => {
           console.error('Signout error:', error);
-          ToastWrapper.error('Signout error', error.message ?? error);
+          ToastWrapper.error('Signout error', (error as Error).message ?? error);
           this.stopLoading();
           throw error;
         },

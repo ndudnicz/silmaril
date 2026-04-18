@@ -5,10 +5,11 @@ import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-mod
 import { DialogService, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { FloatLabelModule } from 'primeng/floatlabel';
 
 @Component({
   selector: 'app-edit-vault-modal',
-  imports: [ReactiveFormsModule, ButtonModule, InputTextModule],
+  imports: [ReactiveFormsModule, ButtonModule, InputTextModule, FloatLabelModule],
   templateUrl: './edit-vault-modal.component.html',
 })
 export class EditVaultModalComponent extends BaseModalComponent {
