@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { BaseComponent } from '../base-component/base-component.component';
 import { Credential } from '../../entities/credential';
-import { catchError, from, Observable, switchMap, take } from 'rxjs';
+import { from, Observable, switchMap, take } from 'rxjs';
 import { DataService } from '../../services/data.service';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
 import { CommonModule } from '@angular/common';
@@ -15,6 +15,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-recycle-bin',
@@ -26,54 +27,55 @@ import { TooltipModule } from 'primeng/tooltip';
     ButtonModule,
     InputTextModule,
     TooltipModule,
+    RouterLink,
   ],
   templateUrl: './recycle-bin.component.html',
-  styleUrl: './recycle-bin.component.css',
 })
 export class RecycleBinComponent extends BaseComponent implements OnInit {
   private readonly dataService = inject(DataService);
-  private readonly loginService = inject(CredentialService);
   private readonly vaultService = inject(VaultService);
   private readonly dialogService = inject(DialogService);
+  private readonly credentialService = inject(CredentialService);
   protected readonly searchValue = signal('');
   protected readonly searchBarPlaceholder = 'Search in Recycle Bin';
   protected readonly allDeletedCredentials = signal<Credential[]>([]);
   protected readonly displayedCredentials = computed(() =>
     this.allDeletedCredentials().filter(
-      (login) =>
-        login.deleted &&
-        (login.decryptedData?.title.toLowerCase().includes(this.searchValue().toLowerCase()) ||
-          this.searchValue().trim() === ''),
+      (credential) =>
+        credential.decryptedData?.title.toLowerCase().includes(this.searchValue().toLowerCase()) ||
+        this.searchValue().trim() === '',
     ),
   );
   protected readonly selected = signal([] as Credential[]);
   protected readonly vaults = computed(() => this.dataService.getVaults());
 
   ngOnInit(): void {
-    this.loadDeletedCredentials();
+    this.loadCredentials();
   }
 
-  private loadDeletedCredentials(): void {
-    this.getDecryptedDeletedCredentials$()
+  loadCredentials(): void {
+    this.startLoading();
+    this.getDecryptedCredentials$()
       .pipe(take(1))
-      .subscribe((deletedCredentials) => {
-        this.allDeletedCredentials.set(deletedCredentials);
+      .subscribe({
+        next: async (credentials: Credential[]) => {
+          console.log('Credentials fetched successfully:', credentials);
+          this.allDeletedCredentials.set(credentials.filter((credential) => credential.deleted));
+          this.stopLoading();
+        },
+        error: (error: unknown) => {
+          this.displayError('Error fetching credentials', error);
+          this.stopLoading();
+        },
       });
   }
 
-  getDecryptedDeletedCredentials$(): Observable<Credential[]> {
-    this.startLoading();
-    return this.loginService.getDeletedCredentials$().pipe(
+  getDecryptedCredentials$(): Observable<Credential[]> {
+    return this.credentialService.getDeletedCredentials$().pipe(
       take(1),
-      switchMap((logins) => from(this.vaultService.decryptAllCredentialsAsync(logins))),
-      switchMap((decryptedLogins) => {
-        this.stopLoading();
-        return from([decryptedLogins.filter((login) => login.deleted)]);
-      }),
-      catchError((error) => {
-        this.stopLoading();
-        this.displayError('Failed to load deleted logins', error);
-        return from([[] as Credential[]]);
+      switchMap((credentials) => {
+        console.log('Credentials fetched from service:', credentials);
+        return from(this.vaultService.decryptAllCredentialsAsync(credentials));
       }),
     );
   }
@@ -146,7 +148,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
         return login;
       }),
     );
-    this.loginService
+    this.credentialService
       .updateCredentials$(this.selected().map((login) => UpdateCredentialDto.fromCredential(login)))
       .pipe(take(1))
       .subscribe({
@@ -189,7 +191,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
 
   proceedDeleteSelectedLogins(): void {
     this.startLoading();
-    this.loginService
+    this.credentialService
       .deleteCredentials$({ ids: this.selected().map((login) => login.id) })
       .pipe(take(1))
       .subscribe({

@@ -23,6 +23,11 @@ import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
 import { Router } from '@angular/router';
+import { MenuModule } from 'primeng/menu';
+import { BadgeModule } from 'primeng/badge';
+import { RippleModule } from 'primeng/ripple';
+import { MenuItem } from 'primeng/api';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-vault',
@@ -36,6 +41,9 @@ import { Router } from '@angular/router';
     ButtonModule,
     TooltipModule,
     InputTextModule,
+    MenuModule,
+    BadgeModule,
+    RippleModule,
   ],
   templateUrl: './vault.component.html',
 })
@@ -45,6 +53,7 @@ export class VaultComponent extends BaseComponent implements OnInit {
   private readonly dataService = inject(DataService);
   private readonly dialogService = inject(DialogService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   protected allCredentials = signal<Credential[]>([]);
   protected readonly displayedCredentials = computed(() =>
@@ -69,6 +78,30 @@ export class VaultComponent extends BaseComponent implements OnInit {
 
   private readonly searchBarPlaceholderMaxLength = 30;
   private readonly vaults = signal<Vault[]>([]);
+
+  menuItems = signal<MenuItem[]>([
+    {
+      separator: true,
+    },
+    {
+      label: 'Settings',
+      icon: 'pi pi-cog',
+      routerLink: '/settings',
+    },
+    {
+      label: 'Recycle bin',
+      icon: 'pi pi-trash',
+      routerLink: '/recycle-bin',
+    },
+    {
+      label: 'Sign out',
+      icon: 'pi pi-sign-out',
+      command: () => this.signout(),
+    },
+    {
+      separator: true,
+    },
+  ]);
 
   ngOnInit(): void {
     this.getVaults();
@@ -218,29 +251,9 @@ export class VaultComponent extends BaseComponent implements OnInit {
     ToastWrapper.success('Master password changed successfully');
   }
 
-  // search(value: string) {
-  //   this.searchValue.set(value.trim());
-  //   if (this.searchValue.trim() === '') {
-  //     this.setDisplayedCredentials();
-  //   } else {
-  //     this.displayedCredentials = this.allCredentials.filter(credential => {
-  //       const title = credential.decryptedData?.title || '';
-  //       return !credential.deleted
-  //         && credential.vaultId == this.vaultId
-  //         && title.toLowerCase().includes(this.searchValue.toLowerCase());
-  //     });
-  //   }
-  // }
-
   clearSearch() {
     this.searchValue.set('');
   }
-
-  // setSelectedCredential(credential: Credential | null) {
-  //   if (this.selectedCredential === null || this.selectedCredential.id !== credential?.id) {
-  //     this.dataService.setSelectedCredential(credential)
-  //   }
-  // }
 
   openEditVaultModal() {
     this.dialogService
@@ -356,5 +369,51 @@ export class VaultComponent extends BaseComponent implements OnInit {
     } else {
       console.warn('Updated credential not found in current credentials:', updatedCredential);
     }
+  }
+
+  signout() {
+    this.dialogService
+      .open(ConfirmModalComponent, {
+        header: 'Sign out',
+        width: '400px',
+        height: 'auto',
+        closable: false,
+        data: {
+          message: 'Are you sure you want to sign out?',
+          confirmText: 'Yes',
+          cancelText: 'No',
+        },
+      })
+      ?.onClose.pipe(take(1))
+      .subscribe(async (confirmed: boolean) => {
+        if (confirmed) {
+          this.onSignoutConfirmed();
+        }
+      });
+  }
+
+  onSignoutConfirmed() {
+    this.startLoading();
+    console.log('Signing out...');
+    this.authService
+      .signout$()
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          console.log('Signout result:', result);
+          this.onSignoutSuccess();
+        },
+        error: (error: unknown) => {
+          this.displayError('Signout failed', error);
+          this.stopLoading();
+        },
+      });
+  }
+
+  onSignoutSuccess() {
+    ToastWrapper.success('Signed out successfully');
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
   }
 }

@@ -1,7 +1,31 @@
 <!-- <div id="flex"> -->
 <div class="flex items-center h-[8vh] w-full">
   <div class="">
-    <span>diamond icon</span>
+    <p-menu
+      #menu
+      [popup]="true"
+      [model]="menuItems()"
+      class="flex justify-center"
+      styleClass="w-full md:w-60"
+    >
+      <ng-template #start>
+        <span class="inline-flex items-center gap-1 px-2 py-2">
+          <span class="text-xl font-semibold">💎 Silmaril</span>
+        </span>
+      </ng-template>
+      <ng-template #submenuheader let-item>
+        <span class="text-primary font-bold">{{ item.label }}</span>
+      </ng-template>
+      <ng-template #end>
+        <div class="flex-col items-center justify-center">
+          <div class="flex-1 flex p-2">
+            <img class="w-6 mr-2" src="assets/images/github.svg" alt="github logo" />
+            <a href="https://github.com/ndudnicz/silmaril" target="_blank"> Github </a>
+          </div>
+        </div>
+      </ng-template>
+    </p-menu>
+    <p-button severity="secondary" variant="text" (click)="menu.toggle($event)" icon="pi pi-bars" />
   </div>
   <div class="flex items-center">
     <input
@@ -68,10 +92,13 @@
   </div>
 } @else if (displayedCredentials().length === 0 && loading === false && searchValue() !== '') {
   <div class="flex items-center justify-center h-[92vh] w-full">
-    <div id="no-data">
-      <span>No results found</span>
-      <i class="pi pi-search"></i>
-      <br />
+    <div class="flex-col justify-center items-center">
+      <div class="flex-col justify-center items-center">
+        <p class="flex-1 text-center">No results found</p>
+      </div>
+      <div class="flex-1 w-full items-center flex justify-center">
+        <i class="pi pi-search"></i>
+      </div>
     </div>
   </div>
 } @else {

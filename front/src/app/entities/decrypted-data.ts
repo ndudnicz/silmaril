@@ -13,6 +13,7 @@ export class DecryptedData {
     this.notes = notes;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static fromObject(obj: any): DecryptedData {
     if (!obj || typeof obj !== 'object') {
       throw new Error('Invalid object for DecryptedData');
@@ -41,7 +42,7 @@ export class DecryptedData {
       return DecryptedData.fromObject(obj);
     } catch (error) {
       console.error('Failed to parse DecryptedData from string:', error);
-      throw new Error(error instanceof Error ? error.message : 'Unknown error');
+      throw new Error(error instanceof Error ? error.message : 'Unknown error', { cause: error });
     }
   }
 

@@ -5,10 +5,11 @@ import { ChangeUsernameModalComponent } from './modals/change-username/change-us
 import { take } from 'rxjs';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-settings',
-  imports: [ButtonModule],
+  imports: [ButtonModule, RouterLink],
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent extends BaseComponent {

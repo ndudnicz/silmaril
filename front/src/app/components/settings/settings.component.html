@@ -1,20 +1,30 @@
-<div class="flex items-center justify-center h-full w-full">
-  <div class="flex-1 m-auto max-w-80 h-80 items-center">
-    <p-button
-      variant="outlined"
-      severity="secondary"
-      label="Change username"
-      icon="pi pi-user"
-      styleClass="w-full mb-4"
-      (click)="openChangeUserNameModal()"
-    />
-    <p-button
-      variant="outlined"
-      severity="secondary"
-      label="Change Password"
-      icon="pi pi-lock"
-      styleClass="w-full"
-      (click)="openChangePasswordModal()"
-    />
+<div class="relative h-full w-full">
+  <a
+    routerLink="/vault"
+    class="absolute top-4 left-4 z-10 flex items-center gap-2 text-sm text-surface-700 hover:underline"
+  >
+    <i class="pi pi-arrow-left"></i>
+    <span>Back</span>
+  </a>
+
+  <div class="flex items-center justify-center h-full w-full">
+    <div class="flex-1 m-auto max-w-80 h-80 items-center">
+      <p-button
+        variant="outlined"
+        severity="secondary"
+        label="Change username"
+        icon="pi pi-user"
+        styleClass="w-full mb-4"
+        (click)="openChangeUserNameModal()"
+      />
+      <p-button
+        variant="outlined"
+        severity="secondary"
+        label="Change Password"
+        icon="pi pi-lock"
+        styleClass="w-full"
+        (click)="openChangePasswordModal()"
+      />
+    </div>
   </div>
 </div>

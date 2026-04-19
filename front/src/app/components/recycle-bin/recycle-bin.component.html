@@ -1,80 +1,76 @@
-<div id="recycle-bin-container">
-  <div class="toolbar-button"></div>
-  <div id="searchbar-container">
-    <input
-      pInputText
-      type="text"
-      [(ngModel)]="searchValue"
-      [placeholder]="searchBarPlaceholder"
-      [ngModelOptions]="{ standalone: true }"
-    />
-    <!-- @if (searchValue() != '') {
-        <p-button variant="text" aria-label="Clear" (click)="clearSearch()">
-          <i class="pi pi-times"></i>
-        </p-button>
-        } -->
-  </div>
-  <span class="spacer"></span>
-  @if (selected().length > 0) {
-    <div class="toolbar-button">
-      <p-button
-        variant="text"
-        severity="secondary"
-        icon="pi pi-undo"
-        pTooltip="Clear Selection"
-        tooltipPosition="bottom"
-        (click)="clearSelection()"
-        [disabled]="selected().length === 0"
-      />
-    </div>
-  }
-  <span id="selected-logins-counter">
-    <i>({{ selected().length }} selected)</i>
-  </span>
-  <div class="toolbar-button">
-    <p-button
-      variant="text"
-      severity="secondary"
-      icon="pi pi-replay"
-      pTooltip="Restore Selected Logins"
-      tooltipPosition="bottom"
-      (click)="restoreSelectedLogins()"
-      [disabled]="selected().length === 0"
-    />
-  </div>
-  <div class="toolbar-button">
-    <p-button
-      variant="text"
-      severity="secondary"
-      icon="pi pi-times-circle"
-      pTooltip="Permanently Delete Selected Logins"
-      tooltipPosition="bottom"
-      (click)="confirmDeleteSelectedLogins()"
-      [disabled]="selected().length === 0"
-    />
-  </div>
+<div class="relative h-full w-full">
+  <a
+    routerLink="/vault"
+    class="absolute top-4 left-4 z-10 flex items-center gap-2 text-sm text-surface-700 hover:underline"
+  >
+    <i class="pi pi-arrow-left"></i>
+    <span>Back</span>
+  </a>
 
-  <div id="recycle-bin-grid-container">
-    <div id="recycle-bin-stacks-container">
-      @if (displayedCredentials().length === 0 && loading === false && searchValue() === '') {
-        <div id="no-data">
-          <span>Empty</span>
-          <br />
+  <div class="flex h-full w-full">
+    <div class="flex-1 absolute top-10 items-center">
+      @if (selected().length > 0) {
+        <div class="toolbar-button">
+          <p-button
+            variant="text"
+            severity="secondary"
+            icon="pi pi-undo"
+            pTooltip="Clear Selection"
+            tooltipPosition="bottom"
+            (click)="clearSelection()"
+            [disabled]="selected().length === 0"
+          />
         </div>
       }
-      @if (displayedCredentials().length === 0 && loading === false && searchValue() !== '') {
-        <div id="no-data">
-          <span>No results found</span>
-          <br />
+      <span id="selected-logins-counter">
+        <i>({{ selected().length }} selected)</i>
+      </span>
+      <div class="toolbar-button">
+        <p-button
+          variant="text"
+          severity="secondary"
+          icon="pi pi-replay"
+          pTooltip="Restore Selected Logins"
+          tooltipPosition="bottom"
+          (click)="restoreSelectedLogins()"
+          [disabled]="selected().length === 0"
+        />
+      </div>
+      <div class="toolbar-button">
+        <p-button
+          variant="text"
+          severity="secondary"
+          icon="pi pi-times-circle"
+          pTooltip="Permanently Delete Selected Logins"
+          tooltipPosition="bottom"
+          (click)="confirmDeleteSelectedLogins()"
+          [disabled]="selected().length === 0"
+        />
+      </div>
+
+      <div id="recycle-bin-grid-container">
+        <div id="recycle-bin-stacks-container">
+          @if (displayedCredentials().length === 0 && loading === false && searchValue() === '') {
+            <div id="no-data">
+              <span>Empty</span>
+              <br />
+            </div>
+          }
+          @if (displayedCredentials().length === 0 && loading === false && searchValue() !== '') {
+            <div id="no-data">
+              <span>No results found</span>
+              <br />
+            </div>
+          }
+          @if (displayedCredentials().length > 0) {
+            <app-card-stacks
+              class="card-stacks"
+              (clickEvent)="select($event)"
+              [displayedCredentials]="displayedCredentials()"
+            ></app-card-stacks>
+          }
         </div>
-      }
-      @if (displayedCredentials().length > 0) {
-        <app-card-stacks
-          class="card-stacks"
-          (clickEvent)="select($event)"
-          [displayedCredentials]="displayedCredentials()"
-        ></app-card-stacks>
-      }
+      </div>
     </div>
   </div>
 </div>

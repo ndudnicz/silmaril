@@ -6,7 +6,7 @@ export class Credential {
   public decryptedData?: DecryptedData | null;
   public initializationVector?: Uint8Array | null;
   // The following properties are used for UI purposes
-  public selected: boolean = false;
+  public selected = false;
 
   constructor(
     public id: string,
@@ -26,6 +26,7 @@ export class Credential {
       : null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static fromObject(obj: any): Credential {
     if (!obj || typeof obj !== 'object') {
       throw new Error('Invalid object for Credential');
