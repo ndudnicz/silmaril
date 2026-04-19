@@ -38,7 +38,6 @@ import { Router } from '@angular/router';
     InputTextModule,
   ],
   templateUrl: './vault.component.html',
-  styleUrl: './vault.component.css',
 })
 export class VaultComponent extends BaseComponent implements OnInit {
   private readonly vaultService = inject(VaultService);
@@ -50,7 +49,10 @@ export class VaultComponent extends BaseComponent implements OnInit {
   protected allCredentials = signal<Credential[]>([]);
   protected readonly displayedCredentials = computed(() =>
     this.allCredentials().filter(
-      (credential) => credential.vaultId === this.vaultId() && !credential.deleted,
+      (credential) =>
+        credential.vaultId === this.vaultId() &&
+        !credential.deleted &&
+        credential.decryptedData?.title.toLowerCase().includes(this.searchValue().toLowerCase()),
     ),
   );
   protected readonly selectedCredential = signal<Credential | null>(null);

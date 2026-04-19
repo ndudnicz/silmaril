@@ -1,12 +1,12 @@
 <div
-  class="progress-container"
+  class="w-full bg-[#e0e0e0] dark:bg-[#333333] relative overflow-hidden h-6"
   [ngStyle]="{
     height: height(),
     'border-radius': borderRadius(),
   }"
 >
   <div
-    class="progress-fill"
+    class="h-full bg-[#007bff] dark:bg-[#66b2ff] relative transition-all duration-500 ease-in-out"
     [ngStyle]="{
       'width.%': value(),
       'background-color': color(),
@@ -15,7 +15,7 @@
     }"
   >
     @if (displayValue()) {
-      <span class="progress-text">{{ value() }}%</span>
+      <span class="text-sm">{{ value() }}%</span>
     }
   </div>
 </div>

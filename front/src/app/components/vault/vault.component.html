@@ -1,85 +1,85 @@
-<div id="vault-container">
+<!-- <div id="flex"> -->
+<div class="flex items-center h-[8vh] w-full">
+  <div class="">
+    <span>diamond icon</span>
+  </div>
   <div class="flex items-center">
-    <div class="">
-      <span>diamond icon</span>
-    </div>
-    <div class="flex items-center">
-      <input
-        pInputText
-        type="text"
-        [(ngModel)]="searchValue"
-        [placeholder]="searchBarPlaceholder()"
-        (ngModelChange)="searchValue.set($event.trim())"
-        [ngModelOptions]="{ standalone: true }"
-      />
-    </div>
-    <div class="flex-1 items-end flex justify-end gap-2">
-      <p-button
-        variant="text"
-        severity="secondary"
-        icon="pi pi-plus"
-        (click)="openAddCredentialModal()"
-        pTooltip="Add Credential"
-        tooltipPosition="bottom"
-      />
-      <p-button
-        variant="text"
-        severity="secondary"
-        icon="pi pi-cog"
-        (click)="openEditVaultModal()"
-        pTooltip="Edit Vault"
-        tooltipPosition="bottom"
-      />
-      <p-button
-        variant="text"
-        severity="secondary"
-        icon="pi pi-key"
-        (click)="openChangeMasterPasswordModal()"
-        pTooltip="Change Master Password"
-        tooltipPosition="bottom"
-      />
-      <p-button
-        variant="text"
-        severity="secondary"
-        icon="pi pi-trash"
-        (click)="openDeleteVaultModal()"
-        pTooltip="Delete Vault"
-        tooltipPosition="bottom"
-      />
+    <input
+      pInputText
+      type="text"
+      [(ngModel)]="searchValue"
+      [placeholder]="searchBarPlaceholder()"
+      (ngModelChange)="searchValue.set($event.trim())"
+      [ngModelOptions]="{ standalone: true }"
+    />
+  </div>
+  <div class="flex-1 items-end flex justify-end gap-2">
+    <p-button
+      variant="text"
+      severity="secondary"
+      icon="pi pi-plus"
+      (click)="openAddCredentialModal()"
+      pTooltip="Add credential"
+      tooltipPosition="bottom"
+    />
+    <p-button
+      variant="text"
+      severity="secondary"
+      icon="pi pi-cog"
+      (click)="openEditVaultModal()"
+      pTooltip="Edit vault"
+      tooltipPosition="bottom"
+    />
+    <p-button
+      variant="text"
+      severity="secondary"
+      icon="pi pi-key"
+      (click)="openChangeMasterPasswordModal()"
+      pTooltip="Change master password"
+      tooltipPosition="bottom"
+    />
+    <p-button
+      variant="text"
+      severity="secondary"
+      icon="pi pi-trash"
+      (click)="openDeleteVaultModal()"
+      pTooltip="Delete vault"
+      tooltipPosition="bottom"
+    />
+  </div>
+</div>
+
+@if (displayedCredentials().length === 0 && loading === false && searchValue() === '') {
+  <div class="flex items-center justify-center h-[92vh] w-full">
+    <div class="flex-col justify-center items-center">
+      <div class="flex-col justify-center items-center">
+        <p class="flex-1 text-center">No data yet</p>
+        <p class="flex-1 text-center">Add your first credential</p>
+      </div>
+      <div class="flex-1 w-full items-center flex justify-center">
+        <p-button
+          variant="text"
+          severity="secondary"
+          icon="pi pi-plus"
+          (click)="openAddCredentialModal()"
+        />
+      </div>
     </div>
   </div>
-
-  <div id="vault-grid-container">
-    <div id="stacks-container">
-      @if (displayedCredentials().length === 0 && loading === false && searchValue() === '') {
-        <div id="no-data">
-          <span>No data yet</span>
-          <br />
-          <span>Add your first credential</span>
-          <br />
-          <p-button
-            variant="text"
-            severity="secondary"
-            icon="pi pi-plus"
-            (click)="openAddCredentialModal()"
-          />
-        </div>
-      }
-      @if (displayedCredentials().length === 0 && loading === false && searchValue() !== '') {
-        <div id="no-data">
-          <span>No results found</span>
-          <i class="pi pi-search"></i>
-          <br />
-        </div>
-      }
-      @if (displayedCredentials().length > 0) {
-        <app-card-stacks
-          class="card-stacks"
-          (clickEvent)="selectedCredential.set($event)"
-          [displayedCredentials]="displayedCredentials()"
-        ></app-card-stacks>
-      }
+} @else if (displayedCredentials().length === 0 && loading === false && searchValue() !== '') {
+  <div class="flex items-center justify-center h-[92vh] w-full">
+    <div id="no-data">
+      <span>No results found</span>
+      <i class="pi pi-search"></i>
+      <br />
     </div>
+  </div>
+} @else {
+  <div class="flex h-[92vh] w-full">
+    <app-card-stacks
+      (clickEvent)="selectedCredential.set($event)"
+      [displayedCredentials]="displayedCredentials()"
+    ></app-card-stacks>
     <p-drawer
       header="Drawer"
       [visible]="showDrawer()"
@@ -97,4 +97,4 @@
       ></app-selected-credential>
     </p-drawer>
   </div>
-</div>
+}

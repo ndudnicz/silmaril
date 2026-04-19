@@ -1,7 +1,13 @@
-<div class="card" (click)="click()" [ngClass]="{ 'card-selected': credential().selected }">
-  <div class="card-content">
-    <h2 class="card-title">{{ credential().decryptedData?.title ?? '*********' }}</h2>
-    <div class="card-icon-container">
+<div
+  class="w-50 h-20 rounded-xs m-1 cursor-pointer bg-[#4867e2] text-[#ebeaea]! hover:bg-[#4867e2]/90"
+  (click)="click()"
+  (keypress.enter)="click()"
+  tabindex="0"
+  [ngClass]="{ 'bg-[#273a84]!': credential().selected }"
+>
+  <div class="px-3 py-2">
+    <h2>{{ credential().decryptedData?.title ?? '*********' }}</h2>
+    <div class="flex items-center gap-1">
       @if (!credential().decryptedData) {
         <i class="pi pi-lock"></i>
       }
@@ -17,7 +23,7 @@
       }
     </div>
   </div>
-  <div class="card-footer">
+  <div class="p-3">
     @for (tagName of credential().tagNames; track tagName; let i = $index) {
       <app-chip [label]="tagName"></app-chip>
     }

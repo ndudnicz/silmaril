@@ -1,7 +1,7 @@
 @for (entry of displayedCredentialStackEntries(); track $index) {
   @if (entry.value.length > 0) {
     <app-card-stack
-      class="card-stack"
+      class="w-full flex-col items-center gap-4"
       (clickEvent)="clickEvent.emit($event)"
       [credentials]="entry.value"
       [title]="entry.key"

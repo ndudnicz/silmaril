@@ -1,13 +1,13 @@
-<div class="stack-container">
-  <div class="stack-header">
-    <div class="title-container">
+<div class="w-full">
+  <div class="w-full flex content-start items-center gap-2">
+    <div class="ml-10">
       <h2>{{ title() }}</h2>
     </div>
-    <div class="divider-container">
+    <div class="flex w-full items-center px-10">
       <p-divider />
     </div>
   </div>
-  <div class="stack-content">
+  <div class="flex flex-wrap w-full px-4 py-2">
     @for (credential of credentials(); track $index) {
       <app-card (clickEvent)="clickEvent.emit(credential)" [credential]="credential"></app-card>
     }
