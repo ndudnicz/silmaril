@@ -16,9 +16,20 @@ public class VaultRepository(AppDbContext db) : IVaultRepository
 
     public async Task<bool> VaultExistByUserIdAsync(IEnumerable<Guid> ids, Guid userId)
     {
-        return await db.Vaults
+        var distinctIds = ids.Distinct().ToList();
+        if (distinctIds.Count == 0)
+        {
+            return false;
+        }
+
+        var matchingIdsCount = await db.Vaults
             .AsNoTracking()
-            .AllAsync(v => ids.Contains(v.Id) && v.UserId == userId);
+            .Where(v => v.UserId == userId && distinctIds.Contains(v.Id))
+            .Select(v => v.Id)
+            .Distinct()
+            .CountAsync();
+
+        return matchingIdsCount == distinctIds.Count;
     }
 
     public async Task<int> CountVaultsByUserIdAsync(Guid userId)

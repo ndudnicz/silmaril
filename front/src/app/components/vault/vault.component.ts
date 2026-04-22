@@ -94,6 +94,11 @@ export class VaultComponent extends BaseComponent implements OnInit {
       routerLink: '/recycle-bin',
     },
     {
+      label: 'FAQ',
+      icon: 'pi pi-question-circle',
+      command: () => this.openInNewTab('/faq'),
+    },
+    {
       label: 'Sign out',
       icon: 'pi pi-sign-out',
       command: () => this.signout(),
@@ -303,7 +308,7 @@ export class VaultComponent extends BaseComponent implements OnInit {
   onVaultUpdateSuccess(updatedVault: Vault) {
     console.log('Vault updated successfully:', updatedVault);
     this.selectedVault.set(updatedVault);
-    this.dataService.updateVault(updatedVault);
+    // this.dataService.updateVault(updatedVault);
     ToastWrapper.success('Vault updated successfully');
     this.stopLoading();
   }
@@ -351,13 +356,14 @@ export class VaultComponent extends BaseComponent implements OnInit {
   }
 
   onVaultDeleteSuccess(deletedVaultId: string) {
-    const vaults = this.dataService.getVaults().filter((v) => v.id !== deletedVaultId);
-    this.dataService.setVaults(vaults);
+    // const vaults = this.dataService.getVaults().filter((v) => v.id !== deletedVaultId);
+    // this.dataService.setVaults(vaults);
+    this.vaults.set(this.vaults().filter((v) => v.id !== deletedVaultId));
     this.selectedCredential.set(null);
     this.allCredentials.set([]);
     this.stopLoading();
     ToastWrapper.success(`Vault "${this.selectedVault?.name}" deleted successfully`);
-    this.router.navigate(['/vault', vaults[0]?.id]);
+    this.router.navigate(['/vault', this.vaults()[0]?.id]);
   }
 
   onCredentialUpdated(updatedCredential: Credential) {

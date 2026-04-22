@@ -3,10 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { VaultService } from '../../services/vault.service';
 import { Router, RouterLink } from '@angular/router';
-import { ToastWrapper } from '../../utils/toast.wrapper';
 import { BaseComponent } from '../base-component/base-component.component';
-import { take } from 'rxjs';
-import { Vault } from '../../entities/vault';
 import { DataService } from '../../services/data.service';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -46,7 +43,10 @@ export class UnlockComponent extends BaseComponent implements OnInit {
       this.startLoading();
       console.log('Form submitted:', this.form.value);
       await this.vaultService.setKeyAsync(this.masterPasswordFormControl.value!);
-      this.loadVaults();
+      // this.loadVaults();
+
+      this.stopLoading();
+      this.router.navigate(['/vault']);
     } catch (error: unknown) {
       this.displayError('Failed to unlock vault', error);
     } finally {
@@ -62,35 +62,35 @@ export class UnlockComponent extends BaseComponent implements OnInit {
     }
   }
 
-  loadVaults(): void {
-    this.vaultService
-      .getVaults$()
-      .pipe(take(1))
-      .subscribe({
-        next: (vaults: Vault[]) => {
-          this.onVaultsLoaded(vaults);
-        },
-        error: (error: unknown) => {
-          this.displayError('Error fetching vaults', error);
-          this.stopLoading();
-        },
-        complete: () => {
-          console.log('Vaults fetched successfully');
-          this.stopLoading();
-        },
-      });
-  }
+  // loadVaults(): void {
+  //   this.vaultService
+  //     .getVaults$()
+  //     .pipe(take(1))
+  //     .subscribe({
+  //       next: (vaults: Vault[]) => {
+  //         this.onVaultsLoaded(vaults);
+  //       },
+  //       error: (error: unknown) => {
+  //         this.displayError('Error fetching vaults', error);
+  //         this.stopLoading();
+  //       },
+  //       complete: () => {
+  //         console.log('Vaults fetched successfully');
+  //         this.stopLoading();
+  //       },
+  //     });
+  // }
 
-  onVaultsLoaded(vaults: Vault[]): void {
-    console.log('Vaults fetched successfully:', vaults);
-    this.dataService.setVaults(vaults);
-    if (vaults.length === 0) {
-      this.displayError('No vaults found. Please create a vault first.', null);
-      return;
-    } else {
-      ToastWrapper.success('Vault unlocked successfully');
-      this.stopLoading();
-      this.router.navigate(['/vault']);
-    }
-  }
+  // onVaultsLoaded(vaults: Vault[]): void {
+  //   console.log('Vaults fetched successfully:', vaults);
+  //   // this.dataService.setVaults(vaults);
+  //   if (vaults.length === 0) {
+  //     this.displayError('No vaults found. Please create a vault first.', null);
+  //     return;
+  //   } else {
+  //     ToastWrapper.success('Vault unlocked successfully');
+  //     this.stopLoading();
+  //     this.router.navigate(['/vault']);
+  //   }
+  // }
 }

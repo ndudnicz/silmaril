@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
 import { Credential } from '../entities/credential';
 import { Vault } from '../entities/vault';
@@ -11,13 +11,10 @@ import { UpdateVaultDto } from '../entities/update/update-vault-dto';
 
 @Injectable({ providedIn: 'root' })
 export class VaultService {
-  private SALT_KEY_NAME = 'vault-salt';
+  private readonly SALT_KEY_NAME = 'vault-salt';
   private key: CryptoKey | null = null;
   private apiEndpointV1 = environment.apiEndpoint + '/v1';
-
-  constructor(private http: HttpClient) {
-    this.key = null;
-  }
+  private readonly http = inject(HttpClient);
 
   public setSalt(salt: string): void {
     console.log(`Setting salt: ${salt}`, typeof salt);
@@ -123,13 +120,12 @@ export class VaultService {
           encryptedData.initializationVector,
         );
         return resolve(credential);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error encrypting login data:', error);
         reject(
           new Error(
-            'Error encrypting login data:' + error
-              ? error.message
-              : 'Unknown error during encryption',
+            'Error encrypting login data:' +
+              (error instanceof Error ? error.message : 'Unknown error during encryption'),
           ),
         );
       }
@@ -147,7 +143,7 @@ export class VaultService {
         );
         console.log('All credentials encrypted successfully');
         resolve(encryptedCredentials);
-      } catch (error: any) {
+      } catch (error: unknown) {
         reject(error);
       }
     });
@@ -167,7 +163,7 @@ export class VaultService {
         credential.decryptedData = DecryptedData.fromString(decryptDataString);
         console.log('Credential data decrypted successfully:', credential.decryptedData.toString());
         resolve(credential);
-      } catch (error: any) {
+      } catch (error: unknown) {
         reject(error);
       }
     });
@@ -184,7 +180,7 @@ export class VaultService {
         );
         console.log('All logins decrypted successfully');
         resolve(decryptedLogins);
-      } catch (error: any) {
+      } catch (error: unknown) {
         reject(error);
       }
     });

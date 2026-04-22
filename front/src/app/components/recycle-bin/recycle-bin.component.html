@@ -8,69 +8,62 @@
   </a>
 
   <div class="flex h-full w-full">
-    <div class="flex-1 absolute top-10 items-center">
-      @if (selected().length > 0) {
-        <div class="toolbar-button">
-          <p-button
-            variant="text"
-            severity="secondary"
-            icon="pi pi-undo"
-            pTooltip="Clear Selection"
-            tooltipPosition="bottom"
-            (click)="clearSelection()"
-            [disabled]="selected().length === 0"
-          />
-        </div>
-      }
-      <span id="selected-logins-counter">
-        <i>({{ selected().length }} selected)</i>
-      </span>
-      <div class="toolbar-button">
+    <div class="flex-1 absolute top-10 items-center w-full">
+      <div class="flex items-center mx-4">
+        <span id="selected-logins-counter">
+          <i>({{ selected().length }} selected)</i>
+        </span>
         <p-button
           variant="text"
           severity="secondary"
-          icon="pi pi-replay"
-          pTooltip="Restore Selected Logins"
+          icon="pi pi-undo"
+          pTooltip="Clear Selection"
           tooltipPosition="bottom"
-          (click)="restoreSelectedLogins()"
+          (click)="clearSelection()"
           [disabled]="selected().length === 0"
         />
-      </div>
-      <div class="toolbar-button">
+        <p-button
+          variant="text"
+          severity="secondary"
+          icon="pi pi-file-arrow-up"
+          pTooltip="Restore Selected Credentials"
+          tooltipPosition="bottom"
+          (click)="restoreSelectedCredentials()"
+          [disabled]="selected().length === 0"
+        />
         <p-button
           variant="text"
           severity="secondary"
           icon="pi pi-times-circle"
-          pTooltip="Permanently Delete Selected Logins"
+          pTooltip="Permanently Delete Selected Credentials"
           tooltipPosition="bottom"
-          (click)="confirmDeleteSelectedLogins()"
+          (click)="confirmDeleteSelectedCredentials()"
           [disabled]="selected().length === 0"
         />
       </div>
-
-      <div id="recycle-bin-grid-container">
-        <div id="recycle-bin-stacks-container">
-          @if (displayedCredentials().length === 0 && loading === false && searchValue() === '') {
-            <div id="no-data">
-              <span>Empty</span>
-              <br />
-            </div>
-          }
-          @if (displayedCredentials().length === 0 && loading === false && searchValue() !== '') {
-            <div id="no-data">
-              <span>No results found</span>
-              <br />
-            </div>
-          }
-          @if (displayedCredentials().length > 0) {
-            <app-card-stacks
-              class="card-stacks"
-              (clickEvent)="select($event)"
-              [displayedCredentials]="displayedCredentials()"
-            ></app-card-stacks>
-          }
-        </div>
+      <!-- <div> -->
+      <div class="flex items-center justify-center h-[80vh] w-full">
+        @if (displayedCredentials().length === 0 && loading === false && searchValue() === '') {
+          <div id="no-data">
+            <span>Empty</span>
+            <br />
+          </div>
+        }
+        @if (displayedCredentials().length === 0 && loading === false && searchValue() !== '') {
+          <div id="no-data">
+            <span>No results found</span>
+            <br />
+          </div>
+        }
+        @if (displayedCredentials().length > 0) {
+          <app-card-stacks
+            class="card-stacks"
+            (clickEvent)="select($event)"
+            [displayedCredentials]="displayedCredentials()"
+          ></app-card-stacks>
+        }
       </div>
+      <!-- </div> -->
     </div>
   </div>
 </div>

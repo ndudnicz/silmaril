@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { BaseModalComponent } from '../../../base-component/modal/base-modal/base-modal.component';
 import { DataService } from '../../../../services/data.service';
 import {
@@ -14,32 +14,33 @@ import { take } from 'rxjs';
 import { DialogService, DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
+import { Vault } from '../../../../entities/vault';
 
-export interface RestoreLoginsModalData {
-  orphanedLogins: Credential[];
+export interface RestoreCredentialsModalData {
+  orphanedCredentials: Credential[];
+  vaults: Vault[];
 }
 
 @Component({
-  selector: 'app-restore-logins-modal',
+  selector: 'app-restore-credentials-modal',
   imports: [ReactiveFormsModule, FormsModule, SelectModule, ButtonModule],
-  templateUrl: './restore-logins-modal.component.html',
-  styleUrl: './restore-logins-modal.component.css',
+  templateUrl: './restore-credentials-modal.component.html',
+  styleUrl: './restore-credentials-modal.component.css',
 })
-export class RestoreLoginsModalComponent extends BaseModalComponent {
+export class RestoreCredentialsModalComponent extends BaseModalComponent {
   private readonly config = inject(DynamicDialogConfig);
   private readonly dialogRef = inject(DynamicDialogRef);
-  protected readonly data = this.config.data as RestoreLoginsModalData;
+  protected readonly data = this.config.data as RestoreCredentialsModalData;
   protected readonly dialogService = inject(DialogService);
   protected readonly dataService = inject(DataService);
-  protected readonly vaults = computed(() => this.dataService.getVaults());
   protected readonly displayVaultSelect = false;
   protected readonly form = new FormGroup({
-    vaultId: new FormControl(this.vaults()[0].id, []),
+    vaultId: new FormControl(this.data.vaults[0].id, []),
   });
 
   checkVaultRequirement(): ValidatorFn {
     return (control: AbstractControl<string>): Record<string, unknown> | null => {
-      const isValid = this.data.orphanedLogins.length === 0;
+      const isValid = this.data.orphanedCredentials.length === 0;
       return isValid ? null : { vaultRequired: { value: control.value } };
     };
   }
@@ -47,11 +48,11 @@ export class RestoreLoginsModalComponent extends BaseModalComponent {
   onSubmit() {
     this.dialogService
       .open(ConfirmModalComponent, {
-        header: 'Confirm restore logins',
+        header: 'Confirm restore credentials',
         closable: true,
         data: {
-          title: 'Restore deleted logins',
-          message: `Are you sure you want to restore ${this.data.orphanedLogins.length} deleted logins?`,
+          title: 'Restore deleted credentials',
+          message: `Are you sure you want to restore ${this.data.orphanedCredentials.length} deleted credentials?`,
           confirmText: 'Restore',
           cancelText: 'Cancel',
         },
@@ -62,7 +63,7 @@ export class RestoreLoginsModalComponent extends BaseModalComponent {
           this.dialogRef.close(this.form.value.vaultId);
         },
         error: (error) => {
-          this.displayError('Error while confirming restore logins', error);
+          this.displayError('Error while confirming restore credentials', error);
         },
       });
   }
