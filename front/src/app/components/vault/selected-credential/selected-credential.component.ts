@@ -14,6 +14,8 @@ import { AddEditCredentialModalComponent } from '../modals/add-edit-credential/a
 import { InputTextModule } from 'primeng/inputtext';
 import { IftaLabelModule } from 'primeng/iftalabel';
 import { ButtonModule } from 'primeng/button';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-selected-credential',
@@ -24,9 +26,10 @@ import { ButtonModule } from 'primeng/button';
     InputTextModule,
     IftaLabelModule,
     ButtonModule,
+    FloatLabelModule,
+    TextareaModule,
   ],
   templateUrl: './selected-credential.component.html',
-  styleUrl: './selected-credential.component.css',
 })
 export class SelectedCredentialComponent extends BaseComponent {
   readonly credential = model<Credential | null>();
@@ -41,7 +44,7 @@ export class SelectedCredentialComponent extends BaseComponent {
   protected readonly password = computed(() => this.credential()?.decryptedData?.password || '');
   protected readonly url = computed(() => this.credential()?.decryptedData?.url || '');
   protected readonly notes = computed(() => this.credential()?.decryptedData?.notes || '');
-
+  note = 'text text text';
   close() {
     this.credential.set(null);
   }
@@ -63,12 +66,12 @@ export class SelectedCredentialComponent extends BaseComponent {
     this.dialogService
       .open(AddEditCredentialModalComponent, {
         closable: true,
-
+        header: `Edit credential '${credential.decryptedData?.title}'`,
         width: '600px',
         height: 'auto',
         data: {
           mode: AddEditCredentialModalComponent.MODAL_MOD.EDIT,
-          login: credential,
+          credential: credential,
           vaultId: credential.vaultId,
         },
       })
@@ -89,13 +92,12 @@ export class SelectedCredentialComponent extends BaseComponent {
     }
     this.dialogService
       .open(ConfirmModalComponent, {
-        closable: true,
-
-        width: '400px',
+        header: `Delete credential '${credential.decryptedData?.title}'`,
+        closable: false,
+        width: '500px',
         height: 'auto',
         data: {
-          title: `Delete Login ${credential.decryptedData?.title}`,
-          message: `Are you sure you want to delete the login "${credential.decryptedData?.title}"? It will be sent to the recycle bin and can be restored later.`,
+          message: `Are you sure you want to delete the credential "${credential.decryptedData?.title}"? It will be sent to the recycle bin and can be restored later.`,
           confirmText: 'Confirm',
           cancelText: 'Cancel',
         },
@@ -110,7 +112,7 @@ export class SelectedCredentialComponent extends BaseComponent {
             .pipe(take(1))
             .subscribe({
               next: (updatedLogin: Credential) => this.onSoftDeleteLoginSuccess(updatedLogin),
-              error: (error: Error) => {
+              error: (error: unknown) => {
                 this.displayError('Error deleting login', error);
                 this.stopLoading();
               },

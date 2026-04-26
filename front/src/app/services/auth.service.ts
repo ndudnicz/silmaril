@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { jwtDecode } from 'jwt-decode';
 import { AuthResponse } from '../entities/authentication/authResponse';
@@ -10,6 +10,8 @@ import { catchError, map, Observable, take, tap, throwError } from 'rxjs';
   providedIn: 'root',
 })
 export class AuthService {
+  private vaultService = inject(VaultService);
+  private http = inject(HttpClient);
   private readonly apiEndpointV1 = environment.apiEndpoint + '/v1';
   private readonly JWT_TOKEN_KEY = 'jwtToken';
   private readonly AUTHENTICATED_KEY = 'authenticated';
@@ -18,19 +20,15 @@ export class AuthService {
   private readonly CSRF_TOKEN_KEY = 'csrfToken';
   private readonly CSRF_COOKIE_NAME = 'XSRF-TOKEN';
   private readonly CSRF_HEADER_NAME = 'X-CSRF-TOKEN';
-  private timeoutRefreshToken: any = null;
-  private refreshTokenDelayInSeconds = 60;
-
-  constructor(
-    private vaultService: VaultService,
-    private http: HttpClient,
-  ) {}
+  private timeoutRefreshToken = signal<number | null>(null);
+  private readonly refreshTokenDelayInSeconds = 60; // Refresh token 60 seconds before it expires
 
   private setLocalStorage(authResponse: AuthResponse): void {
     const parsedToken = jwtDecode(authResponse.jwtToken);
     localStorage.setItem(this.JWT_TOKEN_KEY, authResponse.jwtToken);
     localStorage.setItem(this.AUTHENTICATED_KEY, String(true));
     localStorage.setItem(this.JWT_EXPIRES, String(parsedToken.exp));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     localStorage.setItem(this.USER_ID, String((parsedToken as any).unique_name));
   }
 
@@ -42,30 +40,32 @@ export class AuthService {
     localStorage.removeItem(this.USER_ID);
     localStorage.removeItem(this.CSRF_TOKEN_KEY);
 
-    if (this.timeoutRefreshToken) {
-      clearTimeout(this.timeoutRefreshToken);
-      this.timeoutRefreshToken = null;
+    if (this.timeoutRefreshToken()) {
+      clearTimeout(this.timeoutRefreshToken()!);
+      this.timeoutRefreshToken.set(null);
     }
   }
 
   public setRefreshTokenTimeout(): void {
-    if (this.timeoutRefreshToken) {
-      clearTimeout(this.timeoutRefreshToken);
-      this.timeoutRefreshToken = null;
+    if (this.timeoutRefreshToken()) {
+      clearTimeout(this.timeoutRefreshToken()!);
+      this.timeoutRefreshToken.set(null);
     }
-    var jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES));
+    const jwtExpires = Number(localStorage.getItem(this.JWT_EXPIRES));
     if (jwtExpires) {
       const now = Math.floor(Date.now() / 1000);
       const refreshTime = jwtExpires - now - this.refreshTokenDelayInSeconds;
       console.log(`JWT Expires at: ${jwtExpires}, next refresh in: ${refreshTime} seconds`);
-      this.timeoutRefreshToken = setTimeout(() => {
-        this.refreshToken$()
-          .pipe(take(1))
-          .subscribe({
-            next: () => console.log('Token refreshed successfully'),
-            error: (error) => console.error('Error refreshing token:', error),
-          });
-      }, refreshTime * 1000);
+      this.timeoutRefreshToken.set(
+        setTimeout(() => {
+          this.refreshToken$()
+            .pipe(take(1))
+            .subscribe({
+              next: () => console.log('Token refreshed successfully'),
+              error: (error) => console.error('Error refreshing token:', error),
+            });
+        }, refreshTime * 1000),
+      );
     }
   }
 
@@ -133,7 +133,7 @@ export class AuthService {
         }),
         map(() => true),
         catchError((error) => {
-          let message = error.error.message || 'Token refresh failed';
+          const message = error.error.message || 'Token refresh failed';
           return throwError(() => new Error(message));
         }),
       );

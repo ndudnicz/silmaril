@@ -3,7 +3,6 @@ import { ButtonModule } from 'primeng/button';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 
 export interface ConfirmModalData {
-  title: string;
   message: string;
   confirmText: string;
   cancelText: string;
@@ -13,7 +12,6 @@ export interface ConfirmModalData {
   selector: 'app-confirm-modal',
   imports: [ButtonModule],
   templateUrl: './confirm-modal.component.html',
-  styleUrl: './confirm-modal.component.css',
 })
 export class ConfirmModalComponent {
   private readonly dialogRef = inject(DynamicDialogRef);

@@ -19,7 +19,7 @@ public class UserController(
     {
         return Ok(await userService.GetUserAsync(GetUserId()));
     }
-    
+
     [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> CreateAsync(
@@ -38,13 +38,13 @@ public class UserController(
             return StatusCode(StatusCodes.Status403Forbidden, "Invalid CSRF token.");
         }
     }
-    
+
     [HttpPut]
     public async Task<IActionResult> UpdateAsync([FromBody] UpdateUserDto updateUserDto)
     {
         return Ok(await userService.UpdateUserAsync(GetUserId(), updateUserDto));
     }
-    
+
     [HttpPut]
     [Route("password")]
     public async Task<IActionResult> UpdatePasswordAsync([FromBody] UpdateUserPasswordDto updateUserPasswordDto)

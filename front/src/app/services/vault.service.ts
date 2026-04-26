@@ -1,23 +1,20 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { base64ToUint8Array, CryptoUtilsV1 } from '../utils/crypto.utils';
 import { Credential } from '../entities/credential';
 import { Vault } from '../entities/vault';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, switchMap, take, throwError } from 'rxjs';
 import { CreateVaultDto } from '../entities/create/create-vault-dto';
 import { DecryptedData } from '../entities/decrypted-data';
 import { UpdateVaultDto } from '../entities/update/update-vault-dto';
 
 @Injectable({ providedIn: 'root' })
 export class VaultService {
-  private SALT_KEY_NAME = 'vault-salt';
+  private readonly SALT_KEY_NAME = 'vault-salt';
   private key: CryptoKey | null = null;
   private apiEndpointV1 = environment.apiEndpoint + '/v1';
-
-  constructor(private http: HttpClient) {
-    this.key = null;
-  }
+  private readonly http = inject(HttpClient);
 
   public setSalt(salt: string): void {
     console.log(`Setting salt: ${salt}`, typeof salt);
@@ -54,8 +51,36 @@ export class VaultService {
       console.log(error);
       throw new Error(
         'Failed to set the key:' + (error instanceof Error ? error.message : 'Unknown error'),
+        { cause: error },
       );
     }
+  }
+
+  public setKey$(masterPassword: string): Observable<ArrayBuffer> {
+    const storedSaltBase64 = localStorage.getItem(this.SALT_KEY_NAME);
+    if (!storedSaltBase64) {
+      const errorMessage = 'Salt not set. Please set the salt before setting the master password.';
+      throw new Error(errorMessage);
+    }
+    const saltUint8Array = base64ToUint8Array(storedSaltBase64);
+    return CryptoUtilsV1.deriveKeyFromPassword$(masterPassword, saltUint8Array).pipe(
+      take(1),
+      map((derivedKey) => {
+        this.key = derivedKey;
+        return derivedKey;
+      }),
+      switchMap((derivedKey) => CryptoUtilsV1.exportKey$(derivedKey)),
+      catchError((error) => {
+        console.error('Failed to set the key:', error);
+        return throwError(
+          () =>
+            new Error(
+              'Failed to set the key:' + (error instanceof Error ? error.message : 'Unknown error'),
+              { cause: error },
+            ),
+        );
+      }),
+    );
   }
 
   public isUnlocked(): boolean {
@@ -95,13 +120,12 @@ export class VaultService {
           encryptedData.initializationVector,
         );
         return resolve(credential);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error encrypting login data:', error);
         reject(
           new Error(
-            'Error encrypting login data:' + error
-              ? error.message
-              : 'Unknown error during encryption',
+            'Error encrypting login data:' +
+              (error instanceof Error ? error.message : 'Unknown error during encryption'),
           ),
         );
       }
@@ -119,7 +143,7 @@ export class VaultService {
         );
         console.log('All credentials encrypted successfully');
         resolve(encryptedCredentials);
-      } catch (error: any) {
+      } catch (error: unknown) {
         reject(error);
       }
     });
@@ -139,7 +163,7 @@ export class VaultService {
         credential.decryptedData = DecryptedData.fromString(decryptDataString);
         console.log('Credential data decrypted successfully:', credential.decryptedData.toString());
         resolve(credential);
-      } catch (error: any) {
+      } catch (error: unknown) {
         reject(error);
       }
     });
@@ -156,7 +180,7 @@ export class VaultService {
         );
         console.log('All logins decrypted successfully');
         resolve(decryptedLogins);
-      } catch (error: any) {
+      } catch (error: unknown) {
         reject(error);
       }
     });

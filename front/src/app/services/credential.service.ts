@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Credential } from '../entities/credential';
 import { environment } from '../../environments/environment';
-import { catchError, map, Observable, tap, throwError } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { CreateCredentialDto } from '../entities/create/create-credential-dto';
 import { DeleteCredentialsDto } from '../entities/delete/delete-credential-dto';
@@ -12,8 +12,7 @@ import { UpdateCredentialDto } from '../entities/update/update-credential-dto';
 })
 export class CredentialService {
   private apiEndpointV1 = environment.apiEndpoint + '/v1';
-
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   getCredentials$(): Observable<Credential[]> {
     return this.http

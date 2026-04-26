@@ -6,25 +6,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories;
 
-public class UserRepository(AppDbContext db): IUserRepository
+public class UserRepository(AppDbContext db) : IUserRepository
 {
     public async Task<User?> GetUserAsync(Guid id)
     {
         return await db.Users.FirstOrDefaultAsync(u => u.Id == id);
     }
-    
+
     public async Task<User?> GetUserByUserNameHashAsync(string usernameHash)
     {
         return await db.Users.FirstOrDefaultAsync(x => x.UsernameHash == usernameHash);
     }
-    
+
     public async Task<bool> UserExistsAsync(Guid id)
     {
         return await db.Users
             .AsNoTracking()
             .AnyAsync(x => x.Id == id);
     }
-    
+
     public async Task<bool> UserExistsByUsernameHashAsync(string usernameHash)
     {
         return await db.Users
@@ -48,7 +48,7 @@ public class UserRepository(AppDbContext db): IUserRepository
         await db.SaveChangesAsync();
         return user;
     }
-    
+
     public async Task<int> DeleteUserAsync(User user)
     {
         return await db.Users

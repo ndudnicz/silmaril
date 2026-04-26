@@ -10,7 +10,7 @@ import { FaqComponent } from './components/faq/faq.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { RecycleBinComponent } from './components/recycle-bin/recycle-bin.component';
 
-const title = 'Silmaril - Password Manager';
+const title = 'Silmaril';
 export const routes: Routes = [
   {
     path: 'what-is-master-password',
@@ -42,7 +42,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
       },
       {
-        path: 'vault/:id',
+        path: 'vault',
         title: title + ': Vault',
         component: VaultComponent,
         canActivate: [authGuard, vaultUnlocked],

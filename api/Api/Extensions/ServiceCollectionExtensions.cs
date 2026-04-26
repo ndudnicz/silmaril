@@ -25,7 +25,8 @@ public static class ServiceCollectionExtensions
         AddContext<AppDbContext>();
         return;
 
-        void AddContext<T>() where T : DbContext{
+        void AddContext<T>() where T : DbContext
+        {
             services.AddDbContextPool<T>(options =>
             {
                 options.UseMySql(
@@ -39,9 +40,9 @@ public static class ServiceCollectionExtensions
             });
         }
     }
-    
+
     public static void AddJwtAuthentication(this IServiceCollection services, JwtConfiguration jwtConfiguration)
-    { 
+    {
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -70,7 +71,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddScoped<IVaultRepository, VaultRepository>();
     }
-    
+
     public static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
@@ -79,7 +80,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<IVaultService, VaultService>();
     }
-    
+
     public static void AddValidators(this IServiceCollection services)
     {
         services.AddScoped<IUserValidator, UserValidator>();
@@ -122,7 +123,7 @@ public static class ServiceCollectionExtensions
                 In = ParameterLocation.Header,
                 Description = "Example : `Bearer eyJhbGciOiJIUzI1NiIs...`"
             });
-    
+
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {

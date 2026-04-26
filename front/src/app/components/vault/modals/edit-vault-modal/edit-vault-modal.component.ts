@@ -5,12 +5,12 @@ import { ConfirmModalComponent } from '../../../modals/confirm-modal/confirm-mod
 import { DialogService, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { FloatLabelModule } from 'primeng/floatlabel';
 
 @Component({
   selector: 'app-edit-vault-modal',
-  imports: [ReactiveFormsModule, ButtonModule, InputTextModule],
+  imports: [ReactiveFormsModule, ButtonModule, InputTextModule, FloatLabelModule],
   templateUrl: './edit-vault-modal.component.html',
-  styleUrl: './edit-vault-modal.component.css',
 })
 export class EditVaultModalComponent extends BaseModalComponent {
   private readonly dialogService = inject(DialogService);
@@ -30,10 +30,9 @@ export class EditVaultModalComponent extends BaseModalComponent {
   onSubmit() {
     this.dialogService
       .open(ConfirmModalComponent, {
-        closable: true,
-
+        header: 'Confirm vault name change',
+        closable: false,
         data: {
-          title: 'Confirm Vault Name Change',
           message: 'Are you sure you want to change the vault name?',
           confirmText: 'Confirm',
           cancelText: 'Cancel',

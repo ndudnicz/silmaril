@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Api.Entities;
 
 [Table("tags")]
-public class Tag: MyEntity
+public class Tag : MyEntity
 {
     [Column("name")]
     [MaxLength(MaxStringLength)]

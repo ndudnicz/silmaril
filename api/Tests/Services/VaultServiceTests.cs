@@ -23,7 +23,7 @@ public class VaultServiceTests
         _vaultMapper.Object,
         _loginRepository.Object
         );
-    
+
     private Vault CreateTestVault(
         Guid id = new(),
         Guid userId = new(),
@@ -38,7 +38,7 @@ public class VaultServiceTests
             Created = DateTime.UtcNow
         };
     }
-    
+
     private VaultDto CreateTestVaultDto(
         Guid id = new(),
         string name = "Test Vault"
@@ -60,7 +60,7 @@ public class VaultServiceTests
             Created = vault.Created
         };
     }
-    
+
     [Fact]
     private async Task GetVaultsByUserIdAsync_ShouldReturnVaults()
     {
@@ -71,16 +71,16 @@ public class VaultServiceTests
             CreateTestVault(Guid.NewGuid(), userId, "Vault 2")
         };
         var vaultDtos = vaults.Select(CreateTestVaultDto).ToList();
-        
+
         _vaultRepository.Setup(r => r.GetVaultsByUserIdAsync(userId)).ReturnsAsync(vaults);
         _vaultMapper.Setup(m => m.ToDto(It.IsAny<List<Vault>>())).Returns(vaultDtos);
 
         var service = CreateService();
         var result = await service.GetVaultsByUserIdAsync(userId);
-        
+
         result.Should().BeEquivalentTo(vaults.Select(CreateTestVaultDto));
     }
-    
+
     [Fact]
     private async Task DeleteVaultAsync_ShouldDeleteVault()
     {
@@ -95,7 +95,7 @@ public class VaultServiceTests
             l.Deleted = true;
             return l;
         }).ToList();
-        
+
         _vaultValidator.Setup(v => v.EnsureExistsByUserIdAsync(vaultId, userId)).Returns(Task.CompletedTask);
         _vaultValidator.Setup(v => v.EnsureMultipleVaultsExistAsync(userId)).Returns(Task.CompletedTask);
         _loginRepository.Setup(r => r.GetLoginsByVaultIdWithTagsAsync(vaultId))
@@ -105,40 +105,40 @@ public class VaultServiceTests
 
         var service = CreateService();
         var result = await service.DeleteVaultAsync(vaultId, userId);
-        
+
         result.Should().Be(1);
     }
-    
+
     [Fact]
     private async Task DeleteVaultAsync_ShouldThrow_WhenVaultDoesNotExist()
     {
         var userId = Guid.NewGuid();
         var invalidVaultId = Guid.NewGuid();
-        
+
         _vaultValidator.Setup(v => v.EnsureExistsByUserIdAsync(invalidVaultId, userId))
             .ThrowsAsync(new VaultNotFound("id", invalidVaultId.ToString()));
 
         var service = CreateService();
-        
+
         Func<Task> act = async () => await service.DeleteVaultAsync(invalidVaultId, userId);
-        
+
         await act.Should().ThrowAsync<VaultNotFound>();
     }
-    
+
     [Fact]
     private async Task DeleteVaultAsync_ShouldThrow_WhenVaultIsTheLastOne()
     {
         var userId = Guid.NewGuid();
         var vaultId = Guid.NewGuid();
-        
+
         _vaultValidator.Setup(v => v.EnsureExistsByUserIdAsync(vaultId, userId)).Returns(Task.CompletedTask);
         _vaultValidator.Setup(v => v.EnsureMultipleVaultsExistAsync(userId))
             .ThrowsAsync(new CannotDeleteLastVaultException());
 
         var service = CreateService();
-        
+
         Func<Task> act = async () => await service.DeleteVaultAsync(vaultId, userId);
-        
+
         await act.Should().ThrowAsync<CannotDeleteLastVaultException>();
     }
 }

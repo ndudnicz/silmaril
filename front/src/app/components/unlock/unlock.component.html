@@ -1,19 +1,15 @@
-<div class="home-container">
-  <div>
-    <h3>Enter your master password</h3>
-    <div style="display: flex; justify-content: center">
-      <a
-        routerLink="/what-is-master-password"
-        id="what-is-master-password-link"
-        class="link"
-        target="_blank"
-      >
+<div class="flex justify-center items-center h-full w-full">
+  <div class="flex-1 m-auto max-w-80 h-80">
+    <h3 class="text-xl font-bold text-center">Enter your master password</h3>
+    <div class="flex justify-center mb-2">
+      <a routerLink="/what-is-master-password" class="text-[#007bff]" target="_blank">
         What is a Master Password?
       </a>
     </div>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
       <p-iconfield>
         <input
+          class="w-full"
           type="password"
           pInputText
           placeholder="Master Password"
@@ -22,7 +18,7 @@
         />
         <p-inputicon class="pi pi-lock" />
       </p-iconfield>
-      <div class="unlock-footer">
+      <div class="flex justify-end mt-4">
         <p-button
           variant="text"
           severity="secondary"

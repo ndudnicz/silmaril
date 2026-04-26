@@ -5,7 +5,7 @@ using Api.Entities.Dtos.Update;
 
 namespace Api.Mappers.Interfaces;
 
-public interface IVaultMapper: IMapper<Vault, VaultDto, CreateVaultDto>
+public interface IVaultMapper : IMapper<Vault, VaultDto, CreateVaultDto>
 {
     void FillEntityFromUpdateDto(Vault vault, UpdateVaultDto dto);
 }

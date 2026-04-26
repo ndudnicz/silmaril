@@ -23,7 +23,7 @@ public class AuthServiceTests
         _userRepositoryMock = new Mock<IUserRepository>();
         _authRepositoryMock = new Mock<IAuthRepository>();
         _userValidatorMock = new Mock<IUserValidator>();
-        
+
         _authService = new AuthService(
             _userRepositoryMock.Object,
             _authRepositoryMock.Object,
@@ -38,7 +38,7 @@ public class AuthServiceTests
             }
         );
     }
-    
+
     private static User CreateTestUser(string username = "testUser", string password = "password", Guid userId = new())
     {
         return new User
@@ -64,9 +64,9 @@ public class AuthServiceTests
     public void ValidatePasswordFormat_InvalidPassword_ShouldThrow()
     {
         var password = "invalid";
-        
+
         var act = () => AuthService.EnsurePasswordFormatIsValid(password);
-        
+
         act.Should().Throw<InvalidPasswordFormat>();
     }
 
@@ -110,7 +110,7 @@ public class AuthServiceTests
         // Assert
         await act.Should().ThrowAsync<InvalidPassword>();
     }
-    
+
     [Fact]
     public async Task AuthAsync_InvalidUsername_ThrowsUserNotFound()
     {

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GeneratePasswordModalComponent } from '../generate-password-modal/generate-password-modal.component';
 import {
@@ -22,6 +22,9 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { MessageModule } from 'primeng/message';
 import { InputTextModule } from 'primeng/inputtext';
+import { CommonModule } from '@angular/common';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-add-credential-modal',
@@ -32,11 +35,13 @@ import { InputTextModule } from 'primeng/inputtext';
     InputIconModule,
     InputTextModule,
     MessageModule,
+    IftaLabelModule,
+    CommonModule,
+    TextareaModule,
   ],
   templateUrl: './add-edit-credential-modal.component.html',
-  styleUrl: './add-edit-credential-modal.component.css',
 })
-export class AddEditCredentialModalComponent extends BaseModalComponent {
+export class AddEditCredentialModalComponent extends BaseModalComponent implements OnInit {
   private readonly dialogService = inject(DialogService);
   private readonly vaultService = inject(VaultService);
   private readonly credentialService = inject(CredentialService);
@@ -51,14 +56,12 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
     EDIT: 'edit',
   };
   protected readonly MODAL_MOD = AddEditCredentialModalComponent.MODAL_MOD;
-  protected readonly credential: Credential | null = this.data.credential || null;
+  protected readonly credential: Credential | null = this.data.credential ?? null;
   protected readonly vaultId = this.data.vaultId;
   protected readonly mode = this.data.mode;
   protected readonly characterLimit = 2000;
   protected readonly passwordCharacterLimit = 10000;
-  protected readonly notesCharacterCount = computed(() =>
-    this.credential?.decryptedData?.notes ? this.credential.decryptedData.notes.length : 0,
-  );
+  protected notesCharacterCount = signal(0);
   protected readonly titleFormControl = new FormControl(this.credential?.decryptedData?.title, [
     Validators.required,
     Validators.maxLength(this.characterLimit),
@@ -86,22 +89,22 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
     notesFormControl: this.notesFormControl,
   });
 
-  showPassword = true;
+  showPassword = signal(false);
 
   constructor() {
     super();
-    if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.EDIT && !this.credential) {
-      const msg = 'Edit mode requires a credential object';
-      console.error(msg);
-      ToastWrapper.error(msg, null);
-      throw new Error(msg);
-    }
-    if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.ADD && this.credential) {
-      const msg = 'Add mode should not have a credential object';
-      console.error(msg);
-      ToastWrapper.error(msg, null);
-      throw new Error(msg);
-    }
+    // if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.EDIT && !this.credential) {
+    //   const msg = 'Edit mode requires a credential object';
+    //   console.error(msg);
+    //   ToastWrapper.error(msg, null);
+    //   throw new Error(msg);
+    // }
+    // if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.ADD && this.credential) {
+    //   const msg = 'Add mode should not have a credential object';
+    //   console.error(msg);
+    //   ToastWrapper.error(msg, null);
+    //   throw new Error(msg);
+    // }
     if (
       this.mode !== AddEditCredentialModalComponent.MODAL_MOD.ADD &&
       this.mode !== AddEditCredentialModalComponent.MODAL_MOD.EDIT
@@ -111,6 +114,23 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
       ToastWrapper.error(msg, null);
       throw new Error(msg);
     }
+
+    // this.noteChanged();
+  }
+
+  ngOnInit(): void {
+    this.initFormControls();
+  }
+
+  private initFormControls() {
+    console.log('initFormControls called with credential:', this.credential);
+
+    this.titleFormControl.setValue(this.credential?.decryptedData?.title ?? '');
+    this.identifierFormControl.setValue(this.credential?.decryptedData?.identifier ?? '');
+    this.passwordFormControl.setValue(this.credential?.decryptedData?.password ?? '');
+    this.urlFormControl.setValue(this.credential?.decryptedData?.url ?? '');
+    this.notesFormControl.setValue(this.credential?.decryptedData?.notes ?? '');
+    this.noteChanged();
   }
 
   async onSubmit() {
@@ -140,7 +160,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
             this.stopLoading();
             this.closeDialog(credential);
           },
-          error: (error: Error) => {
+          error: (error: unknown) => {
             this.displayError('Error creating credential', error);
             this.stopLoading();
           },
@@ -148,15 +168,14 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
     } else {
       this.dialogService
         .open(ConfirmModalComponent, {
-          closable: true,
-
+          header: `Edit Credential ${this.credential?.decryptedData?.title}`,
+          closable: false,
+          width: 'auto',
+          height: 'auto',
           data: {
-            title: `Edit Credential ${this.credential?.decryptedData?.title}`,
             message: `Are you sure you want to edit the credential "${this.credential?.decryptedData?.title}"?`,
             confirmText: 'Confirm',
             cancelText: 'Cancel',
-            width: '400px',
-            height: 'auto',
           },
         })
         ?.onClose.pipe(take(1))
@@ -174,13 +193,18 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
                 this.stopLoading();
                 this.closeDialog(updatedCredential);
               },
-              error: (error: Error) => {
+              error: (error: unknown) => {
                 this.displayError('Error updating credential', error);
                 this.stopLoading();
               },
             });
         });
     }
+  }
+
+  noteChanged() {
+    const notesValue = this.notesFormControl.value ?? '';
+    this.notesCharacterCount.set(notesValue.length);
   }
 
   createCredential$(encryptionResult: EncryptionResult): Observable<Credential> {
@@ -218,7 +242,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
   }
 
   addEditTogglePasswordVisibility() {
-    this.showPassword = !this.showPassword;
+    this.showPassword.set(!this.showPassword());
     const passwordField = document.querySelector<HTMLInputElement>('#add-edit-password');
     if (passwordField) {
       passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
@@ -229,7 +253,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
     this.dialogService
       .open(GeneratePasswordModalComponent, {
         closable: true,
-
+        header: 'Password Generator',
         width: '800px',
         height: 'auto',
       })

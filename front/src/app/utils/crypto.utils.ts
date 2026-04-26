@@ -1,3 +1,5 @@
+import { catchError, from, map, Observable, switchMap, take } from 'rxjs';
+
 export interface EncryptionResult {
   ciphertext: Uint8Array;
   initializationVector: Uint8Array;
@@ -33,8 +35,41 @@ export class CryptoUtilsV1 {
     );
   }
 
+  static deriveKeyFromPassword$(password: string, salt: Uint8Array): Observable<CryptoKey> {
+    const enc = new TextEncoder();
+    return from(
+      window.crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']),
+    ).pipe(
+      take(1),
+      catchError((error) => {
+        console.error('Error importing key material:', error);
+        throw new Error('Failed to import key material');
+      }),
+      switchMap((keyMaterial) =>
+        from(
+          crypto.subtle.deriveKey(
+            {
+              name: 'PBKDF2',
+              salt: CryptoUtilsV1.toArrayBufferView(salt),
+              iterations: 100_000,
+              hash: 'SHA-256',
+            },
+            keyMaterial,
+            { name: 'AES-GCM', length: 256 },
+            true,
+            ['encrypt', 'decrypt'],
+          ),
+        ),
+      ),
+    );
+  }
+
   static async exportKeyAsync(key: CryptoKey): Promise<ArrayBuffer> {
     return crypto.subtle.exportKey('raw', key);
+  }
+
+  static exportKey$(key: CryptoKey): Observable<ArrayBuffer> {
+    return from(crypto.subtle.exportKey('raw', key));
   }
 
   static async importKeyAsync(rawKey: ArrayBuffer): Promise<CryptoKey> {
@@ -42,6 +77,12 @@ export class CryptoUtilsV1 {
       'encrypt',
       'decrypt',
     ]);
+  }
+
+  static importKey$(rawKey: ArrayBuffer): Observable<CryptoKey> {
+    return from(
+      crypto.subtle.importKey('raw', rawKey, { name: 'AES-GCM' }, true, ['encrypt', 'decrypt']),
+    );
   }
 
   static async decryptDataAsync(
@@ -60,6 +101,22 @@ export class CryptoUtilsV1 {
     return new TextDecoder().decode(decrypted);
   }
 
+  static decryptData$(
+    key: CryptoKey | null,
+    encryptedData: Uint8Array,
+    initializationVector: Uint8Array,
+  ): Observable<string> {
+    if (!key) throw new Error('Vault is locked');
+
+    return from(
+      crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: CryptoUtilsV1.toArrayBufferView(initializationVector) },
+        key!,
+        CryptoUtilsV1.toArrayBufferView(encryptedData),
+      ),
+    ).pipe(map((decrypted) => new TextDecoder().decode(decrypted)));
+  }
+
   static async encryptDataAsync(
     key: CryptoKey | null,
     plaintext: string,
@@ -76,6 +133,23 @@ export class CryptoUtilsV1 {
     );
 
     return { ciphertext: new Uint8Array(buffer), initializationVector, encryptionVersion: 1 };
+  }
+
+  static encryptData$(key: CryptoKey | null, plaintext: string): Observable<EncryptionResult> {
+    if (!key) throw new Error('Vault is locked');
+
+    const initializationVector = crypto.getRandomValues(new Uint8Array(12));
+    const encoded = new TextEncoder().encode(plaintext);
+
+    return from(
+      crypto.subtle.encrypt({ name: 'AES-GCM', iv: initializationVector }, key!, encoded),
+    ).pipe(
+      map((buffer) => ({
+        ciphertext: new Uint8Array(buffer),
+        initializationVector,
+        encryptionVersion: 1,
+      })),
+    );
   }
 }
 

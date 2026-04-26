@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Api.Entities;
 
 [Table("users")]
-public class User: MyEntity
+public class User : MyEntity
 {
     [Column("username_hash")]
     [MaxLength(Sha512HashLength)]

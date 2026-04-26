@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Credential } from '../../entities/credential';
 import { CardStackComponent } from './card-stack/card-stack.component';
 import { map } from 'rxjs';
@@ -8,7 +8,6 @@ import { map } from 'rxjs';
   selector: 'app-card-stacks',
   imports: [CardStackComponent],
   templateUrl: './card-stacks.component.html',
-  styleUrl: './card-stacks.component.css',
 })
 export class CardStacksComponent {
   public readonly displayedCredentials = input.required<Credential[]>();
@@ -17,8 +16,9 @@ export class CardStacksComponent {
 
   displayedCredentialStackEntries = toSignal(
     this.displayedCredentials$.pipe(
+      takeUntilDestroyed(),
       map((credentials) => {
-        let credentialStacks: any = {};
+        const credentialStacks: Record<string, Credential[]> = {};
         for (const credential of credentials) {
           const stackName =
             credential.decryptedData?.title.charAt(0).toLocaleUpperCase() || 'Uncategorized';

@@ -5,7 +5,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("v1/[controller]")]
-public abstract class MyControllerV1: ControllerBase
+public abstract class MyControllerV1 : ControllerBase
 {
     protected Guid GetUserId()
     {

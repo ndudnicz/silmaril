@@ -7,8 +7,6 @@ import { ButtonModule } from 'primeng/button';
 @Component({
   selector: 'app-card',
   templateUrl: './card.component.html',
-  styleUrls: ['./card.component.css'],
-  standalone: true,
   imports: [CommonModule, ChipComponent, ButtonModule],
 })
 export class CardComponent {

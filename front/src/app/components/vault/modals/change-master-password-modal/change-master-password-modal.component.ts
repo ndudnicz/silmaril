@@ -28,11 +28,10 @@ import { InputTextModule } from 'primeng/inputtext';
     MessageModule,
   ],
   templateUrl: './change-master-password-modal.component.html',
-  styleUrl: './change-master-password-modal.component.css',
 })
 export class ChangeMasterPasswordModalComponent extends BaseModalComponent {
   private readonly dialogService = inject(DialogService);
-  protected readonly minPasswordLength = 8;
+  protected readonly minPasswordLength = 1;
   protected readonly newMasterPasswordFormControl = new FormControl('', [
     Validators.minLength(this.minPasswordLength),
   ]);
@@ -56,13 +55,12 @@ export class ChangeMasterPasswordModalComponent extends BaseModalComponent {
   }
 
   onSubmit() {
-    console.log('Form submitted:', this.form.value);
     this.dialogService
       .open(ConfirmModalComponent, {
-        closable: true,
-
+        header: 'Change master password',
+        closable: false,
+        width: '500px',
         data: {
-          title: 'Change Master Password',
           message:
             'Are you sure you want to change your master password? This will reencrypt all your vaults with the new master password.',
           confirmText: 'Confirm',

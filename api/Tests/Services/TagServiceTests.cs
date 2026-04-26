@@ -24,7 +24,7 @@ public class TagServiceTests
         result.Should().HaveCount(2);
         result.Select(t => t.Name).Should().Contain(new[] { "tag1", "tag2" });
     }
-    
+
     [Fact]
     public async Task GetTagsByNamesAsync_WhenTagNotFound_ShouldThrow()
     {
@@ -33,7 +33,7 @@ public class TagServiceTests
         var service = CreateService();
 
         Func<Task> act = async () => await service.GetTagsByNamesAsync(new[] { "tag1", "tag2" });
-        
+
         await act.Should().ThrowAsync<TagsNotFound>();
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories;
 
-public class VaultRepository(AppDbContext db): IVaultRepository
+public class VaultRepository(AppDbContext db) : IVaultRepository
 {
     public async Task<bool> VaultExistsByUserIdAsync(Guid id, Guid userId)
     {
@@ -13,12 +13,23 @@ public class VaultRepository(AppDbContext db): IVaultRepository
             .AsNoTracking()
             .AnyAsync(v => v.Id == id && v.UserId == userId);
     }
-    
+
     public async Task<bool> VaultExistByUserIdAsync(IEnumerable<Guid> ids, Guid userId)
     {
-        return await db.Vaults
+        var distinctIds = ids.Distinct().ToList();
+        if (distinctIds.Count == 0)
+        {
+            return false;
+        }
+
+        var matchingIdsCount = await db.Vaults
             .AsNoTracking()
-            .AllAsync(v => ids.Contains(v.Id) && v.UserId == userId);
+            .Where(v => v.UserId == userId && distinctIds.Contains(v.Id))
+            .Select(v => v.Id)
+            .Distinct()
+            .CountAsync();
+
+        return matchingIdsCount == distinctIds.Count;
     }
 
     public async Task<int> CountVaultsByUserIdAsync(Guid userId)
@@ -33,7 +44,7 @@ public class VaultRepository(AppDbContext db): IVaultRepository
         return await db.Vaults
             .FirstOrDefaultAsync(v => v.Id == id);
     }
-    
+
     public async Task<List<Vault>> GetVaultsByUserIdAsync(Guid userId)
     {
         return await db.Vaults
@@ -48,7 +59,7 @@ public class VaultRepository(AppDbContext db): IVaultRepository
         await db.SaveChangesAsync();
         return vault;
     }
-    
+
     public async Task<Vault> UpdateVaultAsync(Vault vault)
     {
         vault.Updated = DateTime.Now;

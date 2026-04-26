@@ -8,12 +8,9 @@ import { DividerModule } from 'primeng/divider';
   standalone: true,
   imports: [CardComponent, DividerModule],
   templateUrl: './card-stack.component.html',
-  styleUrls: ['./card-stack.component.css'],
 })
 export class CardStackComponent {
   public readonly title = input.required<string>();
   public readonly credentials = input.required<Credential[]>();
   protected readonly clickEvent = output<Credential>();
-
-  constructor() {}
 }

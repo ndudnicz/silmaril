@@ -50,7 +50,7 @@ public class LoginMapper : ILoginMapper
             InitializationVector = CryptoHelper.DecodeBase64(dto.InitializationVectorBase64 ?? string.Empty)
         };
     }
-    
+
     public List<Login> ToEntity(List<CreateLoginDto> dtos)
     {
         return dtos.Select(ToEntity).ToList();

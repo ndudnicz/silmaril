@@ -8,8 +8,8 @@ public abstract class MyEntity
     protected const int MaxStringLength = 128;
     protected const int Sha512HashLength = 128;
     protected const int Argon2idHashLength = 256;
-    
-    protected MyEntity() {}
+
+    protected MyEntity() { }
     [Key]
     [Column("id")]
     public Guid Id { get; set; }

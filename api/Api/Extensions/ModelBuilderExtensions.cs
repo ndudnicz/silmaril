@@ -16,7 +16,7 @@ public static class ModelBuilderExtensions
         PasswordHash = "$argon2id$v=19$m=16,t=2,p=1$ZEp5eWdQeDBXeGk2OWh6Qw$/sfpIugCYAcUqDG3xmx/2g",
         Salt = CryptoHelper.GenerateRandomByte(UserService.UserSaltLengthInBytes)
     };
-    
+
     public static void SetupUserEntity(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(entity =>
@@ -34,7 +34,7 @@ public static class ModelBuilderExtensions
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
     }
-    
+
     public static void SetupLoginEntity(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Login>(entity =>
@@ -52,7 +52,7 @@ public static class ModelBuilderExtensions
             .WithMany()
             .HasForeignKey(l => l.VaultId);
     }
-    
+
     public static void SetupVaultEntity(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Vault>(entity =>
@@ -81,22 +81,22 @@ public static class ModelBuilderExtensions
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
             entity.SetTableName(ToLowerSnakeCase(entity.GetTableName()));
-        
+
             foreach (var property in entity.GetProperties())
             {
                 property.SetColumnName(ToLowerSnakeCase(property.Name));
             }
-            
+
             foreach (var key in entity.GetKeys())
             {
                 key.SetName(key.GetName().ToLower());
             }
-        
+
             foreach (var fk in entity.GetForeignKeys())
             {
                 fk.SetConstraintName(fk.GetConstraintName().ToLower());
             }
-        
+
             foreach (var index in entity.GetIndexes())
             {
                 index.SetDatabaseName(index.GetDatabaseName().ToLower());
@@ -104,7 +104,7 @@ public static class ModelBuilderExtensions
         }
 
         return;
-        
+
         string ToLowerSnakeCase(string name)
         {
             if (string.IsNullOrWhiteSpace(name))

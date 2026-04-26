@@ -10,7 +10,7 @@ namespace Api.Controllers;
 public class VaultController(
     ILogger<VaultController> logger,
     IVaultService vaultService
-    ): MyControllerV1
+    ) : MyControllerV1
 {
     [HttpGet]
     public async Task<IActionResult> GetAsync()
@@ -30,7 +30,7 @@ public class VaultController(
     {
         return Ok(await vaultService.UpdateVaultAsync(updateVaultDto, GetUserId()));
     }
-    
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid id)
     {

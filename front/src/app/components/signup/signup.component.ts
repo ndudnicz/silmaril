@@ -32,7 +32,6 @@ import { InputTextModule } from 'primeng/inputtext';
     InputTextModule,
   ],
   templateUrl: './signup.component.html',
-  styleUrl: './signup.component.css',
 })
 export class SignupComponent extends BaseComponent implements OnInit {
   private readonly router = inject(Router);
@@ -67,7 +66,7 @@ export class SignupComponent extends BaseComponent implements OnInit {
       .pipe(take(1))
       .subscribe({
         next: () => this.onUserCreationSuccess(),
-        error: (error: any) => {
+        error: (error: unknown) => {
           this.displayError('Error during user creation:', error);
           this.stopLoading();
         },
@@ -82,25 +81,23 @@ export class SignupComponent extends BaseComponent implements OnInit {
   }
 
   passwordValidator(): ValidatorFn {
-    return (control: AbstractControl<string>): { [key: string]: any } | null => {
+    return (control: AbstractControl<string>): Record<string, unknown> | null => {
       const isValid = AuthHelper.checkPasswordFormat(control.value);
       return isValid ? null : { invalidPassword: { value: control.value } };
     };
   }
 
   confirmPasswordValidator(): ValidatorFn {
-    return (control: AbstractControl<string>): { [key: string]: any } | null => {
-      let password = control.root?.get('password')?.value;
+    return (control: AbstractControl<string>): Record<string, unknown> | null => {
+      const password = control.root?.get('password')?.value;
+      console.log(control.root?.get('password')?.value, control.value);
+
       if (password && control.value && control.value !== password) {
         return { passwordMismatch: { value: control.value } };
       }
       return null;
     };
   }
-
-  // inputFocusOut() {
-  //   this.displayPasswordRequirements = this.passwordFormControl.invalid;
-  // }
 
   keypress(event: KeyboardEvent) {
     if (this.form.valid && event.key === 'Enter') {
