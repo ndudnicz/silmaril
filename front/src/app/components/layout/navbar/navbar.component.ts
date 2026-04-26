@@ -26,24 +26,7 @@ export class NavbarComponent extends BaseComponent {
   protected readonly vaultService = inject(VaultService);
   private readonly router = inject(Router);
   private readonly subscription: Subscription = new Subscription();
-  protected readonly vaults = toSignal(this.dataService.vaults$(), { initialValue: [] });
-
-  // constructor() {
-  //   super();
-  //   this.setupSubscriptions();
-  // }
-
-  // setupSubscriptions() {
-  //   this.subscription.add(this.dataService.vaults.subscribe(vaults => {
-  //     if (vaults) {
-  //       this.vaults = vaults;
-  //     }
-  //   }));
-  // }
-
-  // ngOnDestroy() {
-  //   this.subscription.unsubscribe();
-  // }
+  protected readonly vaults = toSignal(this.vaultService.getVaults$(), { initialValue: [] });
 
   openCreateVaultModal() {
     this.dialogService
@@ -61,7 +44,6 @@ export class NavbarComponent extends BaseComponent {
       ?.onClose.pipe(take(1))
       .subscribe((result) => {
         if (result) {
-          this.dataService.addVault(result);
           this.router.navigate(['/vault', result.id]);
         }
       });
