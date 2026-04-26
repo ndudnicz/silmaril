@@ -17,7 +17,6 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
   selector: 'app-add-vault-modal',
   imports: [ReactiveFormsModule, FormsModule, ButtonModule, InputTextModule],
   templateUrl: './add-vault-modal.component.html',
-  styleUrl: './add-vault-modal.component.css',
 })
 export class AddVaultModalComponent extends BaseModalComponent {
   private readonly vaultNameMaxLength = 128;

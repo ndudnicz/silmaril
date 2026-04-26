@@ -1,17 +1,10 @@
-<div class="modal-body">
-  <!-- <h1 mat-dialog-title>Create New Vault</h1> -->
-  <!-- <p-button icon="pi pi-times" (click)="closeDialog()">close</p-button> -->
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
-    <input pInputText placeholder="Vault name" type="text" formControlName="vaultName" required />
-    <br />
-    <div class="buttons">
-      <p-button
-        variant="text"
-        severity="secondary"
-        type="submit"
-        [disabled]="form.invalid || loading"
-        >Create</p-button
-      >
-    </div>
-  </form>
-</div>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keypress)="keypress($event)">
+  <input pInputText placeholder="Vault name" type="text" formControlName="vaultName" required />
+  <br />
+  <div class="flex justify-end gap-2 mt-2">
+    <p-button label="Cancel" variant="text" severity="secondary" (click)="closeDialog()" />
+    <p-button variant="text" severity="secondary" type="submit" [disabled]="form.invalid || loading"
+      >Create</p-button
+    >
+  </div>
+</form>

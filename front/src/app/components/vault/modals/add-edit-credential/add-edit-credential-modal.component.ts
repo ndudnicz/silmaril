@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GeneratePasswordModalComponent } from '../generate-password-modal/generate-password-modal.component';
 import {
@@ -22,8 +22,9 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { MessageModule } from 'primeng/message';
 import { InputTextModule } from 'primeng/inputtext';
-import { FloatLabelModule } from 'primeng/floatlabel';
 import { CommonModule } from '@angular/common';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-add-credential-modal',
@@ -34,12 +35,13 @@ import { CommonModule } from '@angular/common';
     InputIconModule,
     InputTextModule,
     MessageModule,
-    FloatLabelModule,
+    IftaLabelModule,
     CommonModule,
+    TextareaModule,
   ],
   templateUrl: './add-edit-credential-modal.component.html',
 })
-export class AddEditCredentialModalComponent extends BaseModalComponent {
+export class AddEditCredentialModalComponent extends BaseModalComponent implements OnInit {
   private readonly dialogService = inject(DialogService);
   private readonly vaultService = inject(VaultService);
   private readonly credentialService = inject(CredentialService);
@@ -54,7 +56,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
     EDIT: 'edit',
   };
   protected readonly MODAL_MOD = AddEditCredentialModalComponent.MODAL_MOD;
-  protected readonly credential: Credential | null = this.data.credential || null;
+  protected readonly credential: Credential | null = this.data.credential ?? null;
   protected readonly vaultId = this.data.vaultId;
   protected readonly mode = this.data.mode;
   protected readonly characterLimit = 2000;
@@ -91,18 +93,18 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
 
   constructor() {
     super();
-    if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.EDIT && !this.credential) {
-      const msg = 'Edit mode requires a credential object';
-      console.error(msg);
-      ToastWrapper.error(msg, null);
-      throw new Error(msg);
-    }
-    if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.ADD && this.credential) {
-      const msg = 'Add mode should not have a credential object';
-      console.error(msg);
-      ToastWrapper.error(msg, null);
-      throw new Error(msg);
-    }
+    // if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.EDIT && !this.credential) {
+    //   const msg = 'Edit mode requires a credential object';
+    //   console.error(msg);
+    //   ToastWrapper.error(msg, null);
+    //   throw new Error(msg);
+    // }
+    // if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.ADD && this.credential) {
+    //   const msg = 'Add mode should not have a credential object';
+    //   console.error(msg);
+    //   ToastWrapper.error(msg, null);
+    //   throw new Error(msg);
+    // }
     if (
       this.mode !== AddEditCredentialModalComponent.MODAL_MOD.ADD &&
       this.mode !== AddEditCredentialModalComponent.MODAL_MOD.EDIT
@@ -113,6 +115,21 @@ export class AddEditCredentialModalComponent extends BaseModalComponent {
       throw new Error(msg);
     }
 
+    // this.noteChanged();
+  }
+
+  ngOnInit(): void {
+    this.initFormControls();
+  }
+
+  private initFormControls() {
+    console.log('initFormControls called with credential:', this.credential);
+
+    this.titleFormControl.setValue(this.credential?.decryptedData?.title ?? '');
+    this.identifierFormControl.setValue(this.credential?.decryptedData?.identifier ?? '');
+    this.passwordFormControl.setValue(this.credential?.decryptedData?.password ?? '');
+    this.urlFormControl.setValue(this.credential?.decryptedData?.url ?? '');
+    this.notesFormControl.setValue(this.credential?.decryptedData?.notes ?? '');
     this.noteChanged();
   }
 

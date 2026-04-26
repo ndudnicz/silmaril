@@ -14,6 +14,8 @@ import { AddEditCredentialModalComponent } from '../modals/add-edit-credential/a
 import { InputTextModule } from 'primeng/inputtext';
 import { IftaLabelModule } from 'primeng/iftalabel';
 import { ButtonModule } from 'primeng/button';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-selected-credential',
@@ -24,6 +26,8 @@ import { ButtonModule } from 'primeng/button';
     InputTextModule,
     IftaLabelModule,
     ButtonModule,
+    FloatLabelModule,
+    TextareaModule,
   ],
   templateUrl: './selected-credential.component.html',
 })
@@ -40,7 +44,7 @@ export class SelectedCredentialComponent extends BaseComponent {
   protected readonly password = computed(() => this.credential()?.decryptedData?.password || '');
   protected readonly url = computed(() => this.credential()?.decryptedData?.url || '');
   protected readonly notes = computed(() => this.credential()?.decryptedData?.notes || '');
-
+  note = 'text text text';
   close() {
     this.credential.set(null);
   }
@@ -62,12 +66,12 @@ export class SelectedCredentialComponent extends BaseComponent {
     this.dialogService
       .open(AddEditCredentialModalComponent, {
         closable: true,
-
+        header: `Edit credential '${credential.decryptedData?.title}'`,
         width: '600px',
         height: 'auto',
         data: {
           mode: AddEditCredentialModalComponent.MODAL_MOD.EDIT,
-          login: credential,
+          credential: credential,
           vaultId: credential.vaultId,
         },
       })

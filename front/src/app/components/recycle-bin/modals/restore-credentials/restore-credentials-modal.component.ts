@@ -25,7 +25,6 @@ export interface RestoreCredentialsModalData {
   selector: 'app-restore-credentials-modal',
   imports: [ReactiveFormsModule, FormsModule, SelectModule, ButtonModule],
   templateUrl: './restore-credentials-modal.component.html',
-  styleUrl: './restore-credentials-modal.component.css',
 })
 export class RestoreCredentialsModalComponent extends BaseModalComponent {
   private readonly config = inject(DynamicDialogConfig);

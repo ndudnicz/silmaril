@@ -41,8 +41,7 @@
           [disabled]="selected().length === 0"
         />
       </div>
-      <!-- <div> -->
-      <div class="flex items-center justify-center h-[80vh] w-full">
+      <div class="flex h-[80vh] w-full">
         @if (displayedCredentials().length === 0 && loading === false && searchValue() === '') {
           <div id="no-data">
             <span>Empty</span>
@@ -57,13 +56,12 @@
         }
         @if (displayedCredentials().length > 0) {
           <app-card-stacks
-            class="card-stacks"
+            class="w-full"
             (clickEvent)="select($event)"
             [displayedCredentials]="displayedCredentials()"
           ></app-card-stacks>
         }
       </div>
-      <!-- </div> -->
     </div>
   </div>
 </div>

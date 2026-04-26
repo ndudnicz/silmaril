@@ -104,11 +104,12 @@
 } @else {
   <div class="flex h-[92vh] w-full">
     <app-card-stacks
+      class="w-full"
       (clickEvent)="selectedCredential.set($event)"
       [displayedCredentials]="displayedCredentials()"
     ></app-card-stacks>
     <p-drawer
-      header="Drawer"
+      header="Credential"
       [visible]="showDrawer()"
       [style]="{ width: '500px' }"
       position="right"

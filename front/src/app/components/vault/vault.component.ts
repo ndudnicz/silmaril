@@ -356,8 +356,6 @@ export class VaultComponent extends BaseComponent implements OnInit {
   }
 
   onVaultDeleteSuccess(deletedVaultId: string) {
-    // const vaults = this.dataService.getVaults().filter((v) => v.id !== deletedVaultId);
-    // this.dataService.setVaults(vaults);
     this.vaults.set(this.vaults().filter((v) => v.id !== deletedVaultId));
     this.selectedCredential.set(null);
     this.allCredentials.set([]);
@@ -372,6 +370,9 @@ export class VaultComponent extends BaseComponent implements OnInit {
       const updatedCredentials = [...this.allCredentials()];
       updatedCredentials[index] = updatedCredential;
       this.allCredentials.set(updatedCredentials);
+      if (updatedCredential.deleted) {
+        this.selectedCredential.set(null);
+      }
     } else {
       console.warn('Updated credential not found in current credentials:', updatedCredential);
     }
