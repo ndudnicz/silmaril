@@ -1,9 +1,9 @@
 # docker build --no-cache -t silmaril-front . && docker run -p 4200:80 silmaril-front
-FROM node:24 AS build
+FROM node:latest AS build
 WORKDIR /app
 COPY . /app/
 RUN npm install -g pnpm
-RUN pnpm install
+RUN CI=true pnpm i
 RUN pnpm run build:dev
 
 FROM nginx:latest
