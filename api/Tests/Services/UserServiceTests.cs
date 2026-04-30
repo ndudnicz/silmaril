@@ -9,7 +9,6 @@ using Api.Repositories.Interfaces;
 using Api.Services;
 using Api.Services.Interfaces;
 using Api.Services.Validation.Interfaces;
-using FluentAssertions;
 using Moq;
 
 namespace Tests.Services;
@@ -40,16 +39,6 @@ public class UserServiceTests
             UsernameHash = usernameHash,
             PasswordHash = passwordHash,
             Salt = salt ?? CryptoHelper.GenerateRandomByte(UserService.UserSaltLengthInBytes)
-        };
-    }
-
-    private UserDto CreateUserDtoTest(
-        Guid id,
-        byte[] salt)
-    {
-        return new UserDto(salt)
-        {
-            Id = id,
         };
     }
 
@@ -91,72 +80,72 @@ public class UserServiceTests
     }
 
     [Fact]
-    private async Task GetUserAsync_ShouldReturnUserDto()
+    private async Task GetAsync_ShouldReturnUserDto()
     {
         var user = CreateUserTest();
         var userDto = CreateUserDtoTest(user);
 
-        _userRepository.Setup(r => r.GetUserAsync(user.Id)).ReturnsAsync(user);
+        _userRepository.Setup(r => r.GetAsync(user.Id)).ReturnsAsync(user);
         _userMapper.Setup(m => m.ToDto(user)).Returns(userDto);
 
         var service = CreateService();
-        var result = await service.GetUserAsync(user.Id);
+        var result = await service.GetAsync(user.Id);
 
-        result.Should().NotBeNull();
-        result.Id.Should().Be(user.Id);
+        Assert.NotNull(result);
+        Assert.Equal(user.Id, result.Id);
     }
 
 
     [Fact]
-    private async Task GetUserAsync_WhenUserNotFound_ShouldThrow()
+    private async Task GetAsync_WhenUserNotFound_ShouldThrow()
     {
         var user = CreateUserTest();
 
-        _userRepository.Setup(r => r.GetUserAsync(user.Id)).ReturnsAsync((User?)null);
+        _userRepository.Setup(r => r.GetAsync(user.Id)).ReturnsAsync((User?)null);
 
         var service = CreateService();
-        Func<Task> act = async () => await service.GetUserAsync(user.Id);
+        Func<Task> act = async () => await service.GetAsync(user.Id);
 
-        await act.Should().ThrowAsync<UserNotFound>();
+        await Assert.ThrowsAsync<UserNotFound>(act);
     }
 
     [Fact]
-    private async Task GetUserByUsernameAsync_ShouldReturnUserDto()
+    private async Task GetByUserNameAsync_ShouldReturnUserDto()
     {
         var username = "testUser";
         var usernameHash = CryptoHelper.Sha512(username);
         var user = CreateUserTest(Guid.NewGuid(), usernameHash);
         var userDto = CreateUserDtoTest(user);
 
-        _userRepository.Setup(r => r.GetUserByUserNameHashAsync(usernameHash)).ReturnsAsync(user);
+        _userRepository.Setup(r => r.GetByUserNameHashAsync(usernameHash)).ReturnsAsync(user);
         _userMapper.Setup(m => m.ToDto(user)).Returns(userDto);
 
         var service = CreateService();
-        var result = await service.GetUserByUserNameAsync(username);
+        var result = await service.GetByUserNameAsync(username);
 
-        result.Should().NotBeNull();
-        result.Id.Should().Be(user.Id);
+        Assert.NotNull(result);
+        Assert.Equal(user.Id, result.Id);
     }
 
     [Fact]
-    private async Task GetUserByUsernameAsync_WhenUserNotFound_ShouldThrow()
+    private async Task GetByUserNameAsync_WhenUserNotFound_ShouldThrow()
     {
         var username = "testUser";
         var usernameHash = CryptoHelper.Sha512(username);
         var user = CreateUserTest(Guid.NewGuid(), usernameHash);
         var userDto = CreateUserDtoTest(user);
 
-        _userRepository.Setup(r => r.GetUserByUserNameHashAsync(username)).ReturnsAsync(user);
+        _userRepository.Setup(r => r.GetByUserNameHashAsync(username)).ReturnsAsync(user);
         _userMapper.Setup(m => m.ToDto(user)).Returns(userDto);
 
         var service = CreateService();
-        Func<Task> act = async () => await service.GetUserByUserNameAsync(username);
+        Func<Task> act = async () => await service.GetByUserNameAsync(username);
 
-        await act.Should().ThrowAsync<UserNotFound>();
+        await Assert.ThrowsAsync<UserNotFound>(act);
     }
 
     [Fact]
-    private async Task CreateUserAsync_ShouldReturnUserDto()
+    private async Task CreateAsync_ShouldReturnUserDto()
     {
         var createUserDto = CreateCreateUserDtoTest();
         var user = CreateUserTest(Guid.NewGuid(), CryptoHelper.Sha512(createUserDto.Username), CryptoHelper.Argon2idHash(createUserDto.Password));
@@ -164,19 +153,19 @@ public class UserServiceTests
         var defaultVault = CreateVaultDtoTest();
 
         _userValidator.Setup(v => v.EnsureDoesNotExistByUsernameHashAsync(user.UsernameHash)).Returns(Task.CompletedTask);
-        _userRepository.Setup(r => r.CreateUserAsync(It.IsAny<User>())).ReturnsAsync(user);
+        _userRepository.Setup(r => r.CreateAsync(It.IsAny<User>())).ReturnsAsync(user);
         _userMapper.Setup(m => m.ToDto(user)).Returns(userDto);
         _vaultService.Setup(v => v.CreateUserDefaultFirstVaultAsync(user.Id)).ReturnsAsync(defaultVault);
 
         var service = CreateService();
 
-        var result = await service.CreateUserAsync(createUserDto);
+        var result = await service.CreateAsync(createUserDto);
 
-        result.Id.Should().Be(user.Id);
+        Assert.Equal(user.Id, result.Id);
     }
 
     [Fact]
-    private async Task CreateUserAsync_WhenPasswordFormatInvalid_ShouldThrow()
+    private async Task CreateAsync_WhenPasswordFormatInvalid_ShouldThrow()
     {
         var createUserDto = CreateCreateUserDtoTest("username", "invalidPassword");
         var user = CreateUserTest(Guid.NewGuid(), CryptoHelper.Sha512(createUserDto.Username), CryptoHelper.Argon2idHash(createUserDto.Password));
@@ -185,13 +174,13 @@ public class UserServiceTests
 
         var service = CreateService();
 
-        Func<Task> act = async () => await service.CreateUserAsync(createUserDto);
+        Func<Task> act = async () => await service.CreateAsync(createUserDto);
 
-        await act.Should().ThrowAsync<InvalidPasswordFormat>();
+        await Assert.ThrowsAsync<InvalidPasswordFormat>(act);
     }
 
     [Fact]
-    private async Task UpdateUserAsync_ShouldReturnUpdatedUserDto()
+    private async Task UpdateAsync_ShouldReturnUpdatedUserDto()
     {
         var userId = Guid.NewGuid();
         var updateUserDto = CreateUpdateUserDtoTest("updatedUsername");
@@ -202,19 +191,19 @@ public class UserServiceTests
 
         _userValidator.Setup(v => v.EnsureExistsAsync(userId)).Returns(Task.CompletedTask);
         _userValidator.Setup(v => v.EnsureDoesNotExistByUsernameHashAsync(updatedUsernameHash)).Returns(Task.CompletedTask);
-        _userRepository.Setup(r => r.GetUserAsync(userId)).ReturnsAsync(existingUser);
-        _userRepository.Setup(r => r.UpdateUserAsync(It.IsAny<User>())).ReturnsAsync(updatedUser);
+        _userRepository.Setup(r => r.GetAsync(userId)).ReturnsAsync(existingUser);
+        _userRepository.Setup(r => r.UpdateAsync(It.IsAny<User>())).ReturnsAsync(updatedUser);
         _userMapper.Setup(m => m.ToDto(updatedUser)).Returns(updatedUserDto);
 
         var service = CreateService();
 
-        var result = await service.UpdateUserAsync(userId, updateUserDto);
+        var result = await service.UpdateAsync(userId, updateUserDto);
 
-        result.Id.Should().Be(userId);
+        Assert.Equal(userId, result.Id);
     }
 
     [Fact]
-    private async Task UpdateUserAsync_WhenUserNotFound_ShouldThrow()
+    private async Task UpdateAsync_WhenUserNotFound_ShouldThrow()
     {
         var userId = Guid.NewGuid();
 
@@ -222,13 +211,13 @@ public class UserServiceTests
 
         var service = CreateService();
 
-        Func<Task> act = async () => await service.UpdateUserAsync(userId, CreateUpdateUserDtoTest());
+        Func<Task> act = async () => await service.UpdateAsync(userId, CreateUpdateUserDtoTest());
 
-        await act.Should().ThrowAsync<UserNotFound>();
+        await Assert.ThrowsAsync<UserNotFound>(act);
     }
 
     [Fact]
-    private async Task UpdateUserAsync_WhenUsernameAlreadyExists_ShouldThrow()
+    private async Task UpdateAsync_WhenUsernameAlreadyExists_ShouldThrow()
     {
         var username = "existingUsername";
         var user = CreateUserTest(Guid.NewGuid(), CryptoHelper.Sha512(username));
@@ -238,46 +227,42 @@ public class UserServiceTests
 
         var service = CreateService();
 
-        Func<Task> act = async () => await service.UpdateUserAsync(user.Id, CreateUpdateUserDtoTest("existingUsername"));
+        Func<Task> act = async () => await service.UpdateAsync(user.Id, CreateUpdateUserDtoTest("existingUsername"));
 
-        await act.Should().ThrowAsync<UserNameAlreadyExists>();
+        await Assert.ThrowsAsync<UserNameAlreadyExists>(act);
     }
 
     [Fact]
-    private async Task UpdateUserPasswordAsync_ShouldReturnUpdatedUserDto()
+    private async Task UpdatePasswordAsync_ShouldReturnUpdatedUserDto()
     {
         var userId = Guid.NewGuid();
-        var oldPassword = "OldP@ssw0rd123";
-        var newPassword = "NewP@ssw0rd123";
+        const string oldPassword = "OldP@ssw0rd123";
+        const string newPassword = "NewP@ssw0rd123";
         var existingUser = CreateUserTest(userId, CryptoHelper.Sha512("testUser"), CryptoHelper.Argon2idHash(oldPassword));
-        var updateUserPasswordDto = new UpdateUserPasswordDto
-        {
-            OldPassword = oldPassword,
-            NewPassword = newPassword
-        };
+
         var updatedUser = CreateUserTest(userId, existingUser.UsernameHash, CryptoHelper.Argon2idHash(newPassword));
         var updatedUserDto = CreateUserDtoTest(updatedUser);
 
         _userValidator.Setup(v => v.EnsureExistsAsync(userId)).Returns(Task.CompletedTask);
-        _userRepository.Setup(r => r.GetUserAsync(userId)).ReturnsAsync(existingUser);
-        _userRepository.Setup(r => r.UpdateUserAsync(It.IsAny<User>())).ReturnsAsync(updatedUser);
+        _userRepository.Setup(r => r.GetAsync(userId)).ReturnsAsync(existingUser);
+        _userRepository.Setup(r => r.UpdateAsync(It.IsAny<User>())).ReturnsAsync(updatedUser);
         _userMapper.Setup(m => m.ToDto(updatedUser)).Returns(updatedUserDto);
 
         AuthService.EnsurePasswordIsValid(oldPassword, existingUser.PasswordHash);
 
         var service = CreateService();
 
-        var result = await service.UpdateUserPasswordAsync(userId, new UpdateUserPasswordDto
+        var result = await service.UpdatePasswordAsync(userId, new UpdateUserPasswordDto
         {
             OldPassword = oldPassword,
             NewPassword = newPassword
         });
 
-        result.Id.Should().Be(userId);
+        Assert.Equal(userId, result.Id);
     }
 
     [Fact]
-    private async Task UpdateUserPasswordAsync_WhenPasswordInvalid_ShouldThrow()
+    private async Task UpdatePasswordAsync_WhenPasswordInvalid_ShouldThrow()
     {
         var userId = Guid.NewGuid();
         var oldPassword = "OldP@ssw0rd123";
@@ -285,21 +270,21 @@ public class UserServiceTests
         var existingUser = CreateUserTest(userId, CryptoHelper.Sha512("testUser"), CryptoHelper.Argon2idHash(oldPassword));
 
         _userValidator.Setup(v => v.EnsureExistsAsync(userId)).Returns(Task.CompletedTask);
-        _userRepository.Setup(r => r.GetUserAsync(userId)).ReturnsAsync(existingUser);
+        _userRepository.Setup(r => r.GetAsync(userId)).ReturnsAsync(existingUser);
 
         var service = CreateService();
 
-        Func<Task> act = async () => await service.UpdateUserPasswordAsync(userId, new UpdateUserPasswordDto
+        Func<Task> act = async () => await service.UpdatePasswordAsync(userId, new UpdateUserPasswordDto
         {
             OldPassword = "WrongOldPassword",
             NewPassword = "NewP@ssw0rd123"
         });
 
-        await act.Should().ThrowAsync<InvalidPassword>();
+        await Assert.ThrowsAsync<InvalidPassword>(act);
     }
 
     [Fact]
-    private async Task UpdateUserPasswordAsync_WhenPasswordFormatInvalid_ShouldThrow()
+    private async Task UpdatePasswordAsync_WhenPasswordFormatInvalid_ShouldThrow()
     {
         var userId = Guid.NewGuid();
         var updateUserPasswordDto = new UpdateUserPasswordDto
@@ -312,12 +297,12 @@ public class UserServiceTests
             CryptoHelper.Argon2idHash(updateUserPasswordDto.OldPassword));
 
         _userValidator.Setup(v => v.EnsureExistsAsync(userId)).Returns(Task.CompletedTask);
-        _userRepository.Setup(r => r.GetUserAsync(userId)).ReturnsAsync(existingUser);
+        _userRepository.Setup(r => r.GetAsync(userId)).ReturnsAsync(existingUser);
 
         var service = CreateService();
 
-        Func<Task> act = async () => await service.UpdateUserPasswordAsync(userId, updateUserPasswordDto);
+        Func<Task> act = async () => await service.UpdatePasswordAsync(userId, updateUserPasswordDto);
 
-        await act.Should().ThrowAsync<InvalidPasswordFormat>();
+        await Assert.ThrowsAsync<InvalidPasswordFormat>(act);
     }
 }

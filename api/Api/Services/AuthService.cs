@@ -56,7 +56,7 @@ public class AuthService(
     {
         var usernameHash = CryptoHelper.Sha512(authDto.Username);
         await userValidator.EnsureExistsByUsernameHashAsync(usernameHash);
-        var user = await userRepository.GetUserByUserNameHashAsync(CryptoHelper.Sha512(authDto.Username));
+        var user = await userRepository.GetByUserNameHashAsync(CryptoHelper.Sha512(authDto.Username));
         EnsurePasswordIsValid(authDto.Password, user!.PasswordHash);
         var jwt = GenerateJwtToken(user.Id);
         var (refreshTokenStr, refreshToken, refreshTokenExpiration) = GenerateRefreshToken(user.Id);
@@ -74,7 +74,7 @@ public class AuthService(
         var refreshTokenHash = CryptoHelper.Sha512(refreshToken);
         var existingRefreshToken = await authRepository.GetAsync(refreshTokenHash);
         await EnsureRefreshTokenExistsNotExpiredAndUserExistsAsync(existingRefreshToken);
-        var user = await userRepository.GetUserAsync(existingRefreshToken!.UserId);
+        var user = await userRepository.GetAsync(existingRefreshToken!.UserId);
         var jwt = GenerateJwtToken(user!.Id);
         var (newRefreshTokenStr, newRefreshToken, refreshTokenExpiration) = GenerateRefreshToken(user.Id);
         await authRepository.UpsertAsync(newRefreshToken);

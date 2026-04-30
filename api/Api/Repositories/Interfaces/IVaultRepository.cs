@@ -4,16 +4,16 @@ namespace Api.Repositories.Interfaces;
 
 public interface IVaultRepository
 {
-    Task<bool> VaultExistsByUserIdAsync(Guid id, Guid userId);
-    Task<bool> VaultExistByUserIdAsync(IEnumerable<Guid> ids, Guid userId);
-    Task<int> CountVaultsByUserIdAsync(Guid userId);
+    Task<bool> ExistsByUserIdAsync(Guid id, Guid userId);
+    Task<bool> ExistByUserIdAsync(IEnumerable<Guid> ids, Guid userId);
+    Task<int> CountByUserIdAsync(Guid userId);
 
-    Task<Vault?> GetVaultAsync(Guid id);
-    Task<List<Vault>> GetVaultsByUserIdAsync(Guid userId);
+    Task<Vault?> GetAsync(Guid id);
+    Task<List<Vault>> GetByUserIdAsync(Guid userId);
 
-    Task<Vault> CreateVaultAsync(Vault vault);
+    Task<Vault> CreateAsync(Vault vault);
 
-    Task<Vault> UpdateVaultAsync(Vault vault);
+    Task<Vault> UpdateAsync(Vault vault);
 
-    Task<int> DeleteVaultAsync(Guid id);
+    Task<int> DeleteAsync(Guid id);
 }

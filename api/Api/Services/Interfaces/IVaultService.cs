@@ -6,10 +6,9 @@ namespace Api.Services.Interfaces;
 
 public interface IVaultService
 {
-    // Task<VaultDto> GetVaultByIdAndUserIdAsync(Guid id, Guid userId);
-    Task<List<VaultDto>> GetVaultsByUserIdAsync(Guid userId);
-    Task<VaultDto> CreateVaultAsync(CreateVaultDto createVaultDto, Guid userId);
+    Task<List<VaultDto>> GetByUserIdAsync(Guid userId);
+    Task<VaultDto> CreateAsync(CreateVaultDto createVaultDto, Guid userId);
     Task<VaultDto> CreateUserDefaultFirstVaultAsync(Guid userId);
-    Task<VaultDto> UpdateVaultAsync(UpdateVaultDto updateVaultDto, Guid userId);
-    Task<int> DeleteVaultAsync(Guid id, Guid userId);
+    Task<VaultDto> UpdateAsync(UpdateVaultDto updateVaultDto, Guid userId);
+    Task<int> DeleteAsync(Guid id, Guid userId);
 }

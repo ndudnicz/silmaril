@@ -7,7 +7,7 @@ using Api.Mappers.Interfaces;
 
 namespace Api.Mappers;
 
-public class LoginMapper : ILoginMapper
+public class CredentialMapper : ICredentialMapper
 {
     public LoginDto ToDto(Login login)
     {

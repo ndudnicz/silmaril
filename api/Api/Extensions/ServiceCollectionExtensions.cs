@@ -65,7 +65,7 @@ public static class ServiceCollectionExtensions
 
     public static void AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<ILoginRepository, LoginRepository>();
+        services.AddScoped<ICredentialRepository, CredentialRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IAuthRepository, AuthRepository>();
@@ -75,7 +75,7 @@ public static class ServiceCollectionExtensions
     public static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<ILoginService, LoginService>();
+        services.AddScoped<ICredentialService, CredentialService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<IVaultService, VaultService>();
@@ -84,13 +84,13 @@ public static class ServiceCollectionExtensions
     public static void AddValidators(this IServiceCollection services)
     {
         services.AddScoped<IUserValidator, UserValidator>();
-        services.AddScoped<ILoginValidator, LoginValidator>();
+        services.AddScoped<ICredentialValidator, CredentialValidator>();
         services.AddScoped<IVaultValidator, VaultValidator>();
     }
 
     public static void AddMappers(this IServiceCollection services)
     {
-        services.AddSingleton<ILoginMapper, LoginMapper>();
+        services.AddSingleton<ICredentialMapper, CredentialMapper>();
         services.AddSingleton<IUserMapper, UserMapper>();
         services.AddSingleton<IVaultMapper, VaultMapper>();
     }
@@ -100,7 +100,7 @@ public static class ServiceCollectionExtensions
         services.AddAntiforgery(options =>
         {
             options.HeaderName = csrfConfiguration.HeaderName;
-            options.Cookie.Name = csrfConfiguration.SessionCookieName;
+            options.Cookie.Name = CsrfConfiguration.SessionCookieName;
         });
     }
 

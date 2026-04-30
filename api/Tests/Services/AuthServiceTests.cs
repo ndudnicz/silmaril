@@ -6,7 +6,6 @@ using Api.Helpers;
 using Api.Repositories.Interfaces;
 using Api.Services;
 using Api.Services.Validation.Interfaces;
-using FluentAssertions;
 using Moq;
 
 namespace Tests.Services;
@@ -57,7 +56,9 @@ public class AuthServiceTests
 
         var act = () => AuthService.EnsurePasswordFormatIsValid(password);
 
-        act.Should().NotThrow();
+        var exception = Record.Exception(act);
+
+        Assert.Null(exception);
     }
 
     [Fact]
@@ -67,7 +68,7 @@ public class AuthServiceTests
 
         var act = () => AuthService.EnsurePasswordFormatIsValid(password);
 
-        act.Should().Throw<InvalidPasswordFormat>();
+        Assert.Throws<InvalidPasswordFormat>(act);
     }
 
     [Fact]
@@ -78,18 +79,19 @@ public class AuthServiceTests
         var authDto = new AuthDto { Username = userName, Password = "ValidPass1!" };
         var user = CreateTestUser(userName, authDto.Password);
 
-        _userRepositoryMock.Setup(u => u.GetUserByUserNameHashAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _userRepositoryMock.Setup(u => u.GetByUserNameHashAsync(It.IsAny<string>())).ReturnsAsync(user);
         _userValidatorMock.Setup(u => u.EnsureExistsByUsernameHashAsync(It.IsAny<string>()))
             .Returns(Task.CompletedTask);
 
         // Act
+        var now = DateTime.UtcNow;
         var result = await _authService.AuthAsync(authDto);
 
         // Assert
-        result.Should().NotBeNull();
-        result.JwtToken.Should().NotBeNullOrEmpty();
-        result.RefreshToken.Should().NotBeNullOrEmpty();
-        result.RefreshTokenExpiration.Should().BeAfter(DateTime.UtcNow);
+        Assert.NotNull(result);
+        Assert.False(string.IsNullOrEmpty(result.JwtToken));
+        Assert.False(string.IsNullOrEmpty(result.RefreshToken));
+        Assert.True(result.RefreshTokenExpiration > now);
     }
 
     [Fact]
@@ -100,7 +102,7 @@ public class AuthServiceTests
         var authDto = new AuthDto { Username = userName, Password = "InvalidPass" };
         var user = CreateTestUser(userName, "validPassword");
 
-        _userRepositoryMock.Setup(u => u.GetUserByUserNameHashAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _userRepositoryMock.Setup(u => u.GetByUserNameHashAsync(It.IsAny<string>())).ReturnsAsync(user);
         _userValidatorMock.Setup(u => u.EnsureExistsByUsernameHashAsync(It.IsAny<string>()))
             .Returns(Task.CompletedTask);
 
@@ -108,18 +110,18 @@ public class AuthServiceTests
         Func<Task> act = async () => await _authService.AuthAsync(authDto);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidPassword>();
+        await Assert.ThrowsAsync<InvalidPassword>(act);
     }
 
     [Fact]
     public async Task AuthAsync_InvalidUsername_ThrowsUserNotFound()
     {
         // Arrange
-        var userName = "testUser";
+        const string userName = "testUser";
         var authDto = new AuthDto { Username = userName, Password = "validPassword" };
         var user = CreateTestUser(userName, "validPassword");
 
-        _userRepositoryMock.Setup(u => u.GetUserByUserNameHashAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
+        _userRepositoryMock.Setup(u => u.GetByUserNameHashAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
         _userValidatorMock.Setup(u => u.EnsureExistsByUsernameHashAsync(It.IsAny<string>()))
             .Throws(new UserNotFound("username", userName));
 
@@ -127,7 +129,7 @@ public class AuthServiceTests
         Func<Task> act = async () => await _authService.AuthAsync(authDto);
 
         // Assert
-        await act.Should().ThrowAsync<UserNotFound>();
+        await Assert.ThrowsAsync<UserNotFound>(act);
     }
 
     [Fact]
@@ -145,34 +147,35 @@ public class AuthServiceTests
         };
 
         _authRepositoryMock.Setup(a => a.GetAsync(refreshTokenHash)).ReturnsAsync(existingRefreshToken);
-        _userRepositoryMock.Setup(u => u.GetUserAsync(user.Id)).ReturnsAsync(user);
-        _userRepositoryMock.Setup(u => u.UserExistsAsync(user.Id)).ReturnsAsync(true);
+        _userRepositoryMock.Setup(u => u.GetAsync(user.Id)).ReturnsAsync(user);
+        _userRepositoryMock.Setup(u => u.ExistsAsync(user.Id)).ReturnsAsync(true);
         _userValidatorMock.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
 
         // Act
+        var now = DateTime.UtcNow;
         var result = await _authService.RefreshTokenAsync(refreshToken);
 
         // Assert
-        result.Should().NotBeNull();
-        result.JwtToken.Should().NotBeNullOrEmpty();
-        result.RefreshToken.Should().NotBeNullOrEmpty();
-        result.RefreshTokenExpiration.Should().BeAfter(DateTime.UtcNow);
+        Assert.NotNull(result);
+        Assert.False(string.IsNullOrEmpty(result.JwtToken));
+        Assert.False(string.IsNullOrEmpty(result.RefreshToken));
+        Assert.True(result.RefreshTokenExpiration > now);
     }
 
     [Fact]
     public async Task RefreshTokenAsync_UnknownRefreshToken_ThrowsUnknownRefreshToken()
     {
         // Arrange
-        var refreshToken = "unknownRefreshToken";
+        const string refreshToken = "unknownRefreshToken";
 
-        _authRepositoryMock.Setup(a => a.GetAsync(It.IsAny<string>())).ReturnsAsync((RefreshToken)null);
+        _authRepositoryMock.Setup(a => a.GetAsync(It.IsAny<string>())).ReturnsAsync((RefreshToken)null!);
 
         // Act
         Func<Task> act = async () => await _authService.RefreshTokenAsync(refreshToken);
 
         // Assert
-        await act.Should().ThrowAsync<UnknownRefreshToken>();
+        await Assert.ThrowsAsync<UnknownRefreshToken>(act);
     }
 
     [Fact]
@@ -195,6 +198,6 @@ public class AuthServiceTests
         Func<Task> act = async () => await _authService.RefreshTokenAsync(refreshToken);
 
         // Assert
-        await act.Should().ThrowAsync<ExpiredRefreshToken>();
+        await Assert.ThrowsAsync<ExpiredRefreshToken>(act);
     }
 }

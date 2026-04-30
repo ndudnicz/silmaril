@@ -8,7 +8,7 @@ public class VaultValidator(IVaultRepository vaultRepository) : IVaultValidator
 {
     public async Task EnsureExistsByUserIdAsync(Guid id, Guid userId)
     {
-        if (!await vaultRepository.VaultExistsByUserIdAsync(id, userId))
+        if (!await vaultRepository.ExistsByUserIdAsync(id, userId))
         {
             throw new VaultNotFound("id", id.ToString());
         }
@@ -16,7 +16,7 @@ public class VaultValidator(IVaultRepository vaultRepository) : IVaultValidator
 
     public async Task EnsureExistsByUserIdAsync(List<Guid> ids, Guid userId)
     {
-        if (!await vaultRepository.VaultExistByUserIdAsync(ids, userId))
+        if (!await vaultRepository.ExistByUserIdAsync(ids, userId))
         {
             throw new VaultsNotFound("ids", string.Join(", ", ids.Select(x => x.ToString())));
         }
@@ -24,7 +24,7 @@ public class VaultValidator(IVaultRepository vaultRepository) : IVaultValidator
 
     public async Task EnsureMultipleVaultsExistAsync(Guid userId)
     {
-        if (await vaultRepository.CountVaultsByUserIdAsync(userId) <= 1)
+        if (await vaultRepository.CountByUserIdAsync(userId) <= 1)
         {
             throw new CannotDeleteLastVaultException();
         }

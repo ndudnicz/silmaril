@@ -7,7 +7,7 @@ namespace Api.Extensions;
 
 public static class ModelBuilderExtensions
 {
-    private static readonly User setupUser = new User
+    private static readonly User SetupUser = new User
     {
         Id = CryptoHelper.GenerateSecureGuid(),
         Created = DateTime.UtcNow,
@@ -24,7 +24,7 @@ public static class ModelBuilderExtensions
             entity.Property(e => e.Salt)
                 .HasColumnType("binary(16)")
                 .IsRequired();
-            entity.HasData(new List<User> { setupUser });
+            entity.HasData(new List<User> { SetupUser });
         });
         modelBuilder.Entity<User>()
             .HasIndex(u => u.UsernameHash)
@@ -60,7 +60,7 @@ public static class ModelBuilderExtensions
             entity.HasData(new Vault
             {
                 Id = Guid.NewGuid(),
-                UserId = setupUser.Id,
+                UserId = SetupUser.Id,
                 Name = "Default Vault",
                 Created = DateTime.UtcNow
             });
@@ -89,26 +89,26 @@ public static class ModelBuilderExtensions
 
             foreach (var key in entity.GetKeys())
             {
-                key.SetName(key.GetName().ToLower());
+                key.SetName(key.GetName()?.ToLower());
             }
 
             foreach (var fk in entity.GetForeignKeys())
             {
-                fk.SetConstraintName(fk.GetConstraintName().ToLower());
+                fk.SetConstraintName(fk.GetConstraintName()?.ToLower());
             }
 
             foreach (var index in entity.GetIndexes())
             {
-                index.SetDatabaseName(index.GetDatabaseName().ToLower());
+                index.SetDatabaseName(index.GetDatabaseName()?.ToLower());
             }
         }
 
         return;
 
-        string ToLowerSnakeCase(string name)
+        string ToLowerSnakeCase(string? name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                return name;
+                return "";
 
             var builder = new System.Text.StringBuilder();
             for (var i = 0; i < name.Length; i++)

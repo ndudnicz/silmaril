@@ -8,27 +8,26 @@ using Api.Repositories.Interfaces;
 using Api.Services;
 using Api.Services.Interfaces;
 using Api.Services.Validation.Interfaces;
-using FluentAssertions;
 using Moq;
 
 namespace Tests.Services;
 
-public class LoginServiceTests
+public class CredentialServiceTests
 {
-    private readonly Mock<ILoginRepository> _loginRepository = new();
+    private readonly Mock<ICredentialRepository> _credentialRepository = new();
     private readonly Mock<ITagService> _tagService = new();
     private readonly Mock<IUserValidator> _userValidator = new();
-    private readonly Mock<ILoginValidator> _loginValidator = new();
+    private readonly Mock<ICredentialValidator> _credentialValidator = new();
     private readonly Mock<IVaultValidator> _vaultValidator = new();
-    private readonly ILoginMapper _loginMapper = new LoginMapper();
+    private readonly ICredentialMapper _credentialMapper = new CredentialMapper();
 
-    private LoginService CreateService() =>
-        new(_loginRepository.Object,
+    private CredentialService CreateService() =>
+        new(_credentialRepository.Object,
             _tagService.Object,
             _userValidator.Object,
-            _loginValidator.Object,
+            _credentialValidator.Object,
             _vaultValidator.Object,
-            _loginMapper);
+            _credentialMapper);
 
     public static Login CreateTestLogin(
         Guid userId = new(),
@@ -61,18 +60,18 @@ public class LoginServiceTests
         var createDto = new CreateLoginDto { VaultId = vaultId, TagNames = new[] { tags[0].Name } };
         var login = CreateTestLogin(userId, vaultId, tags);
 
-        _tagService.Setup(t => t.GetTagsByNamesAsync(It.IsAny<string[]>()))
+        _tagService.Setup(t => t.GetByNamesAsync(It.IsAny<string[]>()))
             .ReturnsAsync(tags);
-        _loginRepository.Setup(r => r.CreateLoginAsync(It.IsAny<Login>()))
+        _credentialRepository.Setup(r => r.CreateAsync(It.IsAny<Login>()))
             .ReturnsAsync(login);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
 
         var service = CreateService();
-        var result = await service.CreateLoginAsync(createDto, Guid.NewGuid());
+        var result = await service.CreateAsync(createDto, Guid.NewGuid());
 
-        result.Should().NotBeNull();
-        result.Id.Should().Be(login.Id);
+        Assert.NotNull(result);
+        Assert.Equal(login.Id, result.Id);
     }
 
     [Fact]
@@ -96,33 +95,35 @@ public class LoginServiceTests
             CreateTestLogin(userId, vaultId, tags: new List<Tag> { tags[1] })
         };
 
-        _tagService.Setup(t => t.GetTagsAsync()).ReturnsAsync(tags);
-        _loginRepository.Setup(r => r.CreateLoginsAsync(It.IsAny<List<Login>>()))
+        _tagService.Setup(t => t.GetAsync()).ReturnsAsync(tags);
+        _credentialRepository.Setup(r => r.CreateAsync(It.IsAny<List<Login>>()))
             .ReturnsAsync(logins);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
 
         var service = CreateService();
-        var result = await service.CreateLoginsAsync(createDtos, userId);
+        var result = await service.CreateAsync(createDtos, userId);
 
-        result.Should().NotBeNull();
-        result.Should().HaveCount(2);
-        result.Select(l => l.Id).Should().BeEquivalentTo(logins.Select(l => l.Id));
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+        var resultIds = result.Select(l => l.Id).OrderBy(id => id);
+        var expectedIds = logins.Select(l => l.Id).OrderBy(id => id);
+        Assert.Equal(expectedIds, resultIds);
     }
 
     [Fact]
     public async Task CreateLoginAsync_WhenTagsNotFound_ShouldThrow()
     {
         var createDto = new CreateLoginDto { VaultId = Guid.Empty, TagNames = new[] { "inexistant" } };
-        _tagService.Setup(t => t.GetTagsByNamesAsync(It.IsAny<string[]>()))
+        _tagService.Setup(t => t.GetByNamesAsync(It.IsAny<string[]>()))
             .ThrowsAsync(new TagsNotFound("Name", "inexistant"));
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
         var service = CreateService();
 
-        Func<Task> act = async () => await service.CreateLoginAsync(createDto, Guid.NewGuid());
+        Func<Task> act = async () => await service.CreateAsync(createDto, Guid.NewGuid());
 
-        await act.Should().ThrowAsync<TagsNotFound>();
+        await Assert.ThrowsAsync<TagsNotFound>(act);
     }
 
     [Fact]
@@ -135,15 +136,15 @@ public class LoginServiceTests
             new() { VaultId = vaultId, TagNames = new[] { "inexistant2" } }
         };
 
-        _tagService.Setup(t => t.GetTagsAsync())
+        _tagService.Setup(t => t.GetAsync())
             .ThrowsAsync(new TagsNotFound("Name", "inexistant, inexistant2"));
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
         var service = CreateService();
 
-        Func<Task> act = async () => await service.CreateLoginsAsync(createDtos, Guid.NewGuid());
+        Func<Task> act = async () => await service.CreateAsync(createDtos, Guid.NewGuid());
 
-        await act.Should().ThrowAsync<TagsNotFound>();
+        await Assert.ThrowsAsync<TagsNotFound>(act);
     }
 
     [Fact]
@@ -151,47 +152,47 @@ public class LoginServiceTests
     {
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Throws(new UserNotFound("id", Guid.NewGuid().ToString()));
-        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+        _credentialValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
         var service = CreateService();
 
-        Func<Task> act = async () => await service.UpdateLoginAsync(new UpdateLoginDto
+        Func<Task> act = async () => await service.UpdateAsync(new UpdateLoginDto
         {
             Id = Guid.NewGuid()
         }, Guid.NewGuid());
 
-        await act.Should().ThrowAsync<UserNotFound>();
+        await Assert.ThrowsAsync<UserNotFound>(act);
     }
 
     [Fact]
     public async Task DeleteLoginByUserIdAsync_ShouldReturnCount()
     {
-        _loginRepository.Setup(r => r.DeleteLoginAsync(It.IsAny<Guid>()))
+        _credentialRepository.Setup(r => r.DeleteAsync(It.IsAny<Guid>()))
             .ReturnsAsync(1);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
-        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+        _credentialValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
         var service = CreateService();
 
-        var result = await service.DeleteLoginByUserIdAsync(Guid.NewGuid(), Guid.NewGuid());
+        var result = await service.DeleteAsync(Guid.NewGuid(), Guid.NewGuid());
 
-        result.Should().Be(1);
+        Assert.Equal(1, result);
     }
 
     [Fact]
     public async Task DeleteLoginByUserIdAsync_WhenNoLoginDeleted_ShouldReturnZero()
     {
-        _loginRepository.Setup(r => r.DeleteLoginAsync(It.IsAny<Guid>()))
+        _credentialRepository.Setup(r => r.DeleteAsync(It.IsAny<Guid>()))
             .ReturnsAsync(0);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
-        _loginValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+        _credentialValidator.Setup(u => u.EnsureExistsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
 
         var service = CreateService();
-        var result = await service.DeleteLoginByUserIdAsync(Guid.NewGuid(), Guid.NewGuid());
+        var result = await service.DeleteAsync(Guid.NewGuid(), Guid.NewGuid());
 
-        result.Should().Be(0);
+        Assert.Equal(0, result);
     }
 }

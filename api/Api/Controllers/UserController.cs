@@ -1,6 +1,5 @@
 using Api.Entities.Dtos.Create;
 using Api.Entities.Dtos.Update;
-using Api.Mappers.Interfaces;
 using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
@@ -12,12 +11,15 @@ namespace Api.Controllers;
 public class UserController(
     ILogger<UserController> logger,
     IUserService userService
-    ) : MyControllerV1
+    ) : ControllerV1
 {
     [HttpGet]
     public async Task<IActionResult> GetAsync()
     {
-        return Ok(await userService.GetUserAsync(GetUserId()));
+        var userId = GetUserId();
+        var result = await userService.GetAsync(userId);
+        logger.LogInformation("User {userId} successfully retrieved.", userId);
+        return Ok(result);
     }
 
     [HttpPost]
@@ -30,11 +32,13 @@ public class UserController(
         try
         {
             await antiforgery.ValidateRequestAsync(HttpContext);
-            var createdUser = await userService.CreateUserAsync(createUserDto);
+            var createdUser = await userService.CreateAsync(createUserDto);
+            logger.LogInformation("User {userId} successfully created.", createdUser.Id);
             return Created($"api/user", createdUser);
         }
         catch (AntiforgeryValidationException)
         {
+            logger.LogWarning("Failed to create user: Invalid CSRF token.");
             return StatusCode(StatusCodes.Status403Forbidden, "Invalid CSRF token.");
         }
     }
@@ -42,13 +46,19 @@ public class UserController(
     [HttpPut]
     public async Task<IActionResult> UpdateAsync([FromBody] UpdateUserDto updateUserDto)
     {
-        return Ok(await userService.UpdateUserAsync(GetUserId(), updateUserDto));
+        var userId = GetUserId();
+        var result = await userService.UpdateAsync(userId, updateUserDto);
+        logger.LogInformation("User {userId} successfully updated.", userId);
+        return Ok(result);
     }
 
     [HttpPut]
     [Route("password")]
     public async Task<IActionResult> UpdatePasswordAsync([FromBody] UpdateUserPasswordDto updateUserPasswordDto)
     {
-        return Ok(await userService.UpdateUserPasswordAsync(GetUserId(), updateUserPasswordDto));
+        var userId = GetUserId();
+        var result = await userService.UpdatePasswordAsync(userId, updateUserPasswordDto);
+        logger.LogInformation("User {userId} password successfully updated.", userId);
+        return Ok(result);
     }
 }

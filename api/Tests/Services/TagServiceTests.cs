@@ -2,7 +2,6 @@ using Api.Entities;
 using Api.Exceptions;
 using Api.Repositories.Interfaces;
 using Api.Services;
-using FluentAssertions;
 using Moq;
 
 namespace Tests.Services;
@@ -16,24 +15,25 @@ public class TagServiceTests
     public async Task GetTagsByNamesAsync_ShouldReturnTags()
     {
         var tags = new List<Tag> { new() { Name = "tag1" }, new() { Name = "tag2" } };
-        _tagRepository.Setup(r => r.GetTagsByNamesAsync(It.IsAny<string[]>())).ReturnsAsync(tags);
+        _tagRepository.Setup(r => r.GetByNamesAsync(It.IsAny<string[]>())).ReturnsAsync(tags);
 
         var service = CreateService();
-        var result = await service.GetTagsByNamesAsync(new[] { "tag1", "tag2" });
+        var result = await service.GetByNamesAsync(new[] { "tag1", "tag2" });
 
-        result.Should().HaveCount(2);
-        result.Select(t => t.Name).Should().Contain(new[] { "tag1", "tag2" });
+        Assert.Equal(2, result.Count);
+        Assert.Contains("tag1", result.Select(t => t.Name));
+        Assert.Contains("tag2", result.Select(t => t.Name));
     }
 
     [Fact]
     public async Task GetTagsByNamesAsync_WhenTagNotFound_ShouldThrow()
     {
-        _tagRepository.Setup(r => r.GetTagsByNamesAsync(It.IsAny<string[]>())).ReturnsAsync(new List<Tag>());
+        _tagRepository.Setup(r => r.GetByNamesAsync(It.IsAny<string[]>())).ReturnsAsync([]);
 
         var service = CreateService();
 
-        Func<Task> act = async () => await service.GetTagsByNamesAsync(new[] { "tag1", "tag2" });
+        Func<Task> act = async () => await service.GetByNamesAsync(new[] { "tag1", "tag2" });
 
-        await act.Should().ThrowAsync<TagsNotFound>();
+        await Assert.ThrowsAsync<TagsNotFound>(act);
     }
 }

@@ -9,14 +9,14 @@ public class TagService(
     ITagRepository tagRepository
     ) : ITagService
 {
-    public async Task<List<Tag>> GetTagsAsync()
+    public async Task<List<Tag>> GetAsync()
     {
-        return await tagRepository.GetTagsAsync();
+        return await tagRepository.GetAsync();
     }
 
-    public async Task<List<Tag>> GetTagsByNamesAsync(string[] names)
+    public async Task<List<Tag>> GetByNamesAsync(string[] names)
     {
-        var tags = await tagRepository.GetTagsByNamesAsync(names);
+        var tags = await tagRepository.GetByNamesAsync(names);
         EnsureAllTagNamesExist(names, tags);
         return tags;
     }

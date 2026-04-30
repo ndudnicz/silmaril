@@ -4,7 +4,7 @@ namespace Api.Repositories.Interfaces;
 
 public interface ITagRepository
 {
-    Task<List<Tag>> GetTagsAsync();
+    Task<List<Tag>> GetAsync();
 
-    Task<List<Tag>> GetTagsByNamesAsync(string[] names);
+    Task<List<Tag>> GetByNamesAsync(string[] names);
 }

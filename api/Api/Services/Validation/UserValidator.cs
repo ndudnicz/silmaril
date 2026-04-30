@@ -8,7 +8,7 @@ public class UserValidator(IUserRepository userRepository) : IUserValidator
 {
     public async Task EnsureExistsAsync(Guid id)
     {
-        if (!await userRepository.UserExistsAsync(id))
+        if (!await userRepository.ExistsAsync(id))
         {
             throw new UserNotFound("id", id.ToString());
         }
@@ -16,7 +16,7 @@ public class UserValidator(IUserRepository userRepository) : IUserValidator
 
     public async Task EnsureExistsByUsernameHashAsync(string usernameHash)
     {
-        if (!await userRepository.UserExistsByUsernameHashAsync(usernameHash))
+        if (!await userRepository.ExistsByUsernameHashAsync(usernameHash))
         {
             throw new UserNotFound("usernameHash", usernameHash);
         }
@@ -24,7 +24,7 @@ public class UserValidator(IUserRepository userRepository) : IUserValidator
 
     public async Task EnsureDoesNotExistByUsernameHashAsync(string usernameHash)
     {
-        if (await userRepository.UserExistsByUsernameHashAsync(usernameHash))
+        if (await userRepository.ExistsByUsernameHashAsync(usernameHash))
         {
             throw new UserNameAlreadyExists();
         }

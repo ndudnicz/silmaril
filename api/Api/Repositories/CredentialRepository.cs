@@ -6,16 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories;
 
-public class LoginRepository(AppDbContext db) : ILoginRepository
+public class CredentialRepository(AppDbContext db) : ICredentialRepository
 {
-    public async Task<bool> LoginExistsByUserIdAsync(Guid id, Guid userId)
+    public async Task<bool> ExistsByUserIdAsync(Guid id, Guid userId)
     {
         return await db.Logins
             .AsNoTracking()
             .AnyAsync(x => x.Id == id && x.UserId == userId);
     }
 
-    public async Task<bool> LoginsExistByUserIdAsync(IEnumerable<Guid> ids, Guid userId)
+    public async Task<bool> ExistByUserIdAsync(IEnumerable<Guid> ids, Guid userId)
     {
         return await db.Logins
             .AsNoTracking()
@@ -23,14 +23,14 @@ public class LoginRepository(AppDbContext db) : ILoginRepository
             .AnyAsync();
     }
 
-    public async Task<bool> LoginExistsByVaultIdAsync(Guid id, Guid vaultId)
+    public async Task<bool> ExistsByVaultIdAsync(Guid id, Guid vaultId)
     {
         return await db.Logins
             .AsNoTracking()
             .AnyAsync(x => x.Id == id && x.VaultId == vaultId);
     }
 
-    public async Task<bool> LoginsExistByVaultIdAsync(IEnumerable<Guid> ids, Guid vaultId)
+    public async Task<bool> ExistByVaultIdAsync(IEnumerable<Guid> ids, Guid vaultId)
     {
         return await db.Logins
             .AsNoTracking()
@@ -38,14 +38,14 @@ public class LoginRepository(AppDbContext db) : ILoginRepository
             .AnyAsync();
     }
 
-    public async Task<Login?> GetLoginWithTagsAsync(Guid id)
+    public async Task<Login?> GetWithTagsAsync(Guid id)
     {
         return await db.Logins
             .Include(l => l.Tags)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<List<Login>> GetLoginsByUserIdWithTagsAsync(Guid userId, bool deleted = false)
+    public async Task<List<Login>> GetByUserIdWithTagsAsync(Guid userId, bool deleted = false)
     {
         return await db.Logins
             .AsNoTracking()
@@ -54,7 +54,7 @@ public class LoginRepository(AppDbContext db) : ILoginRepository
             .ToListAsync();
     }
 
-    public async Task<List<Login>> GetLoginsByVaultIdWithTagsAsync(Guid vaultId)
+    public async Task<List<Login>> GetByVaultIdWithTagsAsync(Guid vaultId)
     {
         return await db.Logins
             .Include(l => l.Tags)
@@ -62,7 +62,7 @@ public class LoginRepository(AppDbContext db) : ILoginRepository
             .ToListAsync();
     }
 
-    public async Task<List<Login>> GetLoginsByIdsWithTagsAsync(IEnumerable<Guid> ids)
+    public async Task<List<Login>> GetByIdsWithTagsAsync(IEnumerable<Guid> ids)
     {
         return await db.Logins
             .Include(l => l.Tags)
@@ -70,7 +70,7 @@ public class LoginRepository(AppDbContext db) : ILoginRepository
             .ToListAsync();
     }
 
-    public async Task<Login> CreateLoginAsync(Login login)
+    public async Task<Login> CreateAsync(Login login)
     {
         login.Created = DateTime.UtcNow;
         login.Id = CryptoHelper.GenerateSecureGuid();
@@ -79,7 +79,7 @@ public class LoginRepository(AppDbContext db) : ILoginRepository
         return login;
     }
 
-    public async Task<List<Login>> CreateLoginsAsync(List<Login> logins)
+    public async Task<List<Login>> CreateAsync(List<Login> logins)
     {
         var now = DateTime.UtcNow;
         logins.ForEach(l =>
@@ -92,7 +92,7 @@ public class LoginRepository(AppDbContext db) : ILoginRepository
         return logins;
     }
 
-    public async Task<Login> UpdateLoginAsync(Login login)
+    public async Task<Login> UpdateAsync(Login login)
     {
         login.Updated = DateTime.UtcNow;
         db.Logins.Update(login);
@@ -100,7 +100,7 @@ public class LoginRepository(AppDbContext db) : ILoginRepository
         return login;
     }
 
-    public async Task<List<Login>> UpdateLoginsAsync(List<Login> logins)
+    public async Task<List<Login>> UpdateAsync(List<Login> logins)
     {
         var now = DateTime.UtcNow;
         logins.ForEach(l => l.Updated = now);
@@ -109,14 +109,14 @@ public class LoginRepository(AppDbContext db) : ILoginRepository
         return logins;
     }
 
-    public async Task<int> DeleteLoginAsync(Guid id)
+    public async Task<int> DeleteAsync(Guid id)
     {
         return await db.Logins
             .Where(x => x.Id == id)
             .ExecuteDeleteAsync();
     }
 
-    public async Task<int> DeleteLoginsAsync(IEnumerable<Guid> ids)
+    public async Task<int> DeleteAsync(IEnumerable<Guid> ids)
     {
         return await db.Logins
             .Where(x => ids.Contains(x.Id))

@@ -10,56 +10,78 @@ namespace Api.Controllers;
 [Authorize]
 public class LoginController(
     ILogger<LoginController> logger,
-    ILoginService loginService
-    ) : MyControllerV1
+    ICredentialService credentialService
+    ) : ControllerV1
 {
     [HttpGet]
     public async Task<IActionResult> GetLoginsAsync()
     {
-        return Ok(await loginService.GetLoginsByUserIdAsync(GetUserId()));
+        var userId =  GetUserId();
+        var result = await credentialService.GetByUserIdAsync(userId);
+        logger.LogInformation("Found {Count} credentials for user {UserId}", result.Count, userId);
+        return Ok(result);
     }
 
     [HttpGet("deleted")]
     public async Task<IActionResult> GetDeletedLoginsAsync()
     {
-        return Ok(await loginService.GetDeletedLoginsByUserIdAsync(GetUserId()));
+        var userId =  GetUserId();
+        var result = await credentialService.GetDeletedByUserIdAsync(userId);
+        logger.LogInformation("Found {Count} deleted credentials for user {UserId}", result.Count, userId);
+        return Ok(result);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateLoginDto createLoginDto)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateLoginDto createCredentialDto)
     {
-        var createdLogin = await loginService.CreateLoginAsync(createLoginDto, GetUserId());
+        var userId = GetUserId();
+        var createdLogin = await credentialService.CreateAsync(createCredentialDto, GetUserId());
+        logger.LogInformation("Created credential with id {CredentialId} for user {UserId}", createdLogin.Id, userId);
         return Created($"api/logins", createdLogin);
     }
 
     [HttpPost("bulk")]
-    public async Task<IActionResult> CreateBulkAsync([FromBody] List<CreateLoginDto> createLoginDtos)
+    public async Task<IActionResult> CreateBulkAsync([FromBody] List<CreateLoginDto> createCredentialDtos)
     {
-        var createdLogins = await loginService.CreateLoginsAsync(createLoginDtos, GetUserId());
+        var userId =  GetUserId();
+        var createdLogins = await credentialService.CreateAsync(createCredentialDtos, GetUserId());
+        logger.LogInformation("Created {Count} credentials for user {UserId}", createdLogins.Count, userId);
         return Created($"api/logins", createdLogins);
     }
 
     [HttpPut]
-    public async Task<IActionResult> UpdateAsync([FromBody] UpdateLoginDto updateLoginDto)
+    public async Task<IActionResult> UpdateAsync([FromBody] UpdateLoginDto updateCredentialDto)
     {
-        return Ok(await loginService.UpdateLoginAsync(updateLoginDto, GetUserId()));
+        var userId =  GetUserId();
+        var result = await credentialService.UpdateAsync(updateCredentialDto, userId);
+        logger.LogInformation("Updated credential with id {CredentialId} for user {UserId}", result.Id, userId);
+        return Ok(result);
     }
 
     [HttpPut("bulk")]
-    public async Task<IActionResult> UpdateBulkAsync([FromBody] List<UpdateLoginDto> updateLoginDtos)
+    public async Task<IActionResult> UpdateBulkAsync([FromBody] List<UpdateLoginDto> updateCredentialDtos)
     {
-        return Ok(await loginService.UpdateLoginsAsync(updateLoginDtos, GetUserId()));
+        var userId =  GetUserId();
+        var result = await credentialService.UpdateAsync(updateCredentialDtos, userId);
+        logger.LogInformation("Updated {Count} credentials for user {UserId}", result.Count, userId);
+        return Ok(result);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid id)
     {
-        return Ok(await loginService.DeleteLoginByUserIdAsync(id, GetUserId()));
+        var userId =  GetUserId();
+        var result = await credentialService.DeleteAsync(id, userId);
+        logger.LogInformation("Deleted credential with id {CredentialId} for user {UserId}", id, userId);
+        return Ok(result);
     }
 
     [HttpDelete("bulk")]
-    public async Task<IActionResult> DeleteBulkAsync([FromBody] DeleteLoginsDto deleteLoginsDto)
+    public async Task<IActionResult> DeleteBulkAsync([FromBody] DeleteLoginsDto deleteCredentialsDto)
     {
-        return Ok(await loginService.DeleteLoginsByUserIdAsync(deleteLoginsDto.Ids.ToList(), GetUserId()));
+        var userId =  GetUserId();
+        var result = await credentialService.DeleteAsync(deleteCredentialsDto.Ids.ToList(), userId);
+        logger.LogInformation("Deleted {Count} credentials for user {UserId}", result, userId);
+        return Ok(result);
     }
 }

@@ -2,10 +2,10 @@ namespace Api.Configuration;
 
 public record JwtConfiguration
 {
-    public string JwtValidIssuer { get; init; }
-    public string JwtValidAudience { get; init; }
-    public byte[] JwtSecretKey { get; init; }
-    public string RefreshTokenCookieName { get; } = "refreshToken";
+    public required string JwtValidIssuer { get; init; }
+    public required string JwtValidAudience { get; init; }
+    public required byte[] JwtSecretKey { get; init; }
+    public const string RefreshTokenCookieName = "refreshToken";
     public int RefreshTokenExpirationMinutes { get; init; }
     public int AccessTokenExpirationMinutes { get; init; }
 }

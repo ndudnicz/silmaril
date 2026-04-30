@@ -6,9 +6,9 @@ namespace Api.Services.Interfaces;
 
 public interface IUserService
 {
-    Task<UserDto> GetUserByUserNameAsync(string username);
-    Task<UserDto> GetUserAsync(Guid id);
-    Task<UserDto> CreateUserAsync(CreateUserDto createUserDto);
-    Task<UserDto> UpdateUserAsync(Guid userId, UpdateUserDto updateUserDto);
-    Task<UserDto> UpdateUserPasswordAsync(Guid userId, UpdateUserPasswordDto updateUserPasswordDto);
+    Task<UserDto> GetByUserNameAsync(string username);
+    Task<UserDto> GetAsync(Guid id);
+    Task<UserDto> CreateAsync(CreateUserDto createUserDto);
+    Task<UserDto> UpdateAsync(Guid userId, UpdateUserDto updateUserDto);
+    Task<UserDto> UpdatePasswordAsync(Guid userId, UpdateUserPasswordDto updateUserPasswordDto);
 }

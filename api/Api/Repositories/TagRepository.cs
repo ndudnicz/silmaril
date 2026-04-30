@@ -7,12 +7,12 @@ namespace Api.Repositories;
 
 public class TagRepository(AppDbContext db) : ITagRepository
 {
-    public async Task<List<Tag>> GetTagsAsync()
+    public async Task<List<Tag>> GetAsync()
     {
         return await db.Tags.ToListAsync();
     }
 
-    public async Task<List<Tag>> GetTagsByNamesAsync(string[] names)
+    public async Task<List<Tag>> GetByNamesAsync(string[] names)
     {
         return await db.Tags.Where(x => names.Contains(x.Name)).ToListAsync();
     }

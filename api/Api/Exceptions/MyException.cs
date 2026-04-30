@@ -20,7 +20,4 @@ public abstract class MyException : Exception, IMyException
     {
         ErrorMessage = message;
     }
-    protected MyException(
-        System.Runtime.Serialization.SerializationInfo info,
-        System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 }
