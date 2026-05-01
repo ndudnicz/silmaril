@@ -17,7 +17,7 @@ namespace Api.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddContexts(this IServiceCollection services, MySqlConfiguration mySqlConfiguration)
+    public static void AddContexts(this IServiceCollection services, PostgreSqlConfiguration postgreSqlConfiguration)
     {
         const int retryCount = 5;
         const int retryDelaySeconds = 30;
@@ -29,13 +29,12 @@ public static class ServiceCollectionExtensions
         {
             services.AddDbContextPool<T>(options =>
             {
-                options.UseMySql(
-                    mySqlConfiguration.ConnectionString,
-                    ServerVersion.AutoDetect(mySqlConfiguration.ConnectionString),
+                options.UseNpgsql(
+                    postgreSqlConfiguration.ConnectionString,
                     opt => opt.EnableRetryOnFailure(
                         maxRetryCount: retryCount,
                         maxRetryDelay: System.TimeSpan.FromSeconds(retryDelaySeconds),
-                        errorNumbersToAdd: null)
+                        errorCodesToAdd: null)
                 );
             });
         }

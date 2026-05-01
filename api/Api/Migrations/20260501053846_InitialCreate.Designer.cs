@@ -3,60 +3,72 @@ using System;
 using Api.Repositories.EFContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250618064956_UpdateLoginColumns")]
-    partial class UpdateLoginColumns
+    [Migration("20260501053846_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.17")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("ProductVersion", "10.0.7")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Api.Entities.Login", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("created");
 
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("deleted");
+
                     b.Property<byte[]>("EncryptedData")
-                        .HasColumnType("Blob")
+                        .HasColumnType("bytea")
                         .HasColumnName("encrypted_data");
 
                     b.Property<int?>("EncryptionVersion")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("encryption_version");
 
+                    b.Property<byte[]>("InitializationVector")
+                        .HasColumnType("bytea")
+                        .HasColumnName("initialization_vector");
+
                     b.Property<DateTime?>("Updated")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("user_id");
+
+                    b.Property<Guid?>("VaultId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vault_id");
 
                     b.HasKey("Id")
                         .HasName("pk_logins");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_logins_user_id");
+                    b.HasIndex("VaultId")
+                        .HasDatabaseName("ix_logins_vault_id");
 
                     b.ToTable("logins");
                 });
@@ -65,29 +77,29 @@ namespace Api.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("created");
 
                     b.Property<DateTime>("Expires")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasColumnType("character varying(128)")
                         .HasColumnName("token_hash");
 
                     b.Property<DateTime?>("Updated")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -104,21 +116,21 @@ namespace Api.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("created");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasColumnType("character varying(128)")
                         .HasColumnName("name");
 
                     b.Property<DateTime?>("Updated")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated");
 
                     b.HasKey("Id")
@@ -131,52 +143,105 @@ namespace Api.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("created");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("password_hash");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("binary(16)")
+                        .HasColumnType("bytea")
                         .HasColumnName("salt");
 
                     b.Property<DateTime?>("Updated")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("UsernameHash")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
-                        .HasColumnName("username");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("username_hash");
 
                     b.HasKey("Id")
                         .HasName("pk_users");
 
-                    b.HasIndex("Username")
+                    b.HasIndex("UsernameHash")
                         .IsUnique()
-                        .HasDatabaseName("ix_users_username");
+                        .HasDatabaseName("ix_users_username_hash");
 
                     b.ToTable("users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("e2d7412c-47c3-0504-b436-9c5fe26b70d8"),
+                            Created = new DateTime(2026, 5, 1, 5, 38, 45, 749, DateTimeKind.Utc).AddTicks(9730),
+                            PasswordHash = "$argon2id$v=19$m=16,t=2,p=1$ZEp5eWdQeDBXeGk2OWh6Qw$/sfpIugCYAcUqDG3xmx/2g",
+                            Salt = new byte[] { 159, 130, 1, 64, 74, 85, 128, 6, 110, 137, 172, 44, 5, 55, 92, 142 },
+                            UsernameHash = "2E96772232487FB3A058D58F2C310023E07E4017C94D56CC5FAE4B54B44605F42A75B0B1F358991F8C6CBE9B68B64E5B2A09D0AD23FCAC07EE9A9198A745E1D5"
+                        });
+                });
+
+            modelBuilder.Entity("Api.Entities.Vault", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("Updated")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_vaults");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_vaults_user_id");
+
+                    b.ToTable("vaults");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("e8a91207-f378-4ab8-86e3-17c7474f2c5c"),
+                            Created = new DateTime(2026, 5, 1, 5, 38, 45, 752, DateTimeKind.Utc).AddTicks(3380),
+                            Name = "Default Vault",
+                            UserId = new Guid("e2d7412c-47c3-0504-b436-9c5fe26b70d8")
+                        });
                 });
 
             modelBuilder.Entity("LoginTag", b =>
                 {
                     b.Property<Guid>("LoginId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("login_id");
 
                     b.Property<Guid>("TagsId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("tags_id");
 
                     b.HasKey("LoginId", "TagsId")
@@ -190,12 +255,10 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Entities.Login", b =>
                 {
-                    b.HasOne("Api.Entities.User", null)
+                    b.HasOne("Api.Entities.Vault", null)
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_logins_users_user_id");
+                        .HasForeignKey("VaultId")
+                        .HasConstraintName("fk_logins_vaults_vault_id");
                 });
 
             modelBuilder.Entity("Api.Entities.RefreshToken", b =>
@@ -206,6 +269,16 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_refresh_tokens_users_user_id");
+                });
+
+            modelBuilder.Entity("Api.Entities.Vault", b =>
+                {
+                    b.HasOne("Api.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_vaults_users_user_id");
                 });
 
             modelBuilder.Entity("LoginTag", b =>

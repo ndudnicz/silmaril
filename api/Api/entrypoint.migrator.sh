@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Using connection string: $ConnectionStrings__MySql"
+echo "Using connection string: $ConnectionStrings__PostgreSql"
 set -e
 dotnet-ef database update -p Api.csproj -s Api.csproj
 if [ $? -ne 0 ]; then

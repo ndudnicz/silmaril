@@ -17,8 +17,8 @@
 ## ⚙️ Stack
 
 - Front: Angular 21 / Tailwindcss
-- Api: .net 8 / EF core
-- Database: MariaDB
+- Api: .net 10 / EF core
+- Database: PostgreSQL
 
 ---
 
@@ -37,7 +37,7 @@ docker-compose up --build
 # requirement : docker
 ./api/Api/Database/create.sh
 ./api/Api/Database/run.sh
-# mysql -h 127.0.0.1 -P 3307 -uroot -proot
+# psql "host=localhost port=5432 user=userpg password=root"
 
 # front
 cd front
@@ -46,11 +46,12 @@ pnpm start
 # running on http://localhost:4200
 
 # api
-cd api/Api
+cd api
 export Jwt__SecretKeyBase64='your-jwt-secret-key-base64' # requires a 256 bits key length
 export Jwt__ValidIssuer='valid-issuer'
 export Jwt__ValidAudience='valid-audience'
-dotnet ef database update
+dotnet ef database update -p Api/Api.csproj -s Api/Api.csproj
+cd Api
 dotnet run
 # running on http://localhost:5000
 ```

@@ -1,20 +1,24 @@
 using Api.Entities;
-using Api.Helpers;
-using Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Extensions;
 
 public static class ModelBuilderExtensions
 {
+    private static readonly Guid SetupUserId = new("e2d7412c-47c3-0504-b436-9c5fe26b70d8");
+    private static readonly DateTime SetupUserCreated = new(2026, 5, 1, 5, 38, 45, 749, DateTimeKind.Utc);
+    private static readonly byte[] SetupUserSalt = [159, 130, 1, 64, 74, 85, 128, 6, 110, 137, 172, 44, 5, 55, 92, 142];
+    private static readonly Guid SetupVaultId = new("e8a91207-f378-4ab8-86e3-17c7474f2c5c");
+    private static readonly DateTime SetupVaultCreated = new(2026, 5, 1, 5, 38, 45, 752, DateTimeKind.Utc);
+
     private static readonly User SetupUser = new User
     {
-        Id = CryptoHelper.GenerateSecureGuid(),
-        Created = DateTime.UtcNow,
+        Id = SetupUserId,
+        Created = SetupUserCreated.AddTicks(9730),
         // {Username: "q", Password "q"}
         UsernameHash = "2E96772232487FB3A058D58F2C310023E07E4017C94D56CC5FAE4B54B44605F42A75B0B1F358991F8C6CBE9B68B64E5B2A09D0AD23FCAC07EE9A9198A745E1D5",
         PasswordHash = "$argon2id$v=19$m=16,t=2,p=1$ZEp5eWdQeDBXeGk2OWh6Qw$/sfpIugCYAcUqDG3xmx/2g",
-        Salt = CryptoHelper.GenerateRandomByte(UserService.UserSaltLengthInBytes)
+        Salt = SetupUserSalt
     };
 
     public static void SetupUserEntity(this ModelBuilder modelBuilder)
@@ -22,7 +26,7 @@ public static class ModelBuilderExtensions
         modelBuilder.Entity<User>(entity =>
         {
             entity.Property(e => e.Salt)
-                .HasColumnType("binary(16)")
+                .HasColumnType("bytea")
                 .IsRequired();
             entity.HasData(new List<User> { SetupUser });
         });
@@ -40,9 +44,9 @@ public static class ModelBuilderExtensions
         modelBuilder.Entity<Login>(entity =>
         {
             entity.Property(l => l.EncryptedData)
-                .HasColumnType("Blob");
+                .HasColumnType("bytea");
             entity.Property(l => l.InitializationVector)
-                .HasColumnType("TinyBlob");
+                .HasColumnType("bytea");
         });
         modelBuilder.Entity<Login>()
             .HasMany(e => e.Tags)
@@ -59,10 +63,10 @@ public static class ModelBuilderExtensions
         {
             entity.HasData(new Vault
             {
-                Id = Guid.NewGuid(),
+                Id = SetupVaultId,
                 UserId = SetupUser.Id,
                 Name = "Default Vault",
-                Created = DateTime.UtcNow
+                Created = SetupVaultCreated.AddTicks(3380)
             });
         });
     }

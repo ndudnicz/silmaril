@@ -13,18 +13,17 @@ services:
       migrator:
         condition: service_completed_successfully
     environment:
-      - ConnectionStrings__MySql=Server=db;Port=3306;Database=silmaril;User ID=dev;Password=dev;
+      - ConnectionStrings__PostgreSql=Host=db;Port=5432;Database=silmaril;Username=userpg;Password=root;
   db:
-    image: mariadb:latest
+    image: postgres:18.3
     environment:
-      - MARIADB_DATABASE=silmaril
-      - MARIADB_USER=dev
-      - MARIADB_PASSWORD=dev
-      - MARIADB_ROOT_PASSWORD=root
+      - POSTGRES_DB=silmaril
+      - POSTGRES_USER=userpg
+      - POSTGRES_PASSWORD=root
     ports:
-      - 3306:3306
+      - 5431:5432
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U userpg -d silmaril || exit 1"]
       start_period: 10s
       interval: 10s
       timeout: 5s
@@ -38,4 +37,4 @@ services:
       db:
         condition: service_healthy
     environment:
-      - ConnectionStrings__MySql=Server=db;Port=3306;Database=silmaril;User ID=dev;Password=dev;
+      - ConnectionStrings__PostgreSql=Host=db;Port=5432;Database=silmaril;Username=userpg;Password=root;

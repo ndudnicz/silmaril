@@ -1,1 +1,1 @@
-docker start db_maria
+docker start psql

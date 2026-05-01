@@ -4,7 +4,7 @@ namespace Api.Configuration;
 
 public static class ConfigurationParser
 {
-    public static (JwtConfiguration, MySqlConfiguration, CsrfConfiguration) Parse(ConfigurationManager configuration)
+    public static (JwtConfiguration, PostgreSqlConfiguration, CsrfConfiguration) Parse(ConfigurationManager configuration)
     {
         var jwtSecretKeyBae64 = configuration["Jwt:SecretKeyBase64"];
         if (string.IsNullOrEmpty(jwtSecretKeyBae64))
@@ -29,10 +29,10 @@ public static class ConfigurationParser
 ");
             Console.ResetColor();
         }
-        var mysqlConfiguration = new MySqlConfiguration
+        var postgreSqlConfiguration = new PostgreSqlConfiguration
         {
-            ConnectionString = configuration["ConnectionStrings:MySql"] ??
-                               throw new InvalidOperationException("MySql:ConnectionString is not defined in the configuration.")
+            ConnectionString = configuration["ConnectionStrings:PostgreSql"] ??
+                               throw new InvalidOperationException("ConnectionStrings:PostgreSql is not defined in the configuration.")
         };
         var jwtSecretKey = CryptoHelper.DecodeBase64(jwtSecretKeyBae64!);
         var accessTokenExpirationMinutes = int.Parse(configuration["Jwt:AccessTokenExpirationMinutes"] ?? "");
@@ -52,6 +52,6 @@ public static class ConfigurationParser
             CookieName = configuration["Csrf:CookieName"] ?? throw new InvalidOperationException("Csrf:CookieName is not defined in the configuration."),
             HeaderName = configuration["Csrf:HeaderName"] ?? throw new InvalidOperationException("Csrf:HeaderName is not defined in the configuration."),
         };
-        return (jwtConfiguration, mysqlConfiguration, csrfConfiguration);
+        return (jwtConfiguration, postgreSqlConfiguration, csrfConfiguration);
     }
 }

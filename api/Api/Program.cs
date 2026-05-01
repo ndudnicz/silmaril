@@ -7,10 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 // Add services to the container.
-var (jwtConfiguration, mysqlConfiguration, csrfConfiguration) = ConfigurationParser.Parse(configuration);
+var (jwtConfiguration, postgreSqlConfiguration, csrfConfiguration) = ConfigurationParser.Parse(configuration);
 builder.Services.AddSingleton<CsrfConfiguration>(_ => csrfConfiguration);
 builder.Services.AddSingleton<JwtConfiguration>(_ => jwtConfiguration);
-builder.Services.AddContexts(mysqlConfiguration);
+builder.Services.AddContexts(postgreSqlConfiguration);
 builder.Services.AddJwtAuthentication(jwtConfiguration);
 builder.Services.AddRepositories();
 builder.Services.AddServices();

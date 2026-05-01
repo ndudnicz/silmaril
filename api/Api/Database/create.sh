@@ -1,1 +1,1 @@
-docker create -p 3307:3306 -e MARIADB_ROOT_PASSWORD=root --name db_maria mariadb:latest
+docker create --name psql -e POSTGRES_PASSWORD=root -e POSTGRES_USER=userpg -e POSTGRES_DB=silmaril -p 5432:5432 postgres:18.3

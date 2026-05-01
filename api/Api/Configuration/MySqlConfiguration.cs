@@ -1,6 +1,6 @@
 namespace Api.Configuration;
 
-public struct MySqlConfiguration
+public struct PostgreSqlConfiguration
 {
     public string ConnectionString { get; init; }
 }
