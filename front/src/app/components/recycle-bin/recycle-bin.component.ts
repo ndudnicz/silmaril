@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { BaseComponent } from '../base-component/base-component.component';
 import { Credential } from '../../entities/credential';
-import { from, Observable, switchMap, take } from 'rxjs';
+import { Observable, switchMap, take } from 'rxjs';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -57,7 +57,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     this.getDecryptedCredentials$()
       .pipe(take(1))
       .subscribe({
-        next: async (credentials: Credential[]) => {
+        next: (credentials: Credential[]) => {
           console.log('Credentials fetched successfully:', credentials);
           this.allDeletedCredentials.set(credentials.filter((credential) => credential.deleted));
           this.stopLoading();
@@ -74,7 +74,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
       take(1),
       switchMap((credentials) => {
         console.log('Credentials fetched from service:', credentials);
-        return from(this.vaultService.decryptAllCredentialsAsync(credentials));
+        return this.vaultService.decryptAllCredentials$(credentials);
       }),
     );
   }
@@ -89,7 +89,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   }
 
   restoreSelectedCredentials(): void {
-    console.log(this.vaults());
+    console.log('Attempting to restore selected credentials:', this.selected());
 
     const orphanedCredentials = this.selected().filter(
       (login) => !this.vaults().some((vault) => vault.id === login.vaultId),
@@ -102,8 +102,6 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   }
 
   openRestoreOrphanedCredentialsModal(orphanedCredentials: Credential[]): void {
-    console.log(this.vaults());
-
     this.dialogService
       .open(RestoreCredentialsModalComponent, {
         header: 'Restore orphaned credentials',
@@ -124,12 +122,14 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   }
 
   openConfirmRestoreCredentialsModal(): void {
+    console.log('restoring ', this.selected());
+
     this.dialogService
       .open(ConfirmModalComponent, {
         header: 'Confirm restore credentials',
         closable: false,
         data: {
-          message: `Are you sure you want to restore ${this.selected.length} credentials?`,
+          message: `Are you sure you want to restore ${this.selected().length} credentials?`,
           confirmText: 'Restore',
           cancelText: 'Cancel',
         },

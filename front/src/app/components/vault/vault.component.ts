@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BaseComponent } from '../base-component/base-component.component';
-import { from, Observable, Subscription, switchMap, take } from 'rxjs';
+import { catchError, Observable, Subscription, switchMap, take, tap } from 'rxjs';
 import { Vault } from '../../entities/vault';
 import { truncateString } from '../../utils/string.utils';
 import { CardStacksComponent } from '../card-stacks/card-stacks.component';
@@ -140,7 +140,7 @@ export class VaultComponent extends BaseComponent implements OnInit {
     this.getDecryptedCredentials$()
       .pipe(take(1))
       .subscribe({
-        next: async (credentials: Credential[]) => {
+        next: (credentials: Credential[]) => {
           console.log('Credentials fetched successfully:', credentials);
           this.allCredentials.set(credentials);
           this.stopLoading();
@@ -157,7 +157,7 @@ export class VaultComponent extends BaseComponent implements OnInit {
       take(1),
       switchMap((credentials) => {
         console.log('Credentials fetched from service:', credentials);
-        return from(this.vaultService.decryptAllCredentialsAsync(credentials));
+        return this.vaultService.decryptAllCredentials$(credentials);
       }),
     );
   }
@@ -177,7 +177,7 @@ export class VaultComponent extends BaseComponent implements OnInit {
         },
       })
       ?.onClose.pipe(take(1))
-      .subscribe(async (result: Credential) => {
+      .subscribe((result: Credential) => {
         if (result) {
           this.allCredentials.update((credentials) => [...credentials, result]);
         }
@@ -193,29 +193,38 @@ export class VaultComponent extends BaseComponent implements OnInit {
         height: 'auto',
       })
       ?.onClose.pipe(take(1))
-      .subscribe(async (newMasterPassword: string) => {
+      .subscribe((newMasterPassword: string) => {
         if (newMasterPassword != null) {
-          await this.changeMasterPassword(newMasterPassword);
+          this.changeMasterPassword(newMasterPassword);
         }
       });
   }
 
-  private async changeMasterPassword(newMasterPassword: string) {
+  private changeMasterPassword(newMasterPassword: string) {
     this.startLoading();
-    const deletedCredentials = await this.getDeletedCredentialsAsync();
     this.vaultService.clearKey();
-    await this.vaultService.setKeyAsync(newMasterPassword);
-    this.allCredentials.set(
-      await this.vaultService.encryptAllCredentialsAsync([
-        ...this.allCredentials(),
-        ...deletedCredentials,
-      ]),
-    );
-    this.credentialService
-      .updateCredentials$(this.allCredentials().map((l) => UpdateCredentialDto.fromCredential(l)))
-      .pipe(take(1))
+    this.vaultService
+      .setKey$(newMasterPassword)
+      .pipe(
+        take(1),
+        switchMap(() => this.vaultService.encryptAllCredentials$(this.allCredentials())),
+        tap((encryptedCredentials) => {
+          this.allCredentials.set(encryptedCredentials);
+        }),
+        switchMap((encryptedCredentials) =>
+          this.credentialService.updateCredentials$(
+            encryptedCredentials.map((l) => UpdateCredentialDto.fromCredential(l)),
+          ),
+        ),
+        catchError((error) => {
+          console.error('Error while changing master password', error);
+          this.displayError('Error while changing master password', error);
+          this.stopLoading();
+          return [];
+        }),
+      )
       .subscribe({
-        next: async (updatedCredentials: Credential[]) => {
+        next: (updatedCredentials: Credential[]) => {
           this.onUpdateCredentialsSuccess(updatedCredentials);
         },
         error: (error: unknown) => {
@@ -225,35 +234,30 @@ export class VaultComponent extends BaseComponent implements OnInit {
       });
   }
 
-  private async getDeletedCredentialsAsync(): Promise<Credential[]> {
-    return new Promise<Credential[]>((resolve, reject) => {
-      this.startLoading();
-      this.credentialService
-        .getDeletedCredentials$()
-        .pipe(
-          take(1),
-          switchMap((deletedCredentials) =>
-            from(this.vaultService.decryptAllCredentialsAsync(deletedCredentials)),
-          ),
-        )
-        .subscribe({
-          next: (deletedCredentials: Credential[]) => {
-            this.stopLoading();
-            resolve(deletedCredentials);
-          },
-          error: (error: unknown) => {
-            this.stopLoading();
-            reject(error);
-          },
-        });
-    });
+  getDeletedCredentials$(): Observable<Credential[]> {
+    return this.credentialService.getDeletedCredentials$().pipe(
+      take(1),
+      switchMap((deletedCredentials) =>
+        this.vaultService.decryptAllCredentials$(deletedCredentials),
+      ),
+    );
   }
 
-  private async onUpdateCredentialsSuccess(updatedCredentials: Credential[]) {
-    updatedCredentials = await this.vaultService.decryptAllCredentialsAsync(updatedCredentials);
-    this.allCredentials.set(updatedCredentials);
-    this.stopLoading();
-    ToastWrapper.success('Master password changed successfully');
+  private onUpdateCredentialsSuccess(updatedCredentials: Credential[]) {
+    this.vaultService
+      .decryptAllCredentials$(updatedCredentials)
+      .pipe(take(1))
+      .subscribe({
+        next: (decryptedCredentials: Credential[]) => {
+          this.allCredentials.set(decryptedCredentials);
+          this.stopLoading();
+          ToastWrapper.success('Master password changed successfully');
+        },
+        error: (error: unknown) => {
+          this.displayError('Error while decrypting credentials', error);
+          this.stopLoading();
+        },
+      });
   }
 
   clearSearch() {
@@ -392,7 +396,7 @@ export class VaultComponent extends BaseComponent implements OnInit {
         },
       })
       ?.onClose.pipe(take(1))
-      .subscribe(async (confirmed: boolean) => {
+      .subscribe((confirmed: boolean) => {
         if (confirmed) {
           this.onSignoutConfirmed();
         }

@@ -179,7 +179,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent implemen
           },
         })
         ?.onClose.pipe(take(1))
-        .subscribe(async (confirmed: boolean) => {
+        .subscribe((confirmed: boolean) => {
           if (!confirmed) {
             return;
           }
@@ -219,8 +219,9 @@ export class AddEditCredentialModalComponent extends BaseModalComponent implemen
     return this.credentialService
       .createCredential$(createCredentialDto)
       .pipe(
+        take(1),
         switchMap((createdCredential: Credential) =>
-          from(this.vaultService.decryptCredentialDataAsync(createdCredential)),
+          this.vaultService.decryptCredentialData$(createdCredential)
         ),
       );
   }
@@ -236,7 +237,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent implemen
     return this.credentialService.updateCredential$(updateCredentialDto).pipe(
       take(1),
       switchMap((updatedCredential: Credential) =>
-        from(this.vaultService.decryptCredentialDataAsync(updatedCredential)),
+        from(this.vaultService.decryptCredentialData$(updatedCredential)),
       ),
     );
   }

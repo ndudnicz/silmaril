@@ -4,7 +4,7 @@ import { Credential } from '../entities/credential';
 import { Vault } from '../entities/vault';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable, switchMap, take, throwError } from 'rxjs';
+import { catchError, from, map, Observable, switchMap, take, tap, throwError, toArray } from 'rxjs';
 import { CreateVaultDto } from '../entities/create/create-vault-dto';
 import { DecryptedData } from '../entities/decrypted-data';
 import { UpdateVaultDto } from '../entities/update/update-vault-dto';
@@ -30,30 +30,6 @@ export class VaultService {
   public clearSalt(): void {
     console.log('Clearing salt');
     localStorage.removeItem(this.SALT_KEY_NAME);
-  }
-
-  public async setKeyAsync(masterPassword: string): Promise<void> {
-    const storedSaltBase64 = localStorage.getItem(this.SALT_KEY_NAME);
-    console.log(`Stored salt base64: ${storedSaltBase64}`, typeof storedSaltBase64);
-
-    if (!storedSaltBase64) {
-      const errorMessage = 'Salt not set. Please set the salt before setting the master password.';
-      throw new Error(errorMessage);
-    }
-    try {
-      console.log(`Setting key with salt b64: ${storedSaltBase64}`);
-      const saltUint8Array = base64ToUint8Array(storedSaltBase64);
-      console.log(`Salt Uint8Array: ${saltUint8Array}`);
-      this.key = await CryptoUtilsV1.deriveKeyFromPasswordAsync(masterPassword, saltUint8Array);
-      const exportedKey = await CryptoUtilsV1.exportKeyAsync(this.key);
-      console.log(`Key set successfully. Exported key: ${exportedKey}`);
-    } catch (error) {
-      console.log(error);
-      throw new Error(
-        'Failed to set the key:' + (error instanceof Error ? error.message : 'Unknown error'),
-        { cause: error },
-      );
-    }
   }
 
   public setKey$(masterPassword: string): Observable<ArrayBuffer> {
@@ -95,95 +71,113 @@ export class VaultService {
     this.key = null;
   }
 
-  async encryptCredentialDataAsync(credential: Credential): Promise<Credential> {
-    return new Promise<Credential>(async (resolve, reject) => {
-      try {
-        if (!this.key) {
-          throw new Error('Vault is not unlocked. Please set the master password.');
-        }
-        console.log('Encrypting login data:', credential);
-        const encryptedData = await CryptoUtilsV1.encryptDataAsync(
-          this.key,
-          credential.decryptedData!.toString(),
-        );
+  encryptCredentialData$(credential: Credential): Observable<Credential> {
+    if (!this.key) {
+      return throwError(
+        () => new Error('Vault is locked. Please set the master password.'),
+      );
+    }
+    console.log('Encrypting credential data:', credential);
+    return CryptoUtilsV1.encryptData$(this.key, credential.decryptedData!.toString()).pipe(
+      take(1),
+      map((encryptionResult) => {
         console.log(
           'Encrypted data:',
           credential.initializationVector,
-          encryptedData.initializationVector,
+          encryptionResult.initializationVector,
         );
-        credential.encryptedData = encryptedData.ciphertext;
-        credential.initializationVector = encryptedData.initializationVector;
-        credential.encryptionVersion = encryptedData.encryptionVersion;
+        credential.encryptedData = encryptionResult.ciphertext;
+        credential.initializationVector = encryptionResult.initializationVector;
+        credential.encryptionVersion = encryptionResult.encryptionVersion;
         console.log(
           'Encrypted data:',
           credential.initializationVector,
-          encryptedData.initializationVector,
+          encryptionResult.initializationVector,
         );
-        return resolve(credential);
-      } catch (error: unknown) {
-        console.error('Error encrypting login data:', error);
-        reject(
-          new Error(
-            'Error encrypting login data:' +
-              (error instanceof Error ? error.message : 'Unknown error during encryption'),
-          ),
+        return credential;
+      }),
+      catchError((error) => {
+        console.error('Error encrypting credential data:', error);
+        return throwError(
+          () =>
+            new Error(
+              'Error encrypting credential data:' +
+                (error instanceof Error ? error.message : 'Unknown error during encryption'),
+            ),
         );
-      }
-    });
+      }),
+    );
   }
 
-  async encryptAllCredentialsAsync(credentials: Credential[]): Promise<Credential[]> {
-    return new Promise<Credential[]>(async (resolve, reject) => {
-      try {
-        if (!this.key) {
-          throw new Error('Vault is not unlocked. Please set the master password.');
-        }
-        const encryptedCredentials = await Promise.all(
-          credentials.map(this.encryptCredentialDataAsync.bind(this)),
+  encryptAllCredentials$(credentials: Credential[]): Observable<Credential[]> {
+    if (!this.key) {
+      return throwError(
+        () => new Error('Vault is locked. Please set the master password.'),
+      );
+    }
+    return from(credentials).pipe(
+      switchMap((credential) => this.encryptCredentialData$(credential)),
+      toArray(),
+      catchError((error) => {
+        console.error('Error encrypting credentials:', error);
+        return throwError(
+          () =>
+            new Error(
+              'Error encrypting credentials:' +
+                (error instanceof Error ? error.message : 'Unknown error during encryption'),
+            ),
         );
-        console.log('All credentials encrypted successfully');
-        resolve(encryptedCredentials);
-      } catch (error: unknown) {
-        reject(error);
-      }
-    });
+      }),
+    );
   }
 
-  async decryptCredentialDataAsync(credential: Credential): Promise<Credential> {
-    return new Promise<Credential>(async (resolve, reject) => {
-      try {
-        if (!this.key) {
-          throw new Error('Vault is not unlocked. Please set the master password.');
-        }
-        const decryptDataString = await CryptoUtilsV1.decryptDataAsync(
-          this.key,
-          credential.encryptedData!,
-          credential.initializationVector!,
-        );
-        credential.decryptedData = DecryptedData.fromString(decryptDataString);
+  decryptCredentialData$(credential: Credential): Observable<Credential> {
+    if (!this.key) {
+      return throwError(
+        () => new Error('Vault is locked. Please set the master password.'),
+      );
+    }
+    return CryptoUtilsV1.decryptData$(this.key, credential.encryptedData!, credential.initializationVector!).pipe(
+      take(1),
+      map((decryptedDataString) => {
+        credential.decryptedData = DecryptedData.fromString(decryptedDataString);
         console.log('Credential data decrypted successfully:', credential.decryptedData.toString());
-        resolve(credential);
-      } catch (error: unknown) {
-        reject(error);
-      }
-    });
+        return credential;
+      }),
+      catchError((error) => {
+        console.error('Error decrypting credential data:', error);
+        return throwError(
+          () =>
+            new Error(
+              'Error decrypting credential data:' +
+                (error instanceof Error ? error.message : 'Unknown error during decryption'),
+            ),
+        );
+      }),
+    );
   }
 
-  async decryptAllCredentialsAsync(logins: Credential[]): Promise<Credential[]> {
-    return new Promise<Credential[]>(async (resolve, reject) => {
-      try {
-        if (!this.key) {
-          throw new Error('Vault is not unlocked. Please set the master password.');
-        }
-        const decryptedLogins = await Promise.all(
-          logins.map(this.decryptCredentialDataAsync.bind(this)),
+  decryptAllCredentials$(credentials: Credential[]): Observable<Credential[]> {
+    if (!this.key) {
+      return throwError(
+        () => new Error('Vault is locked. Please set the master password.'),
+      );
+    }
+    return from(credentials).pipe(
+      switchMap((credential) => this.decryptCredentialData$(credential)),
+      toArray(),
+            tap((credentials) => console.log('All credentials decrypted successfully', credentials)),
+      catchError((error) => {
+        console.error('Error decrypting credentials:', error);
+        return throwError(
+          () =>
+            new Error(
+              'Error decrypting credentials:' +
+                (error instanceof Error ? error.message : 'Unknown error during decryption'),
+            ),
         );
-        console.log('All logins decrypted successfully');
-        resolve(decryptedLogins);
-      } catch (error: unknown) {
-        reject(error);
-      }
-    });
+      }),
+    );
   }
 
   public getVaults$(): Observable<Vault[]> {

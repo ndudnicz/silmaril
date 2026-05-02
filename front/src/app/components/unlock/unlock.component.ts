@@ -9,6 +9,8 @@ import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
+import { ToastWrapper } from '../../utils/toast.wrapper';
+import { take } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -39,19 +41,21 @@ export class UnlockComponent extends BaseComponent implements OnInit {
   }
 
   async onSubmit() {
-    try {
-      this.startLoading();
-      console.log('Form submitted:', this.form.value);
-      await this.vaultService.setKeyAsync(this.masterPasswordFormControl.value!);
-      // this.loadVaults();
-
-      this.stopLoading();
-      this.router.navigate(['/vault']);
-    } catch (error: unknown) {
-      this.displayError('Failed to unlock vault', error);
-    } finally {
-      this.stopLoading();
-    }
+    this.startLoading();
+    this.vaultService
+      .setKey$(this.masterPasswordFormControl.value!)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          ToastWrapper.success('Vault unlocked successfully');
+          this.stopLoading();
+          this.router.navigate(['/vault']);
+        },
+        error: (error: unknown) => {
+          this.displayError('Failed to unlock vault', error);
+          this.stopLoading();
+        },
+      });
   }
 
   keypress(event: KeyboardEvent) {
