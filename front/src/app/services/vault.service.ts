@@ -4,7 +4,18 @@ import { Credential } from '../entities/credential';
 import { Vault } from '../entities/vault';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { catchError, from, map, Observable, switchMap, take, tap, throwError, toArray } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  from,
+  map,
+  Observable,
+  switchMap,
+  take,
+  tap,
+  throwError,
+  toArray,
+} from 'rxjs';
 import { CreateVaultDto } from '../entities/create/create-vault-dto';
 import { DecryptedData } from '../entities/decrypted-data';
 import { UpdateVaultDto } from '../entities/update/update-vault-dto';
@@ -73,9 +84,7 @@ export class VaultService {
 
   encryptCredentialData$(credential: Credential): Observable<Credential> {
     if (!this.key) {
-      return throwError(
-        () => new Error('Vault is locked. Please set the master password.'),
-      );
+      return throwError(() => new Error('Vault is locked. Please set the master password.'));
     }
     console.log('Encrypting credential data:', credential);
     return CryptoUtilsV1.encryptData$(this.key, credential.decryptedData!.toString()).pipe(
@@ -111,9 +120,7 @@ export class VaultService {
 
   encryptAllCredentials$(credentials: Credential[]): Observable<Credential[]> {
     if (!this.key) {
-      return throwError(
-        () => new Error('Vault is locked. Please set the master password.'),
-      );
+      return throwError(() => new Error('Vault is locked. Please set the master password.'));
     }
     return from(credentials).pipe(
       switchMap((credential) => this.encryptCredentialData$(credential)),
@@ -133,11 +140,13 @@ export class VaultService {
 
   decryptCredentialData$(credential: Credential): Observable<Credential> {
     if (!this.key) {
-      return throwError(
-        () => new Error('Vault is locked. Please set the master password.'),
-      );
+      return throwError(() => new Error('Vault is locked. Please set the master password.'));
     }
-    return CryptoUtilsV1.decryptData$(this.key, credential.encryptedData!, credential.initializationVector!).pipe(
+    return CryptoUtilsV1.decryptData$(
+      this.key,
+      credential.encryptedData!,
+      credential.initializationVector!,
+    ).pipe(
       take(1),
       map((decryptedDataString) => {
         credential.decryptedData = DecryptedData.fromString(decryptedDataString);
@@ -159,14 +168,12 @@ export class VaultService {
 
   decryptAllCredentials$(credentials: Credential[]): Observable<Credential[]> {
     if (!this.key) {
-      return throwError(
-        () => new Error('Vault is locked. Please set the master password.'),
-      );
+      return throwError(() => new Error('Vault is locked. Please set the master password.'));
     }
     return from(credentials).pipe(
-      switchMap((credential) => this.decryptCredentialData$(credential)),
+      concatMap((credential) => this.decryptCredentialData$(credential)),
       toArray(),
-            tap((credentials) => console.log('All credentials decrypted successfully', credentials)),
+      tap((credentials) => console.log('All credentials decrypted successfully', credentials)),
       catchError((error) => {
         console.error('Error decrypting credentials:', error);
         return throwError(

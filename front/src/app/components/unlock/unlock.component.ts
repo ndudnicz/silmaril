@@ -40,7 +40,7 @@ export class UnlockComponent extends BaseComponent implements OnInit {
     }
   }
 
-  async onSubmit() {
+  onSubmit() {
     this.startLoading();
     this.vaultService
       .setKey$(this.masterPasswordFormControl.value!)
@@ -65,36 +65,4 @@ export class UnlockComponent extends BaseComponent implements OnInit {
       this.onSubmit();
     }
   }
-
-  // loadVaults(): void {
-  //   this.vaultService
-  //     .getVaults$()
-  //     .pipe(take(1))
-  //     .subscribe({
-  //       next: (vaults: Vault[]) => {
-  //         this.onVaultsLoaded(vaults);
-  //       },
-  //       error: (error: unknown) => {
-  //         this.displayError('Error fetching vaults', error);
-  //         this.stopLoading();
-  //       },
-  //       complete: () => {
-  //         console.log('Vaults fetched successfully');
-  //         this.stopLoading();
-  //       },
-  //     });
-  // }
-
-  // onVaultsLoaded(vaults: Vault[]): void {
-  //   console.log('Vaults fetched successfully:', vaults);
-  //   // this.dataService.setVaults(vaults);
-  //   if (vaults.length === 0) {
-  //     this.displayError('No vaults found. Please create a vault first.', null);
-  //     return;
-  //   } else {
-  //     ToastWrapper.success('Vault unlocked successfully');
-  //     this.stopLoading();
-  //     this.router.navigate(['/vault']);
-  //   }
-  // }
 }

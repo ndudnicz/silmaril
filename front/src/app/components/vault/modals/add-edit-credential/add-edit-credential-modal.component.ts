@@ -93,18 +93,6 @@ export class AddEditCredentialModalComponent extends BaseModalComponent implemen
 
   constructor() {
     super();
-    // if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.EDIT && !this.credential) {
-    //   const msg = 'Edit mode requires a credential object';
-    //   console.error(msg);
-    //   ToastWrapper.error(msg, null);
-    //   throw new Error(msg);
-    // }
-    // if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.ADD && this.credential) {
-    //   const msg = 'Add mode should not have a credential object';
-    //   console.error(msg);
-    //   ToastWrapper.error(msg, null);
-    //   throw new Error(msg);
-    // }
     if (
       this.mode !== AddEditCredentialModalComponent.MODAL_MOD.ADD &&
       this.mode !== AddEditCredentialModalComponent.MODAL_MOD.EDIT
@@ -146,60 +134,79 @@ export class AddEditCredentialModalComponent extends BaseModalComponent implemen
       url: this.urlFormControl.value || '',
       notes: this.notesFormControl.value || '',
     });
-    const encryptionResult = await CryptoUtilsV1.encryptDataAsync(
-      this.vaultService.getKey(),
-      decryptedData.toString(),
-    );
+    CryptoUtilsV1.encryptData$(this.vaultService.getKey()!, decryptedData.toString())
+      .pipe(take(1))
+      .subscribe({
+        next: (encryptionResult) => {
+          console.log('Encryption successful:', encryptionResult);
+          this.handleCredentialSave(encryptionResult);
+        },
+        error: (error) => {
+          console.error('Encryption failed:', error);
+          this.displayError('Error encrypting credential data', error);
+        },
+      });
+  }
+
+  private handleCredentialSave(encryptionResult: EncryptionResult) {
     if (this.mode === AddEditCredentialModalComponent.MODAL_MOD.ADD) {
-      this.startLoading();
-      this.createCredential$(encryptionResult)
-        .pipe(take(1))
-        .subscribe({
-          next: (credential: Credential) => {
-            console.log('Credential created successfully:', credential);
-            this.stopLoading();
-            this.closeDialog(credential);
-          },
-          error: (error: unknown) => {
-            this.displayError('Error creating credential', error);
-            this.stopLoading();
-          },
-        });
+      this.handleCreate(encryptionResult);
     } else {
-      this.dialogService
-        .open(ConfirmModalComponent, {
-          header: `Edit Credential ${this.credential?.decryptedData?.title}`,
-          closable: false,
-          width: 'auto',
-          height: 'auto',
-          data: {
-            message: `Are you sure you want to edit the credential "${this.credential?.decryptedData?.title}"?`,
-            confirmText: 'Confirm',
-            cancelText: 'Cancel',
-          },
-        })
-        ?.onClose.pipe(take(1))
-        .subscribe((confirmed: boolean) => {
-          if (!confirmed) {
-            return;
-          }
-          this.startLoading();
-          this.editCredential$(encryptionResult)
-            .pipe(take(1))
-            .subscribe({
-              next: (updatedCredential: Credential) => {
-                console.log('Credential updated successfully:', updatedCredential);
-                ToastWrapper.success('Credential updated successfully');
-                this.stopLoading();
-                this.closeDialog(updatedCredential);
-              },
-              error: (error: unknown) => {
-                this.displayError('Error updating credential', error);
-                this.stopLoading();
-              },
-            });
-        });
+      this.handleUpdate(encryptionResult);
     }
+  }
+
+  private handleCreate(encryptionResult: EncryptionResult) {
+    this.startLoading();
+    this.createCredential$(encryptionResult)
+      .pipe(take(1))
+      .subscribe({
+        next: (credential: Credential) => {
+          console.log('Credential created successfully:', credential);
+          this.stopLoading();
+          this.closeDialog(credential);
+        },
+        error: (error: unknown) => {
+          this.displayError('Error creating credential', error);
+          this.stopLoading();
+        },
+      });
+  }
+
+  private handleUpdate(encryptionResult: EncryptionResult) {
+    this.dialogService
+      .open(ConfirmModalComponent, {
+        header: `Edit Credential ${this.credential?.decryptedData?.title}`,
+        closable: false,
+        width: 'auto',
+        height: 'auto',
+        data: {
+          message: `Are you sure you want to edit the credential "${this.credential?.decryptedData?.title}"?`,
+          confirmText: 'Confirm',
+          cancelText: 'Cancel',
+        },
+      })
+      ?.onClose.pipe(take(1))
+      .subscribe((confirmed: boolean) => {
+        if (!confirmed) {
+          return;
+        }
+        this.startLoading();
+        this.editCredential$(encryptionResult)
+          .pipe(take(1))
+          .subscribe({
+            next: (updatedCredential: Credential) => {
+              console.log('Credential updated successfully:', updatedCredential);
+              ToastWrapper.success('Credential updated successfully');
+              this.stopLoading();
+              this.closeDialog(updatedCredential);
+            },
+            error: (error: unknown) => {
+              this.displayError('Error updating credential', error);
+              this.stopLoading();
+            },
+          });
+      });
   }
 
   noteChanged() {
@@ -207,7 +214,7 @@ export class AddEditCredentialModalComponent extends BaseModalComponent implemen
     this.notesCharacterCount.set(notesValue.length);
   }
 
-  createCredential$(encryptionResult: EncryptionResult): Observable<Credential> {
+  private createCredential$(encryptionResult: EncryptionResult): Observable<Credential> {
     const createCredentialDto: CreateCredentialDto = {
       vaultId: this.vaultId,
       encryptedDataBase64: uint8ArrayToBase64(encryptionResult.ciphertext),
@@ -216,17 +223,15 @@ export class AddEditCredentialModalComponent extends BaseModalComponent implemen
       tagNames: [],
     };
 
-    return this.credentialService
-      .createCredential$(createCredentialDto)
-      .pipe(
-        take(1),
-        switchMap((createdCredential: Credential) =>
-          this.vaultService.decryptCredentialData$(createdCredential)
-        ),
-      );
+    return this.credentialService.createCredential$(createCredentialDto).pipe(
+      take(1),
+      switchMap((createdCredential: Credential) =>
+        this.vaultService.decryptCredentialData$(createdCredential),
+      ),
+    );
   }
 
-  editCredential$(encryptionResult: EncryptionResult): Observable<Credential> {
+  private editCredential$(encryptionResult: EncryptionResult): Observable<Credential> {
     this.credential!.encryptedData = encryptionResult.ciphertext;
     this.credential!.initializationVector = encryptionResult.initializationVector;
     this.credential!.encryptionVersion = encryptionResult.encryptionVersion;
