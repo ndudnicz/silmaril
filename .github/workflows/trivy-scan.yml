@@ -2,8 +2,11 @@ name: Trivy Scan
 
 on:
   push:
-    branches:
-      - trivy
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+  schedule:
+    - cron: "42 8 * * *"
 
 jobs:
   trivy-scan:
