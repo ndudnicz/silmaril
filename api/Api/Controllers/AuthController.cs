@@ -31,7 +31,8 @@ public class AuthController(
                 SameSite = SameSiteMode.Lax,
                 Expires = authResponse.RefreshTokenExpiration
             });
-            logger.LogInformation("User {Username} authenticated successfully", authDto.Username);
+            logger.LogInformation("User {Username} authenticated successfully",
+                authDto.Username.Replace(Environment.NewLine, ""));
             return Ok(authResponse);
         }
         catch (AntiforgeryValidationException)

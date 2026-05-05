@@ -10,6 +10,7 @@ import { DividerModule } from 'primeng/divider';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
+import { secureMathRandom } from '../../../../utils/crypto.utils';
 
 interface PasswordOptions {
   minLength?: number;
@@ -81,9 +82,6 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
     [PasswordStrength.GOOD]: '#60b582',
     [PasswordStrength.STRONG]: '#00966f',
   };
-  // private readonly progressBarValue = 0;
-  // private readonly progressBarColor = this.progressBarColors[PasswordStrength.WEAK];
-  // private readonly passwordStrengthStr = PasswordStrength.WEAK.toString();
 
   protected readonly passwordStrength = computed(() =>
     this.getPasswordStrength(this.generatedPassword()),
@@ -101,7 +99,6 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
 
   ngOnInit(): void {
     this.formGeneratePassword.valueChanges.subscribe(this.setNewPassword.bind(this));
-    // this.setProgressPasswordStrengthValues();
   }
 
   minLengthValidator(control: FormControl): Record<string, boolean> | null {
@@ -173,7 +170,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
       let password = '';
       while (password.length < length) {
         if (password.length > 0) password += '-';
-        let word = words[Math.floor(Math.random() * words.length)];
+        let word = words[Math.floor(secureMathRandom() * words.length)];
         word = word.charAt(0).toUpperCase() + word.slice(1);
 
         let insertChars = '';
@@ -182,7 +179,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
         if (specialChar) charsetParts.push(specialChars);
         const charset = charsetParts.join('');
         for (let i = 0; i < charsToAdd; i++) {
-          insertChars += charset.charAt(Math.floor(Math.random() * charset.length));
+          insertChars += charset.charAt(Math.floor(secureMathRandom() * charset.length));
         }
 
         if (numbers) {
@@ -192,7 +189,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
           const numbersToAdd = 2;
           const numberSet = numberSetPart.join('');
           for (let i = 0; i < numbersToAdd; i++) {
-            insertNumbers += numberSet.charAt(Math.floor(Math.random() * numberSet.length));
+            insertNumbers += numberSet.charAt(Math.floor(secureMathRandom() * numberSet.length));
           }
           word += insertNumbers;
         }
@@ -213,7 +210,7 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
 
     let password = '';
     for (let i = 0; i < length; i++) {
-      password += charset.charAt(Math.floor(Math.random() * charset.length));
+      password += charset.charAt(Math.floor(secureMathRandom() * charset.length));
     }
 
     return password;
@@ -282,13 +279,6 @@ export class GeneratePasswordModalComponent extends BaseModalComponent implement
       };
     }
   }
-
-  // setProgressPasswordStrengthValues(): void {
-  //   const strength = this.getPasswordStrength(this.generatedPassword);
-  //   this.progressBarValue = strength.score > 100 ? 100 : strength.score;
-  //   this.progressBarColor = strength.color;
-  //   this.passwordStrength = strength.str;
-  // }
 
   disableSubmit(): boolean {
     return this.generatedPassword().length < this.minLength;
