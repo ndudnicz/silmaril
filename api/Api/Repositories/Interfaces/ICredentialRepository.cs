@@ -9,17 +9,17 @@ public interface ICredentialRepository
     Task<bool> ExistsByVaultIdAsync(Guid id, Guid vaultId);
     Task<bool> ExistByVaultIdAsync(IEnumerable<Guid> ids, Guid vaultId);
 
-    Task<Login?> GetWithTagsAsync(Guid id);
-    Task<List<Login>> GetByIdsWithTagsAsync(IEnumerable<Guid> ids);
-    Task<List<Login>> GetByVaultIdWithTagsAsync(Guid vaultId);
-    Task<List<Login>> GetByUserIdWithTagsAsync(Guid userId, bool deleted = false);
+    Task<Credential?> GetWithTagsAsync(Guid id);
+    Task<List<Credential>> GetByIdsWithTagsAsync(IEnumerable<Guid> ids);
+    Task<List<Credential>> GetByVaultIdWithTagsAsync(Guid vaultId);
+    Task<List<Credential>> GetByUserIdWithTagsAsync(Guid userId, bool deleted = false);
 
 
-    Task<Login> CreateAsync(Login login);
-    Task<List<Login>> CreateAsync(List<Login> logins);
+    Task<Credential> CreateAsync(Credential credential);
+    Task<List<Credential>> CreateAsync(List<Credential> credentials);
 
-    Task<Login> UpdateAsync(Login login);
-    Task<List<Login>> UpdateAsync(List<Login> logins);
+    Task<Credential> UpdateAsync(Credential credential);
+    Task<List<Credential>> UpdateAsync(List<Credential> credentials);
 
     Task<int> DeleteAsync(Guid id);
     Task<int> DeleteAsync(IEnumerable<Guid> ids);

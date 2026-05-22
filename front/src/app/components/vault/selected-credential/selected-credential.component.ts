@@ -51,7 +51,7 @@ export class SelectedCredentialComponent extends BaseComponent {
 
   togglePasswordVisibility(): void {
     this.showPassword.set(!this.showPassword());
-    const passwordField = document.querySelector<HTMLInputElement>('#selected-login-password');
+    const passwordField = document.querySelector<HTMLInputElement>('#selected-credential-password');
     if (passwordField) {
       passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
     }
@@ -111,9 +111,10 @@ export class SelectedCredentialComponent extends BaseComponent {
             .updateCredential$(UpdateCredentialDto.fromCredential(this.credential()!))
             .pipe(take(1))
             .subscribe({
-              next: (updatedLogin: Credential) => this.onSoftDeleteLoginSuccess(updatedLogin),
+              next: (updatedCredential: Credential) =>
+                this.onSoftDeleteCredentialSuccess(updatedCredential),
               error: (error: unknown) => {
-                this.displayError('Error deleting login', error);
+                this.displayError('Error deleting credential', error);
                 this.stopLoading();
               },
             });
@@ -121,10 +122,10 @@ export class SelectedCredentialComponent extends BaseComponent {
       });
   }
 
-  onSoftDeleteLoginSuccess(updatedLogin: Credential): void {
-    console.log('Login soft deleted successfully:', updatedLogin);
-    this.updateCredential.emit(updatedLogin);
-    ToastWrapper.success('Login deleted successfully');
+  onSoftDeleteCredentialSuccess(updatedCredential: Credential): void {
+    console.log('Credential soft deleted successfully:', updatedCredential);
+    this.updateCredential.emit(updatedCredential);
+    ToastWrapper.success('Credential deleted successfully');
     this.stopLoading();
   }
 

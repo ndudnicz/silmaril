@@ -1,6 +1,6 @@
 namespace Api.Entities.Dtos;
 
-public class LoginDto(byte[] encryptedData, byte[] initializationVector) : MyEntity
+public class CredentialDto(byte[] encryptedData, byte[] initializationVector) : MyEntity
 {
     public Guid UserId { get; set; }
     private byte[]? EncryptedData { get; set; } = encryptedData;

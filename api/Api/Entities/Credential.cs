@@ -2,8 +2,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Entities;
 
-[Table("logins")]
-public class Login : MyEntity
+[Table("credentials")]
+public class Credential : MyEntity
 {
     [Column("user_id")]
     public Guid UserId { get; set; }

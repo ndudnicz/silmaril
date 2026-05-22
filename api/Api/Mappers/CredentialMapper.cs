@@ -9,39 +9,39 @@ namespace Api.Mappers;
 
 public class CredentialMapper : ICredentialMapper
 {
-    public LoginDto ToDto(Login login)
+    public CredentialDto ToDto(Credential credential)
     {
-        return new LoginDto(login.EncryptedData!, login.InitializationVector!)
+        return new CredentialDto(credential.EncryptedData!, credential.InitializationVector!)
         {
-            Id = login.Id,
-            Created = login.Created,
-            Updated = login.Updated,
-            UserId = login.UserId,
-            VaultId = login.VaultId,
-            TagNames = login.Tags.Select(x => x.Name).ToArray(),
-            EncryptionVersion = login.EncryptionVersion,
-            Deleted = login.Deleted
+            Id = credential.Id,
+            Created = credential.Created,
+            Updated = credential.Updated,
+            UserId = credential.UserId,
+            VaultId = credential.VaultId,
+            TagNames = credential.Tags.Select(x => x.Name).ToArray(),
+            EncryptionVersion = credential.EncryptionVersion,
+            Deleted = credential.Deleted
         };
     }
 
-    public List<LoginDto> ToDto(List<Login> logins)
+    public List<CredentialDto> ToDto(List<Credential> logins)
     {
         return logins.Select(ToDto).ToList();
     }
 
-    public void FillEntityFromUpdateDto(Login login, UpdateLoginDto dto, List<Tag> tags)
+    public void FillEntityFromUpdateDto(Credential credential, UpdateCredentialDto dto, List<Tag> tags)
     {
-        login.Tags = tags;
-        login.EncryptedData = CryptoHelper.DecodeBase64(dto.EncryptedDataBase64 ?? string.Empty);
-        login.InitializationVector = CryptoHelper.DecodeBase64(dto.InitializationVectorBase64 ?? string.Empty);
-        login.EncryptionVersion = dto.EncryptionVersion;
-        login.Deleted = dto.Deleted;
-        login.VaultId = dto.VaultId;
+        credential.Tags = tags;
+        credential.EncryptedData = CryptoHelper.DecodeBase64(dto.EncryptedDataBase64 ?? string.Empty);
+        credential.InitializationVector = CryptoHelper.DecodeBase64(dto.InitializationVectorBase64 ?? string.Empty);
+        credential.EncryptionVersion = dto.EncryptionVersion;
+        credential.Deleted = dto.Deleted;
+        credential.VaultId = dto.VaultId;
     }
 
-    public Login ToEntity(CreateLoginDto dto)
+    public Credential ToEntity(CreateCredentialDto dto)
     {
-        return new Login
+        return new Credential
         {
             VaultId = dto.VaultId,
             EncryptedData = CryptoHelper.DecodeBase64(dto.EncryptedDataBase64 ?? string.Empty),
@@ -51,7 +51,7 @@ public class CredentialMapper : ICredentialMapper
         };
     }
 
-    public List<Login> ToEntity(List<CreateLoginDto> dtos)
+    public List<Credential> ToEntity(List<CreateCredentialDto> dtos)
     {
         return dtos.Select(ToEntity).ToList();
     }

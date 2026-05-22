@@ -29,7 +29,7 @@ public class CredentialServiceTests
             _vaultValidator.Object,
             _credentialMapper);
 
-    public static Login CreateTestLogin(
+    public static Credential CreateTestLogin(
         Guid userId = new(),
         Guid vaultId = new(),
         List<Tag>? tags = null,
@@ -37,7 +37,7 @@ public class CredentialServiceTests
         int encryptionVersion = 1
         )
     {
-        return new Login
+        return new Credential
         {
             Id = Guid.NewGuid(),
             UserId = userId,
@@ -57,12 +57,12 @@ public class CredentialServiceTests
         var tags = new List<Tag> { new() { Name = "tag1" } };
         var vaultId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        var createDto = new CreateLoginDto { VaultId = vaultId, TagNames = new[] { tags[0].Name } };
+        var createDto = new CreateCredentialDto { VaultId = vaultId, TagNames = new[] { tags[0].Name } };
         var login = CreateTestLogin(userId, vaultId, tags);
 
         _tagService.Setup(t => t.GetByNamesAsync(It.IsAny<string[]>()))
             .ReturnsAsync(tags);
-        _credentialRepository.Setup(r => r.CreateAsync(It.IsAny<Login>()))
+        _credentialRepository.Setup(r => r.CreateAsync(It.IsAny<Credential>()))
             .ReturnsAsync(login);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
@@ -79,7 +79,7 @@ public class CredentialServiceTests
     {
         var userId = Guid.NewGuid();
         var vaultId = Guid.NewGuid();
-        var createDtos = new List<CreateLoginDto>
+        var createDtos = new List<CreateCredentialDto>
         {
             new() { VaultId = vaultId, TagNames = new[] { "tag1" } },
             new() { VaultId = vaultId, TagNames = new[] { "tag2" } }
@@ -89,14 +89,14 @@ public class CredentialServiceTests
             new() { Name = "tag1" },
             new() { Name = "tag2" }
         };
-        var logins = new List<Login>
+        var logins = new List<Credential>
         {
             CreateTestLogin(userId, vaultId, tags: new List<Tag> { tags[0] }),
             CreateTestLogin(userId, vaultId, tags: new List<Tag> { tags[1] })
         };
 
         _tagService.Setup(t => t.GetAsync()).ReturnsAsync(tags);
-        _credentialRepository.Setup(r => r.CreateAsync(It.IsAny<List<Login>>()))
+        _credentialRepository.Setup(r => r.CreateAsync(It.IsAny<List<Credential>>()))
             .ReturnsAsync(logins);
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
             .Returns(Task.CompletedTask);
@@ -114,7 +114,7 @@ public class CredentialServiceTests
     [Fact]
     public async Task CreateLoginAsync_WhenTagsNotFound_ShouldThrow()
     {
-        var createDto = new CreateLoginDto { VaultId = Guid.Empty, TagNames = new[] { "inexistant" } };
+        var createDto = new CreateCredentialDto { VaultId = Guid.Empty, TagNames = new[] { "inexistant" } };
         _tagService.Setup(t => t.GetByNamesAsync(It.IsAny<string[]>()))
             .ThrowsAsync(new TagsNotFound("Name", "inexistant"));
         _userValidator.Setup(u => u.EnsureExistsAsync(It.IsAny<Guid>()))
@@ -130,7 +130,7 @@ public class CredentialServiceTests
     public async Task CreateLoginsAsync_WhenTagsNotFound_ShouldThrow()
     {
         var vaultId = Guid.NewGuid();
-        var createDtos = new List<CreateLoginDto>
+        var createDtos = new List<CreateCredentialDto>
         {
             new() { VaultId = vaultId, TagNames = new[] { "inexistant" } },
             new() { VaultId = vaultId, TagNames = new[] { "inexistant2" } }
@@ -156,7 +156,7 @@ public class CredentialServiceTests
             .Returns(Task.CompletedTask);
         var service = CreateService();
 
-        Func<Task> act = async () => await service.UpdateAsync(new UpdateLoginDto
+        Func<Task> act = async () => await service.UpdateAsync(new UpdateCredentialDto
         {
             Id = Guid.NewGuid()
         }, Guid.NewGuid());

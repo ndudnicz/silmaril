@@ -16,47 +16,55 @@ export class CredentialService {
 
   getCredentials$(): Observable<Credential[]> {
     return this.http
-      .get<Credential[]>(`${this.apiEndpointV1}/login`)
-      .pipe(map((logins) => logins.map((login) => Credential.fromObject(login))));
+      .get<Credential[]>(`${this.apiEndpointV1}/credential`)
+      .pipe(
+        map((credentials) => credentials.map((credential) => Credential.fromObject(credential))),
+      );
   }
 
   getDeletedCredentials$(): Observable<Credential[]> {
     return this.http
-      .get<Credential[]>(`${this.apiEndpointV1}/login/deleted`)
-      .pipe(map((logins) => logins.map((login) => Credential.fromObject(login))));
+      .get<Credential[]>(`${this.apiEndpointV1}/credential/deleted`)
+      .pipe(
+        map((credentials) => credentials.map((credential) => Credential.fromObject(credential))),
+      );
   }
 
-  createCredential$(createLoginDto: CreateCredentialDto): Observable<Credential> {
+  createCredential$(createCredentialDto: CreateCredentialDto): Observable<Credential> {
     return this.http
-      .post<Credential>(`${this.apiEndpointV1}/login`, createLoginDto)
-      .pipe(map((login) => Credential.fromObject(login)));
+      .post<Credential>(`${this.apiEndpointV1}/credential`, createCredentialDto)
+      .pipe(map((credential) => Credential.fromObject(credential)));
   }
 
-  createCredentials$(createLoginDtos: CreateCredentialDto[]): Observable<Credential[]> {
+  createCredentials$(createCredentialDtos: CreateCredentialDto[]): Observable<Credential[]> {
     return this.http
-      .post<Credential[]>(`${this.apiEndpointV1}/login/bulk`, createLoginDtos)
-      .pipe(map((logins) => logins.map((login) => Credential.fromObject(login))));
+      .post<Credential[]>(`${this.apiEndpointV1}/credential/bulk`, createCredentialDtos)
+      .pipe(
+        map((credentials) => credentials.map((credential) => Credential.fromObject(credential))),
+      );
   }
 
-  updateCredential$(updateLoginDto: UpdateCredentialDto): Observable<Credential> {
+  updateCredential$(updateCredentialDto: UpdateCredentialDto): Observable<Credential> {
     return this.http
-      .put<Credential>(`${this.apiEndpointV1}/login`, updateLoginDto)
-      .pipe(map((login) => Credential.fromObject(login)));
+      .put<Credential>(`${this.apiEndpointV1}/credential`, updateCredentialDto)
+      .pipe(map((credential) => Credential.fromObject(credential)));
   }
 
-  updateCredentials$(updateLoginDtos: UpdateCredentialDto[]): Observable<Credential[]> {
+  updateCredentials$(updateCredentialDtos: UpdateCredentialDto[]): Observable<Credential[]> {
     return this.http
-      .put<Credential[]>(`${this.apiEndpointV1}/login/bulk`, updateLoginDtos)
-      .pipe(map((logins) => logins.map((login) => Credential.fromObject(login))));
+      .put<Credential[]>(`${this.apiEndpointV1}/credential/bulk`, updateCredentialDtos)
+      .pipe(
+        map((credentials) => credentials.map((credential) => Credential.fromObject(credential))),
+      );
   }
 
   deleteCredential$(id: string): Observable<number> {
-    return this.http.delete<number>(`${this.apiEndpointV1}/login/${id}`);
+    return this.http.delete<number>(`${this.apiEndpointV1}/credential/${id}`);
   }
 
-  deleteCredentials$(deleteLoginsDto: DeleteCredentialsDto): Observable<number> {
-    return this.http.delete<number>(`${this.apiEndpointV1}/login/bulk`, {
-      body: deleteLoginsDto,
+  deleteCredentials$(deleteCredentialsDto: DeleteCredentialsDto): Observable<number> {
+    return this.http.delete<number>(`${this.apiEndpointV1}/credential/bulk`, {
+      body: deleteCredentialsDto,
     });
   }
 }

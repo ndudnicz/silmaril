@@ -85,7 +85,7 @@ namespace Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "logins",
+                name: "credentials",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -100,32 +100,32 @@ namespace Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_logins", x => x.id);
+                    table.PrimaryKey("pk_credentials", x => x.id);
                     table.ForeignKey(
-                        name: "fk_logins_vaults_vault_id",
+                        name: "fk_credentials_vaults_vault_id",
                         column: x => x.vault_id,
                         principalTable: "vaults",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "login_tag",
+                name: "credential_tag",
                 columns: table => new
                 {
-                    login_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    credential_id = table.Column<Guid>(type: "uuid", nullable: false),
                     tags_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_login_tag", x => new { x.login_id, x.tags_id });
+                    table.PrimaryKey("pk_credential_tag", x => new { x.credential_id, x.tags_id });
                     table.ForeignKey(
-                        name: "fk_login_tag_logins_login_id",
-                        column: x => x.login_id,
-                        principalTable: "logins",
+                        name: "fk_credential_tag_credentials_credential_id",
+                        column: x => x.credential_id,
+                        principalTable: "credentials",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_login_tag_tags_tags_id",
+                        name: "fk_credential_tag_tags_tags_id",
                         column: x => x.tags_id,
                         principalTable: "tags",
                         principalColumn: "id",
@@ -143,13 +143,13 @@ namespace Api.Migrations
                 values: new object[] { new Guid("e8a91207-f378-4ab8-86e3-17c7474f2c5c"), new DateTime(2026, 5, 1, 5, 38, 45, 752, DateTimeKind.Utc).AddTicks(3380), "Default Vault", null, new Guid("e2d7412c-47c3-0504-b436-9c5fe26b70d8") });
 
             migrationBuilder.CreateIndex(
-                name: "ix_login_tag_tags_id",
-                table: "login_tag",
+                name: "ix_credential_tag_tags_id",
+                table: "credential_tag",
                 column: "tags_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_logins_vault_id",
-                table: "logins",
+                name: "ix_credentials_vault_id",
+                table: "credentials",
                 column: "vault_id");
 
             migrationBuilder.CreateIndex(
@@ -174,13 +174,13 @@ namespace Api.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "login_tag");
+                name: "credential_tag");
 
             migrationBuilder.DropTable(
                 name: "refresh_tokens");
 
             migrationBuilder.DropTable(
-                name: "logins");
+                name: "credentials");
 
             migrationBuilder.DropTable(
                 name: "tags");

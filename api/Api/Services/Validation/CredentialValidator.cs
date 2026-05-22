@@ -10,7 +10,7 @@ public class CredentialValidator(ICredentialRepository credentialRepository) : I
     {
         if (!await credentialRepository.ExistsByUserIdAsync(id, userId))
         {
-            throw new LoginNotFound("id", id.ToString());
+            throw new CredentialNotFound("id", id.ToString());
         }
     }
 
@@ -18,7 +18,7 @@ public class CredentialValidator(ICredentialRepository credentialRepository) : I
     {
         if (!await credentialRepository.ExistByUserIdAsync(ids, userId))
         {
-            throw new LoginsNotFound("ids", string.Join(", ", ids.Select(x => x.ToString())));
+            throw new CredentialsNotFound("ids", string.Join(", ", ids.Select(x => x.ToString())));
         }
     }
 }

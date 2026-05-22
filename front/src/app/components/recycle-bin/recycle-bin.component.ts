@@ -79,20 +79,20 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
     );
   }
 
-  select(login: Credential): void {
-    if (this.selected().includes(login)) {
-      this.selected.set(this.selected().filter((l) => l !== login));
+  select(credential: Credential): void {
+    if (this.selected().includes(credential)) {
+      this.selected.set(this.selected().filter((l) => l !== credential));
     } else {
-      this.selected.set([...this.selected(), login]);
+      this.selected.set([...this.selected(), credential]);
     }
-    login.selected = !login.selected;
+    credential.selected = !credential.selected;
   }
 
   restoreSelectedCredentials(): void {
     console.log('Attempting to restore selected credentials:', this.selected());
 
     const orphanedCredentials = this.selected().filter(
-      (login) => !this.vaults().some((vault) => vault.id === login.vaultId),
+      (credential) => !this.vaults().some((vault) => vault.id === credential.vaultId),
     );
     if (orphanedCredentials.length > 0) {
       this.openRestoreOrphanedCredentialsModal(orphanedCredentials);
@@ -147,18 +147,20 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   proceedRestoreSelectedCredentials(destinationVaultId: string | null): void {
     this.startLoading();
     this.selected.set(
-      this.selected().map((login) => {
-        login.vaultId = destinationVaultId ?? login.vaultId;
-        login.deleted = false;
-        return login;
+      this.selected().map((credential) => {
+        credential.vaultId = destinationVaultId ?? credential.vaultId;
+        credential.deleted = false;
+        return credential;
       }),
     );
     this.credentialService
-      .updateCredentials$(this.selected().map((login) => UpdateCredentialDto.fromCredential(login)))
+      .updateCredentials$(
+        this.selected().map((credential) => UpdateCredentialDto.fromCredential(credential)),
+      )
       .pipe(take(1))
       .subscribe({
         next: () => {
-          this.onRestoreLoginSuccess();
+          this.onRestoreCredentialSuccess();
         },
         error: (error: unknown) => {
           this.stopLoading();
@@ -167,9 +169,9 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
       });
   }
 
-  onRestoreLoginSuccess(): void {
+  onRestoreCredentialSuccess(): void {
     this.allDeletedCredentials.set(
-      this.allDeletedCredentials().filter((login) => !this.selected().includes(login)),
+      this.allDeletedCredentials().filter((credential) => !this.selected().includes(credential)),
     );
     this.clearSelection();
     this.stopLoading();
@@ -197,7 +199,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   proceedDeleteSelectedCredentials(): void {
     this.startLoading();
     this.credentialService
-      .deleteCredentials$({ ids: this.selected().map((login) => login.id) })
+      .deleteCredentials$({ ids: this.selected().map((credential) => credential.id) })
       .pipe(take(1))
       .subscribe({
         next: () => {
@@ -214,7 +216,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
 
   onDeleteCredentialsSuccess(): void {
     this.allDeletedCredentials.set(
-      this.allDeletedCredentials().filter((login) => !this.selected().includes(login)),
+      this.allDeletedCredentials().filter((credential) => !this.selected().includes(credential)),
     );
     this.clearSelection();
   }
@@ -224,7 +226,7 @@ export class RecycleBinComponent extends BaseComponent implements OnInit {
   }
 
   clearSelection() {
-    this.selected().forEach((login) => (login.selected = false));
+    this.selected().forEach((credential) => (credential.selected = false));
     this.selected.set([]);
   }
 }

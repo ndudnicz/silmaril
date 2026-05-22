@@ -5,7 +5,7 @@ using Api.Entities.Dtos.Update;
 
 namespace Api.Mappers.Interfaces;
 
-public interface ICredentialMapper : IMapper<Login, LoginDto, CreateLoginDto>
+public interface ICredentialMapper : IMapper<Credential, CredentialDto, CreateCredentialDto>
 {
-    void FillEntityFromUpdateDto(Login login, UpdateLoginDto dto, List<Tag> tags);
+    void FillEntityFromUpdateDto(Credential credential, UpdateCredentialDto dto, List<Tag> tags);
 }

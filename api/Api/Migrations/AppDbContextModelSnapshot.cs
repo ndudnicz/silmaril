@@ -22,7 +22,7 @@ namespace Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Api.Entities.Login", b =>
+            modelBuilder.Entity("Api.Entities.Credential", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,12 +62,12 @@ namespace Api.Migrations
                         .HasColumnName("vault_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_logins");
+                        .HasName("pk_credentials");
 
                     b.HasIndex("VaultId")
-                        .HasDatabaseName("ix_logins_vault_id");
+                        .HasDatabaseName("ix_credentials_vault_id");
 
-                    b.ToTable("logins", (string)null);
+                    b.ToTable("credentials");
                 });
 
             modelBuilder.Entity("Api.Entities.RefreshToken", b =>
@@ -106,7 +106,7 @@ namespace Api.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_refresh_tokens_user_id");
 
-                    b.ToTable("refresh_tokens", (string)null);
+                    b.ToTable("refresh_tokens");
                 });
 
             modelBuilder.Entity("Api.Entities.Tag", b =>
@@ -133,7 +133,7 @@ namespace Api.Migrations
                     b.HasKey("Id")
                         .HasName("pk_tags");
 
-                    b.ToTable("tags", (string)null);
+                    b.ToTable("tags");
                 });
 
             modelBuilder.Entity("Api.Entities.User", b =>
@@ -175,7 +175,7 @@ namespace Api.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_users_username_hash");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("users");
 
                     b.HasData(
                         new
@@ -219,7 +219,7 @@ namespace Api.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_vaults_user_id");
 
-                    b.ToTable("vaults", (string)null);
+                    b.ToTable("vaults");
 
                     b.HasData(
                         new
@@ -231,31 +231,31 @@ namespace Api.Migrations
                         });
                 });
 
-            modelBuilder.Entity("LoginTag", b =>
+            modelBuilder.Entity("CredentialTag", b =>
                 {
-                    b.Property<Guid>("LoginId")
+                    b.Property<Guid>("CredentialId")
                         .HasColumnType("uuid")
-                        .HasColumnName("login_id");
+                        .HasColumnName("credential_id");
 
                     b.Property<Guid>("TagsId")
                         .HasColumnType("uuid")
                         .HasColumnName("tags_id");
 
-                    b.HasKey("LoginId", "TagsId")
-                        .HasName("pk_login_tag");
+                    b.HasKey("CredentialId", "TagsId")
+                        .HasName("pk_credential_tag");
 
                     b.HasIndex("TagsId")
-                        .HasDatabaseName("ix_login_tag_tags_id");
+                        .HasDatabaseName("ix_credential_tag_tags_id");
 
-                    b.ToTable("login_tag", (string)null);
+                    b.ToTable("credential_tag");
                 });
 
-            modelBuilder.Entity("Api.Entities.Login", b =>
+            modelBuilder.Entity("Api.Entities.Credential", b =>
                 {
                     b.HasOne("Api.Entities.Vault", null)
                         .WithMany()
                         .HasForeignKey("VaultId")
-                        .HasConstraintName("fk_logins_vaults_vault_id");
+                        .HasConstraintName("fk_credentials_vaults_vault_id");
                 });
 
             modelBuilder.Entity("Api.Entities.RefreshToken", b =>
@@ -278,21 +278,21 @@ namespace Api.Migrations
                         .HasConstraintName("fk_vaults_users_user_id");
                 });
 
-            modelBuilder.Entity("LoginTag", b =>
+            modelBuilder.Entity("CredentialTag", b =>
                 {
-                    b.HasOne("Api.Entities.Login", null)
+                    b.HasOne("Api.Entities.Credential", null)
                         .WithMany()
-                        .HasForeignKey("LoginId")
+                        .HasForeignKey("CredentialId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_login_tag_logins_login_id");
+                        .HasConstraintName("fk_credential_tag_credentials_credential_id");
 
                     b.HasOne("Api.Entities.Tag", null)
                         .WithMany()
                         .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_login_tag_tags_tags_id");
+                        .HasConstraintName("fk_credential_tag_tags_tags_id");
                 });
 #pragma warning restore 612, 618
         }

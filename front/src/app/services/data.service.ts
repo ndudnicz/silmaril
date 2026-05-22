@@ -6,17 +6,19 @@ import { BehaviorSubject, Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class DataService {
-  private _deletedLogin: BehaviorSubject<Credential | null> =
+  private _deletedCredential: BehaviorSubject<Credential | null> =
     new BehaviorSubject<Credential | null>(null);
-  public readonly deletedLogin: Observable<Credential | null> = this._deletedLogin.asObservable();
-  setDeletedLogin(login: Credential | null): void {
-    this._deletedLogin.next(login);
+  public readonly deletedCredential: Observable<Credential | null> =
+    this._deletedCredential.asObservable();
+  setDeletedCredential(credential: Credential | null): void {
+    this._deletedCredential.next(credential);
   }
 
-  private _updatedLogin: BehaviorSubject<Credential | null> =
+  private _updatedCredential: BehaviorSubject<Credential | null> =
     new BehaviorSubject<Credential | null>(null);
-  public readonly updatedLogin: Observable<Credential | null> = this._updatedLogin.asObservable();
-  setUpdatedLogin(login: Credential): void {
-    this._updatedLogin.next(login);
+  public readonly updatedCredential: Observable<Credential | null> =
+    this._updatedCredential.asObservable();
+  setUpdatedCredential(credential: Credential): void {
+    this._updatedCredential.next(credential);
   }
 }
