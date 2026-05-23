@@ -8,13 +8,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [Authorize]
-public class LoginController(
-    ILogger<LoginController> logger,
+public class CredentialController(
+    ILogger<CredentialController> logger,
     ICredentialService credentialService
     ) : ControllerV1
 {
     [HttpGet]
-    public async Task<IActionResult> GetLoginsAsync()
+    public async Task<IActionResult> GetCredentialsAsync()
     {
         var userId =  GetUserId();
         var result = await credentialService.GetByUserIdAsync(userId);
@@ -23,7 +23,7 @@ public class LoginController(
     }
 
     [HttpGet("deleted")]
-    public async Task<IActionResult> GetDeletedLoginsAsync()
+    public async Task<IActionResult> GetDeletedCredentialsAsync()
     {
         var userId =  GetUserId();
         var result = await credentialService.GetDeletedByUserIdAsync(userId);
@@ -32,25 +32,25 @@ public class LoginController(
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateLoginDto createCredentialDto)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateCredentialDto createCredentialDto)
     {
         var userId = GetUserId();
-        var createdLogin = await credentialService.CreateAsync(createCredentialDto, GetUserId());
-        logger.LogInformation("Created credential with id {CredentialId} for user {UserId}", createdLogin.Id, userId);
-        return Created($"api/logins", createdLogin);
+        var createdCredential = await credentialService.CreateAsync(createCredentialDto, GetUserId());
+        logger.LogInformation("Created credential with id {CredentialId} for user {UserId}", createdCredential.Id, userId);
+        return Created($"api/credentials", createdCredential);
     }
 
     [HttpPost("bulk")]
-    public async Task<IActionResult> CreateBulkAsync([FromBody] List<CreateLoginDto> createCredentialDtos)
+    public async Task<IActionResult> CreateBulkAsync([FromBody] List<CreateCredentialDto> createCredentialDtos)
     {
         var userId =  GetUserId();
-        var createdLogins = await credentialService.CreateAsync(createCredentialDtos, GetUserId());
-        logger.LogInformation("Created {Count} credentials for user {UserId}", createdLogins.Count, userId);
-        return Created($"api/logins", createdLogins);
+        var createdCredentials = await credentialService.CreateAsync(createCredentialDtos, GetUserId());
+        logger.LogInformation("Created {Count} credentials for user {UserId}", createdCredentials.Count, userId);
+        return Created($"api/credentials", createdCredentials);
     }
 
     [HttpPut]
-    public async Task<IActionResult> UpdateAsync([FromBody] UpdateLoginDto updateCredentialDto)
+    public async Task<IActionResult> UpdateAsync([FromBody] UpdateCredentialDto updateCredentialDto)
     {
         var userId =  GetUserId();
         var result = await credentialService.UpdateAsync(updateCredentialDto, userId);
@@ -59,7 +59,7 @@ public class LoginController(
     }
 
     [HttpPut("bulk")]
-    public async Task<IActionResult> UpdateBulkAsync([FromBody] List<UpdateLoginDto> updateCredentialDtos)
+    public async Task<IActionResult> UpdateBulkAsync([FromBody] List<UpdateCredentialDto> updateCredentialDtos)
     {
         var userId =  GetUserId();
         var result = await credentialService.UpdateAsync(updateCredentialDtos, userId);
@@ -77,7 +77,7 @@ public class LoginController(
     }
 
     [HttpDelete("bulk")]
-    public async Task<IActionResult> DeleteBulkAsync([FromBody] DeleteLoginsDto deleteCredentialsDto)
+    public async Task<IActionResult> DeleteBulkAsync([FromBody] DeleteCredentialsDto deleteCredentialsDto)
     {
         var userId =  GetUserId();
         var result = await credentialService.DeleteAsync(deleteCredentialsDto.Ids.ToList(), userId);

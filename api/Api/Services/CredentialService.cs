@@ -18,19 +18,19 @@ public class CredentialService(
     ICredentialMapper credentialMapper
 ) : ICredentialService
 {
-    public async Task<List<LoginDto>> GetByUserIdAsync(Guid userId)
+    public async Task<List<CredentialDto>> GetByUserIdAsync(Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
         return credentialMapper.ToDto(await credentialRepository.GetByUserIdWithTagsAsync(userId));
     }
 
-    public async Task<List<LoginDto>> GetDeletedByUserIdAsync(Guid userId)
+    public async Task<List<CredentialDto>> GetDeletedByUserIdAsync(Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
         return credentialMapper.ToDto(await credentialRepository.GetByUserIdWithTagsAsync(userId, deleted: true));
     }
 
-    public async Task<LoginDto> CreateAsync(CreateLoginDto createCredentialDto, Guid userId)
+    public async Task<CredentialDto> CreateAsync(CreateCredentialDto createCredentialDto, Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
         await vaultValidator.EnsureExistsByUserIdAsync(createCredentialDto.VaultId, userId);
@@ -43,7 +43,7 @@ public class CredentialService(
         return credentialMapper.ToDto(await credentialRepository.CreateAsync(credential));
     }
 
-    public async Task<List<LoginDto>> CreateAsync(List<CreateLoginDto> createLoginDtos, Guid userId)
+    public async Task<List<CredentialDto>> CreateAsync(List<CreateCredentialDto> createLoginDtos, Guid userId)
     {
         if (createLoginDtos.Count == 0)
         {
@@ -52,22 +52,22 @@ public class CredentialService(
         await userValidator.EnsureExistsAsync(userId);
         await vaultValidator.EnsureExistsByUserIdAsync(
             createLoginDtos.Select(c => c.VaultId).Distinct().ToList(), userId);
-        var logins = credentialMapper.ToEntity(createLoginDtos);
+        var credentials = credentialMapper.ToEntity(createLoginDtos);
         var tags = await tagService.GetAsync();
-        logins.ForEach(login => AssignUserAndTagsToLogin(login, userId, tags));
-        return credentialMapper.ToDto(await credentialRepository.CreateAsync(logins));
+        credentials.ForEach(credential => AssignUserAndTagsToLogin(credential, userId, tags));
+        return credentialMapper.ToDto(await credentialRepository.CreateAsync(credentials));
     }
 
-    private void AssignUserAndTagsToLogin(Login login, Guid userId, List<Tag> availableTags)
+    private void AssignUserAndTagsToLogin(Credential credential, Guid userId, List<Tag> availableTags)
     {
-        tagService.EnsureAllTagNamesExist(login.TagNames, availableTags);
-        login.UserId = userId;
-        login.Tags = availableTags
-            .Where(tag => login.TagNames.Contains(tag.Name, StringComparer.OrdinalIgnoreCase))
+        tagService.EnsureAllTagNamesExist(credential.TagNames, availableTags);
+        credential.UserId = userId;
+        credential.Tags = availableTags
+            .Where(tag => credential.TagNames.Contains(tag.Name, StringComparer.OrdinalIgnoreCase))
             .ToList();
     }
 
-    public async Task<LoginDto> UpdateAsync(UpdateLoginDto updateCredentialDto, Guid userId)
+    public async Task<CredentialDto> UpdateAsync(UpdateCredentialDto updateCredentialDto, Guid userId)
     {
         await userValidator.EnsureExistsAsync(userId);
         await credentialValidator.EnsureExistsByUserIdAsync(updateCredentialDto.Id, userId);
@@ -83,7 +83,7 @@ public class CredentialService(
     }
 
 
-    public async Task<List<LoginDto>> UpdateAsync(List<UpdateLoginDto> updateCredentialDtos, Guid userId)
+    public async Task<List<CredentialDto>> UpdateAsync(List<UpdateCredentialDto> updateCredentialDtos, Guid userId)
     {
         if (updateCredentialDtos.Count == 0)
         {
@@ -108,8 +108,8 @@ public class CredentialService(
     }
 
     private async Task ApplyDtosToLoginsAsync(
-        List<UpdateLoginDto> updateCredentialDtos,
-        Dictionary<Guid, Login> existingCredentialsDictionary)
+        List<UpdateCredentialDto> updateCredentialDtos,
+        Dictionary<Guid, Credential> existingCredentialsDictionary)
     {
         var allTags = await tagService.GetAsync();
         var allTagNames = updateCredentialDtos
@@ -119,9 +119,9 @@ public class CredentialService(
         tagService.EnsureAllTagNamesExist(allTagNames, allTags);
         foreach (var dto in updateCredentialDtos)
         {
-            var login = existingCredentialsDictionary[dto.Id];
+            var credential = existingCredentialsDictionary[dto.Id];
             credentialMapper.FillEntityFromUpdateDto(
-                login,
+                credential,
                 dto,
                 allTags.Where(x => dto.TagNames.Contains(x.Name))
                     .ToList());

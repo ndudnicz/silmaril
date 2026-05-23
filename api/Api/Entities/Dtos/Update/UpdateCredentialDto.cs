@@ -1,6 +1,6 @@
 namespace Api.Entities.Dtos.Update;
 
-public record UpdateLoginDto
+public record UpdateCredentialDto
 {
     public required Guid Id { get; set; }
     public string? EncryptedDataBase64 { get; set; }

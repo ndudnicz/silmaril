@@ -11,7 +11,7 @@ public static class ModelBuilderExtensions
     private static readonly Guid SetupVaultId = new("e8a91207-f378-4ab8-86e3-17c7474f2c5c");
     private static readonly DateTime SetupVaultCreated = new(2026, 5, 1, 5, 38, 45, 752, DateTimeKind.Utc);
 
-    private static readonly User SetupUser = new User
+    private static readonly User SetupDebugUser = new User
     {
         Id = SetupUserId,
         Created = SetupUserCreated.AddTicks(9730),
@@ -21,117 +21,120 @@ public static class ModelBuilderExtensions
         Salt = SetupUserSalt
     };
 
-    public static void SetupUserEntity(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>(entity =>
+        public void SetupUserEntity()
         {
-            entity.Property(e => e.Salt)
-                .HasColumnType("bytea")
-                .IsRequired();
-            entity.HasData(new List<User> { SetupUser });
-        });
-        modelBuilder.Entity<User>()
-            .HasIndex(u => u.UsernameHash)
-            .IsUnique();
-        modelBuilder.Entity<User>()
-            .HasMany<Vault>()
-            .WithOne()
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-
-    public static void SetupLoginEntity(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Login>(entity =>
-        {
-            entity.Property(l => l.EncryptedData)
-                .HasColumnType("bytea");
-            entity.Property(l => l.InitializationVector)
-                .HasColumnType("bytea");
-        });
-        modelBuilder.Entity<Login>()
-            .HasMany(e => e.Tags)
-            .WithMany();
-        modelBuilder.Entity<Login>()
-            .HasOne<Vault>()
-            .WithMany()
-            .HasForeignKey(l => l.VaultId);
-    }
-
-    public static void SetupVaultEntity(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Vault>(entity =>
-        {
-            entity.HasData(new Vault
+            modelBuilder.Entity<User>(entity =>
             {
-                Id = SetupVaultId,
-                UserId = SetupUser.Id,
-                Name = "Default Vault",
-                Created = SetupVaultCreated.AddTicks(3380)
+                entity.Property(e => e.Salt)
+                    .HasColumnType("bytea")
+                    .IsRequired();
+                entity.HasData(new List<User> { SetupDebugUser });
             });
-        });
-    }
-
-    public static void SetupRefreshTokenEntity(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<RefreshToken>()
-            .HasOne<User>()
-            .WithOne()
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-
-    // Rename tables and columns to lower snake_case
-    public static void SetupColumnAndTableNames(this ModelBuilder modelBuilder)
-    {
-        foreach (var entity in modelBuilder.Model.GetEntityTypes())
-        {
-            entity.SetTableName(ToLowerSnakeCase(entity.GetTableName()));
-
-            foreach (var property in entity.GetProperties())
-            {
-                property.SetColumnName(ToLowerSnakeCase(property.Name));
-            }
-
-            foreach (var key in entity.GetKeys())
-            {
-                key.SetName(key.GetName()?.ToLower());
-            }
-
-            foreach (var fk in entity.GetForeignKeys())
-            {
-                fk.SetConstraintName(fk.GetConstraintName()?.ToLower());
-            }
-
-            foreach (var index in entity.GetIndexes())
-            {
-                index.SetDatabaseName(index.GetDatabaseName()?.ToLower());
-            }
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.UsernameHash)
+                .IsUnique();
+            modelBuilder.Entity<User>()
+                .HasMany<Vault>()
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
-        return;
-
-        string ToLowerSnakeCase(string? name)
+        public void SetupCredentialEntity()
         {
-            if (string.IsNullOrWhiteSpace(name))
-                return "";
-
-            var builder = new System.Text.StringBuilder();
-            for (var i = 0; i < name.Length; i++)
+            modelBuilder.Entity<Credential>(entity =>
             {
-                var c = name[i];
-                if (char.IsUpper(c))
-                {
-                    if (i > 0)
-                        builder.Append('_');
+                entity.Property(l => l.EncryptedData)
+                    .HasColumnType("bytea");
+                entity.Property(l => l.InitializationVector)
+                    .HasColumnType("bytea");
+            });
+            modelBuilder.Entity<Credential>()
+                .HasMany(e => e.Tags)
+                .WithMany();
+            modelBuilder.Entity<Credential>()
+                .HasOne<Vault>()
+                .WithMany()
+                .HasForeignKey(l => l.VaultId);
+        }
 
-                    builder.Append(char.ToLower(c));
-                }
-                else
+        public void SetupVaultEntity()
+        {
+            modelBuilder.Entity<Vault>(entity =>
+            {
+                entity.HasData(new Vault
                 {
-                    builder.Append(c);
+                    Id = SetupVaultId,
+                    UserId = SetupDebugUser.Id,
+                    Name = "Default Vault",
+                    Created = SetupVaultCreated.AddTicks(3380)
+                });
+            });
+        }
+
+        public void SetupRefreshTokenEntity()
+        {
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne<User>()
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
+        public void SetupColumnAndTableNames()
+        {
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            {
+                entity.SetTableName(ToLowerSnakeCase(entity.GetTableName()));
+
+                foreach (var property in entity.GetProperties())
+                {
+                    property.SetColumnName(ToLowerSnakeCase(property.Name));
+                }
+
+                foreach (var key in entity.GetKeys())
+                {
+                    key.SetName(key.GetName()?.ToLower());
+                }
+
+                foreach (var fk in entity.GetForeignKeys())
+                {
+                    fk.SetConstraintName(fk.GetConstraintName()?.ToLower());
+                }
+
+                foreach (var index in entity.GetIndexes())
+                {
+                    index.SetDatabaseName(index.GetDatabaseName()?.ToLower());
                 }
             }
 
-            return builder.ToString();
+            return;
+            
+            // Rename tables and columns to lower snake_case
+            string ToLowerSnakeCase(string? name)
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                    return "";
+
+                var builder = new System.Text.StringBuilder();
+                for (var i = 0; i < name.Length; i++)
+                {
+                    var c = name[i];
+                    if (char.IsUpper(c))
+                    {
+                        if (i > 0)
+                            builder.Append('_');
+
+                        builder.Append(char.ToLower(c));
+                    }
+                    else
+                    {
+                        builder.Append(c);
+                    }
+                }
+
+                return builder.ToString();
+            }
         }
     }
 }

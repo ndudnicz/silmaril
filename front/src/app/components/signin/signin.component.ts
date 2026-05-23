@@ -15,7 +15,7 @@ import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   standalone: true,
-  selector: 'app-login',
+  selector: 'app-credential',
   imports: [
     ReactiveFormsModule,
     RouterLink,

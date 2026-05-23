@@ -81,7 +81,7 @@ public class VaultServiceTests
     {
         var userId = Guid.NewGuid();
         var vaultId = Guid.NewGuid();
-        var logins = new List<Login>
+        var logins = new List<Credential>
         {
             CredentialServiceTests.CreateTestLogin(userId, vaultId)
         };

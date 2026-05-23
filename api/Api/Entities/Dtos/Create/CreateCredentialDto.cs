@@ -1,6 +1,6 @@
 namespace Api.Entities.Dtos.Create;
 
-public record CreateLoginDto
+public record CreateCredentialDto
 {
     public required Guid VaultId { get; set; }
     public string? EncryptedDataBase64 { get; set; }
